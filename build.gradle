@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.51'
+}
+
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main.java.srcDirs += 'src/main'
+    test.java.srcDirs += 'src/test/aoc2016'
+    test.resources.srcDirs += 'src/test/resources'
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
