@@ -22,3 +22,11 @@ inline fun <reified T> MutableMap<T, Int>.increase(what: T) {
         this[what] = 1
     }
 }
+
+inline fun <reified T> MutableMap<T, Int>.decrease(what: T) {
+    if (this.containsKey(what)) {
+        this[what] = this[what]!! - 1
+    } else {
+        this[what] = -1
+    }
+}
