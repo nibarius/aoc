@@ -1,5 +1,8 @@
 package aoc2016
 
+import java.math.BigInteger
+import java.security.MessageDigest
+
 inline fun <reified T : Enum<T>> T.next(): T {
     val values = enumValues<T>()
     val nextOrdinal = (ordinal + 1) % values.size
@@ -29,4 +32,9 @@ inline fun <reified T> MutableMap<T, Int>.decrease(what: T) {
     } else {
         this[what] = -1
     }
+}
+
+fun String.md5(): String {
+    val md = MessageDigest.getInstance("MD5")
+    return BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
 }

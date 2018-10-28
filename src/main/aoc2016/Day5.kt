@@ -1,13 +1,6 @@
 package aoc2016
 
-import java.math.BigInteger
-import java.security.MessageDigest
-
 class Day5(val input: String) {
-    private fun String.md5(): String {
-        val md = MessageDigest.getInstance("MD5")
-        return BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
-    }
 
     fun solvePart1(): String {
         var pwd = ""
