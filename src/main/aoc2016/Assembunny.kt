@@ -16,7 +16,7 @@ class Assembunny(private val instructions: MutableList<String>) {
                     return instructionPointer + valueOf(params[1])
                 }
             }
-            // Day 23: Add a toggle operation
+        // Day 23: Add a toggle operation
             "tgl" -> {
                 val toggleIndex = instructionPointer + valueOf(params[0])
                 if (toggleIndex in 0 until instructions.size) {
@@ -27,11 +27,19 @@ class Assembunny(private val instructions: MutableList<String>) {
                         "tgl" -> "inc"
                         "jnz" -> "cpy"
                         "cpy" -> "jnz"
-                        else -> "error"
+                        else -> "error" //tgl is not allowed to toggle add, mul and nop
                     }
                     instructions[toggleIndex] = instructions[toggleIndex].replace(toToggle, newInstruction)
                 }
             }
+        // Day 23, Part 2: Add a multiplication and nop operation
+            "mul" -> registers[params[1]] = valueOf(params[0]) * valueOf(params[1])
+            "nop" -> {
+                // Does nothing, just need to take up space in the program
+                // to be able to detect if the toggle operations tries to toggle it.
+                // If it does the instructions replaced with a copy can't be replaced.
+            }
+            "error" -> throw RuntimeException("Toggle hit a unsupported instruction.")
         }
         return instructionPointer + 1
     }
