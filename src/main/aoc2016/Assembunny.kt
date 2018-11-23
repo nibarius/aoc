@@ -3,6 +3,7 @@ package aoc2016
 class Assembunny(private val instructions: MutableList<String>) {
 
     val registers = mutableMapOf("a" to 0, "b" to 0, "c" to 0, "d" to 0)
+    var numPrintouts = 0
 
     private fun doInstruction(instructionPointer: Int, instruction: String, params: List<String>): Int {
         when (instruction) {
@@ -40,6 +41,26 @@ class Assembunny(private val instructions: MutableList<String>) {
                 // If it does the instructions replaced with a copy can't be replaced.
             }
             "error" -> throw RuntimeException("Toggle hit a unsupported instruction.")
+            // Day 25: Add out, div2s, div and sub instructions
+            "out" -> {
+                print(valueOf(params[0]))
+                numPrintouts++
+                if (numPrintouts > 50) {
+                    print("...")
+                    return instructions.size
+                }
+            }
+            "div2s" -> { // division by two with strange handling of the reminder
+                // first argument /= 2, second argument hold 2 if there is no reminder else 1
+                registers[params[1]] = if (valueOf(params[0]) % 2 == 0) 2 else 1
+                registers[params[0]] = valueOf(params[0]) / 2
+            }
+            "div2" -> { // Normal division by two with normal reminder handling
+                // first argument /= 2, second argument reminder
+                registers[params[1]] = valueOf(params[0]) % 2
+                registers[params[0]] = valueOf(params[0]) / 2
+            }
+            "sub" -> registers[params[1]] = valueOf(params[0]) - valueOf(params[1])
         }
         return instructionPointer + 1
     }

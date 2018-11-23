@@ -1,0 +1,7 @@
+cpy a d
+add 2555 d                  // d += 365 * 7 <==> d = input + 2555
+cpy d a     <-- Label A:
+div2 a b    <-- Label B:
+out b                       // a = div result, b = 1 if it was odd before division, else 0, d = input + 2555
+jnz a -2                    // Jump to B ==> Keep dividing a by two until it becomes zero, then start over
+jnz 1 -4                    // Jump to A (infinite loop)
