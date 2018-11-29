@@ -3,6 +3,7 @@ package test.aoc2016
 import aoc2016.Day10
 import org.junit.Assert
 import org.junit.Test
+import resourceAsList
 
 class Day10Test {
     private val exampleInput = listOf("value 5 goes to bot 2",

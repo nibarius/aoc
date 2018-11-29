@@ -3,6 +3,7 @@ package test.aoc2016
 import aoc2016.Day21
 import org.junit.Assert
 import org.junit.Test
+import resourceAsList
 
 class Day21Test {
     private val exampleInput = listOf("swap position 4 with position 0",

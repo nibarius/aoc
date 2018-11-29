@@ -3,6 +3,7 @@ package test.aoc2016
 import aoc2016.Day18
 import org.junit.Assert
 import org.junit.Test
+import resourceAsString
 
 class Day18Test {
     @Test
