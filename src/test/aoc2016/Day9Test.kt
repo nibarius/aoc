@@ -3,6 +3,7 @@ package test.aoc2016
 import aoc2016.Day9
 import org.junit.Assert
 import org.junit.Test
+import resourceAsString
 
 class Day9Test {
 

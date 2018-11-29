@@ -1,5 +1,3 @@
-package test.aoc2016
-
 import java.io.File
 
 internal object Resources

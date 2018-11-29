@@ -4,6 +4,7 @@ import aoc2016.Assembunny
 import aoc2016.Day25
 import org.junit.Assert
 import org.junit.Test
+import resourceAsList
 
 class Day25Test {
 

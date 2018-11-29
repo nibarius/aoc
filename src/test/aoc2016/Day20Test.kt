@@ -3,6 +3,7 @@ package test.aoc2016
 import aoc2016.Day20
 import org.junit.Assert
 import org.junit.Test
+import resourceAsList
 
 class Day20Test {
     private val exampleInput = listOf("5-8",

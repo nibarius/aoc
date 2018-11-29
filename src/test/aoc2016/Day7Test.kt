@@ -3,6 +3,7 @@ package test.aoc2016
 import aoc2016.Day7
 import org.junit.Assert
 import org.junit.Test
+import resourceAsList
 
 class Day7Test {
     private val day1TestInput = listOf("abba[mnop]qrst",
