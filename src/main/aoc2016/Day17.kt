@@ -1,5 +1,7 @@
 package aoc2016
 
+import md5
+
 class Day17(private val input: String) {
 
     private data class State(val x: Int, val y: Int, val history: String)

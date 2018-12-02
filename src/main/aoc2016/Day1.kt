@@ -1,6 +1,8 @@
 package aoc2016
 
 import aoc2016.Day1.Wind.*
+import next
+import prev
 import java.lang.Math.abs
 
 

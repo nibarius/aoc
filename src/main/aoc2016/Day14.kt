@@ -1,5 +1,7 @@
 package aoc2016
 
+import md5
+
 class Day14(private val salt: String) {
 
     private fun String.threeInARowChar(): Char? {
