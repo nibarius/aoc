@@ -1,5 +1,7 @@
 package aoc2016
 
+import md5
+
 class Day5(val input: String) {
 
     fun solvePart1(): String {

@@ -1,5 +1,3 @@
-package aoc2016
-
 import java.math.BigInteger
 import java.security.MessageDigest
 

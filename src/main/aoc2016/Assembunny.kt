@@ -1,5 +1,8 @@
 package aoc2016
 
+import decrease
+import increase
+
 class Assembunny(private val instructions: MutableList<String>) {
 
     val registers = mutableMapOf("a" to 0, "b" to 0, "c" to 0, "d" to 0)

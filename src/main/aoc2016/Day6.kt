@@ -1,5 +1,7 @@
 package aoc2016
 
+import increase
+
 class Day6(input: List<String>) {
 
     private val characters = countCharacters(input)
