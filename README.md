@@ -1,2 +1,5 @@
 # aoc
-Advent of code
+[Advent of code](https://adventofcode.com) is a set of 25 small programming puzzles. Very fun
+and it can be done at any time of the year, not only during December when the new problems unlock.
+
+This repo holds my solutions for Advent of Code (except 2017 which I did without saving the code anywhere).
