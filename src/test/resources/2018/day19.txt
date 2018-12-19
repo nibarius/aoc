@@ -1,0 +1,37 @@
+#ip 4
+addi 4 16 4 goto ip + 16 (jump 16 steps ahead)
+seti 1 3 5
+seti 1 1 3
+mulr 5 3 1
+eqrr 1 2 1
+addr 1 4 4  goto ip + reg1 (part 1 always jump 1 forward, could also be + 0)
+addi 4 1 4  goto ip++ (jump 1 forward)
+addr 5 0 0
+addi 3 1 3
+gtrr 3 2 1
+addr 4 1 4  goto ip + value of register 1 (part always jump 1 forward)
+seti 2 8 4  goto 2
+addi 5 1 5
+gtrr 5 2 1
+addr 1 4 4  goto ip + reg1 (part 1 always jump 1 forward)
+seti 1 3 4  goto 1 (always)
+mulr 4 4 4  goto ip * ip (always exit program)
+addi 2 2 2
+mulr 2 2 2
+mulr 4 2 2
+muli 2 11 2
+addi 1 6 1
+mulr 1 4 1
+addi 1 18 1
+addr 2 1 2
+addr 4 0 4
+seti 0 3 4  goto 0 (always)
+setr 4 5 1
+mulr 1 4 1
+addr 4 1 1
+mulr 4 1 1
+muli 1 14 1
+mulr 1 4 1
+addr 2 1 2
+seti 0 1 0
+seti 0 4 4
