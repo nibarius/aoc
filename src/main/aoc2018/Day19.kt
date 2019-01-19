@@ -4,7 +4,7 @@ package aoc2018
 class Day19(val input: List<String>) {
     private val registers = MutableList(6) { 0 }
 
-    fun solvePart1(): Int {
+    fun solvePart1(): Long {
         val elf = ElfCode(input)
         elf.runProgram()
         return elf.registers[0]
