@@ -21,7 +21,7 @@ class ShortestPath(private val traversable: List<Char>) {
 
     fun availableNeighbours(map: Map<Pos, Char>, pos: Pos): List<Pos> {
         return Dir.values().map { dir -> dir.from(pos) }
-                .filter {newPos -> map.containsKey(newPos) && traversable.contains(map[newPos])}
+                .filter { newPos -> map.containsKey(newPos) && traversable.contains(map[newPos]) }
     }
 
     fun adjacentTo(pos1: Pos, pos2: Pos): Boolean {
@@ -35,19 +35,17 @@ class ShortestPath(private val traversable: List<Char>) {
 
         val toCheck = GapList<State>()
         availableNeighbours(map, from).forEach { toCheck.add(State(it, listOf())) }
-        val alreadyChecked = GapList<Pos>()
+        val alreadyChecked = mutableSetOf<Pos>()
         while (toCheck.isNotEmpty()) {
-            val current = toCheck.removeAt(0)
+            val current = toCheck.remove()
+            if (alreadyChecked.contains(current.currentPos)) continue
             val path = current.previous.toMutableList()
             path.add(current.currentPos)
             if (current.currentPos == to) {
                 return path
             }
             alreadyChecked.add(current.currentPos)
-            availableNeighbours(map, current.currentPos)
-                    .filter { !alreadyChecked.contains(it) } // Exclude pos that is part of any shorter path
-                    .filter { neighbour -> toCheck.find { it.currentPos == neighbour } == null } // Exclude already queued position
-                    .forEach { toCheck.add(State(it, path)) }
+            availableNeighbours(map, current.currentPos).forEach { toCheck.add(State(it, path)) }
         }
         return emptyList()
     }
