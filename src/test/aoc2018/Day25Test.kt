@@ -6,8 +6,6 @@ import org.junit.Test
 import resourceAsList
 
 class Day25Test {
-
-
     @Test
     fun partOneTestInput1() {
         val testInput = listOf(
@@ -76,17 +74,7 @@ class Day25Test {
 
     @Test
     fun partOneRealInput() {
-        assertEquals(-2, Day25(resourceAsList("2018/day25.txt")).solvePart1())
-    }
-
-    @Test
-    fun partTwoTestInput() {
-        assertEquals(-2, Day25(listOf()).solvePart2())
-    }
-
-    @Test
-    fun partTwoRealInput() {
-        assertEquals(-2, Day25(resourceAsList("2018/day25.txt")).solvePart2())
+        assertEquals(396, Day25(resourceAsList("2018/day25.txt")).solvePart1())
     }
 }
 
