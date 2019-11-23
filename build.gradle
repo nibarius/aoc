@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.3.10'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.60'
 }
 
 version '1.0-SNAPSHOT'
@@ -16,15 +16,16 @@ sourceSets {
     main.java.srcDirs += 'src/main'
     test.java.srcDirs += 'src/test/aoc2016'
     test.java.srcDirs += 'src/test/aoc2018'
+    test.java.srcDirs += 'src/test/aoc2019'
     test.java.srcDirs += 'src/test/common'
     test.resources.srcDirs += 'src/test/resources'
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1"
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile 'org.magicwerk:brownies-collections:0.9.13'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    implementation 'org.magicwerk:brownies-collections:0.9.13'
 }
 
 compileKotlin {
