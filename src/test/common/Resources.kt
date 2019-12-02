@@ -10,3 +10,9 @@ fun resourceAsString(fileName: String, delimiter: String = ""): String {
 fun resourceAsList(fileName: String): List<String> =
         File(Resources.javaClass.classLoader.getResource(fileName).toURI())
                 .readLines()
+
+fun resourceAsList(fileName: String, delimiter: String): List<String> =
+        File(Resources.javaClass.classLoader.getResource(fileName).toURI())
+                .readLines()
+                .first()
+                .split(delimiter)
