@@ -7,9 +7,9 @@ class Day2(input: List<String>) {
 
     fun solvePart1(): Int {
         val computer = Intcode(parsedInput)
-        computer.initialize(12, 2)
+        computer.reinitialize(listOf(Pair(1, 12), Pair(2, 2)))
         computer.run()
-        return computer.output
+        return computer.dumpMemory()[0]
     }
 
     fun solvePart2(): Int {
@@ -17,9 +17,9 @@ class Day2(input: List<String>) {
         val computer = Intcode(parsedInput)
         for (noun in 0 until 99) {
             for (verb in 0 until 99) {
-                computer.initialize(noun, verb)
+                computer.reinitialize(listOf(Pair(1, noun), Pair(2, verb)))
                 computer.run()
-                if (computer.output == desired) {
+                if (computer.dumpMemory()[0] == desired) {
                     return 100 * noun + verb
                 }
             }
