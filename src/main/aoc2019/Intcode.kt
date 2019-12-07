@@ -5,6 +5,15 @@ class Intcode(private val initialMemory: List<Int>, val input: MutableList<Int> 
     private val memory = initialMemory.toMutableList()
     fun dumpMemory() = memory.toList()
     val output = mutableListOf<Int>()
+    var computerState = ComputerState.NotStarted
+        private set
+
+    enum class ComputerState {
+        NotStarted,
+        Running,
+        WaitingForInput,
+        Terminated
+    }
 
     sealed class Instruction(val numParams: Int) {
         class Add : Instruction(3)
@@ -85,13 +94,24 @@ class Intcode(private val initialMemory: List<Int>, val input: MutableList<Int> 
     }
 
     fun run() {
+        computerState = ComputerState.Running
         while (instructionPointer < memory.size) {
             val (instruction, params) = getCurrentInstructionAndParameters()
             when (instruction) {
-                is Instruction.Terminate -> return
+                is Instruction.Terminate -> {
+                    computerState = ComputerState.Terminated
+                    return
+                }
                 is Instruction.Add -> memory[params[2]] = memory[params[0]] + memory[params[1]]
                 is Instruction.Multiply -> memory[params[2]] = memory[params[0]] * memory[params[1]]
-                is Instruction.Input -> memory[params[0]] = input.removeAt(0)
+                is Instruction.Input -> {
+                    if (input.isEmpty()) {
+                        computerState = ComputerState.WaitingForInput
+                        return
+                    } else {
+                        memory[params[0]] = input.removeAt(0)
+                    }
+                }
                 is Instruction.Output -> output.add(memory[params[0]])
                 is Instruction.JumpIfTrue -> if (memory[params[0]] != 0) {
                     instructionPointer = memory[params[1]] - instruction.length()
@@ -113,7 +133,8 @@ class Intcode(private val initialMemory: List<Int>, val input: MutableList<Int> 
         memory.addAll(initialMemory)
         input.clear()
         output.clear()
-        memoryOverride.forEach {(address, value) ->
+        computerState = ComputerState.NotStarted
+        memoryOverride.forEach { (address, value) ->
             memory[address] = value
         }
         instructionPointer = 0
