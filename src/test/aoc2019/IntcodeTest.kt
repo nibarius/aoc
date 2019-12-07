@@ -49,14 +49,14 @@ class IntcodeTest {
     fun testDay5OperationMode() {
         val computer = Intcode("1002,4,3,4,33".toIntList())
         computer.run()
-        assertEquals(listOf(1002,4,3,4,99), computer.dumpMemory())
+        assertEquals(listOf(1002, 4, 3, 4, 99), computer.dumpMemory())
     }
 
     @Test
     fun testDay5NegativeValues() {
         val computer = Intcode("1101,100,-1,4,0".toIntList())
         computer.run()
-        assertEquals(listOf(1101,100,-1,4,99), computer.dumpMemory())
+        assertEquals(listOf(1101, 100, -1, 4, 99), computer.dumpMemory())
     }
 
     @Test
