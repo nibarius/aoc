@@ -9,7 +9,7 @@ class Day7Test {
     @Test
     fun testPermutationsOf() {
         val d7 = Day7(listOf())
-        assertEquals(listOf(listOf(0, 1), listOf(1, 0)), d7.allPermutationsOf(0..1))
+        assertEquals(listOf(listOf(0L, 1L), listOf(1L, 0L)), d7.allPermutationsOf(0..1))
         d7.allPermutationsOf(0..5)
                 .also { perm -> assertEquals(true, perm.all { it.size == 6 }) }
                 .also { perm -> assertEquals(true, perm.all { it.toSet().size == 6 }) }
