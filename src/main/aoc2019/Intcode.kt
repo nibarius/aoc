@@ -9,11 +9,24 @@ class Intcode(private val initialMemory: List<Long>, val input: MutableList<Long
         initialMemory.withIndex().forEach{ mem[it.index.toLong()] = it.value }
     }
 
-    // compacted memory dump without real addresses beyond the initial memory, useful for simple debugging
-    fun dumpMemory() = memory.values.toList()
     val output = mutableListOf<Long>()
     var computerState = ComputerState.NotStarted
         private set
+
+    // Create a copy of the current computer at the current state
+    fun copy(): Intcode {
+        val new = Intcode(initialMemory, input.toMutableList())
+        new.instructionPointer = instructionPointer
+        new.relativeBase = relativeBase
+        new.memory.clear()
+        memory.forEach { (key, value) -> new.memory[key] = value }
+        new.output.addAll(output)
+        new.computerState = computerState
+        return new
+    }
+
+    // compacted memory dump without real addresses beyond the initial memory, useful for simple debugging
+    fun dumpMemory() = memory.values.toList()
 
     enum class ComputerState {
         NotStarted,

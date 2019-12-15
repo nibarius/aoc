@@ -172,6 +172,24 @@ class IntcodeTest {
         c.run()
         assertEquals(input[1], c.output.first())
     }
+
+    @Test
+    fun testCopy() {
+        // add value of address 0 with 0 and put in 0, output 0, read from input and put in 0, exit
+        val program = "1,0,0,0,4,0,3,0,99".toLongList()
+        val c1 = Intcode(program)
+        val c2 = c1.copy()
+        c1.run()
+        assertEquals(2, c1.output.first())
+        assertEquals(mutableListOf<Long>(), c2.output)
+        val c3 = c1.copy()
+        assertEquals(2L, c3.dumpMemory()[0])
+        c1.input.add(100)
+        c1.run()
+        assertEquals("100,0,0,0,4,0,3,0,99".toLongList(), c1.dumpMemory())
+        c2.input.add(99)
+        c2.run()
+        assertEquals("99,0,0,0,4,0,3,0,99".toLongList(), c2.dumpMemory())
+        assertEquals(2L, c3.dumpMemory()[0])
+    }
 }
-
-
