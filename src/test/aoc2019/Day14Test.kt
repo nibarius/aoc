@@ -166,6 +166,6 @@ class Day14Test {
 
     @Test
     fun partTwoRealInput() {
-        assertEquals(0, Day14(resourceAsList("2019/day14.txt")).solvePart2())
+        assertEquals(1766154, Day14(resourceAsList("2019/day14.txt")).solvePart2())
     }
 }

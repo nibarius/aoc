@@ -24,73 +24,61 @@ class Day14(input: List<String>) {
         return Pair(amount.toInt(), material)
     }
 
-
     // Returns the amount of ore needed to create the given material
-    private fun create(amount: Int, material: String, available: MutableMap<String, Int>): Int {
+    private fun create(amount: Long, material: String, available: MutableMap<String, Long>): Long {
         if (material == "ORE") {
             return amount
         }
 
         // If there is already some of the desired material created since an earlier reaction use that.
-        val alreadyAvailable = min(amount, available.getOrDefault(material, 0))
+        val alreadyAvailable = min(amount, available.getOrDefault(material, 0).toLong())
         available[material] = available.getOrDefault(material, 0) - alreadyAvailable
         val toCreate = amount - alreadyAvailable
 
+        // Create more materials to fill the need.
         val reaction = reactions[material] ?: error("Unknown material: $material")
-        val numReactions = ceil(toCreate.toFloat() / reaction.res.first).toInt()
-        val oreNeeded = reaction.req.sumBy { create(numReactions * it.first, it.second, available) }
+        val numReactions = ceil(toCreate.toFloat() / reaction.res.first).toLong()
+        val oreNeeded = reaction.req.sumByLong { create(numReactions * it.first, it.second, available) }
         val created = numReactions * reaction.res.first
 
-        // Store any left over materials for future reactions
+        // Store any left over materials for future reactions.
         val leftOver = created - toCreate
         available[material] = available.getOrDefault(material, 0) + leftOver
 
         return oreNeeded
     }
 
-    fun solvePart1(): Int {
-        return create(1, "FUEL", mutableMapOf())
+    fun solvePart1(): Long {
+        return create(1L, "FUEL", mutableMapOf())
     }
 
-    fun solvePart2(): Int {
-        val leftOvers = mutableMapOf<String, Int>()
-        // state of leftovers to ore consumed
-        val states = mutableMapOf<Map<String, Int>, Pair<Int,Long>>()
-        states[leftOvers.toMap()] = Pair(0,0L)
-        var oreSoFar = 0L
+    fun solvePart2(): Long {
+        val capacity = 1_000_000_000_000
+        val oreForOne = create(1L, "FUEL", mutableMapOf())
+        val lowerBound = capacity / oreForOne
+        var start = lowerBound
+        var end = lowerBound * 2
+        var candidate = 0L
 
-        var iterations = 0
-        val loopLength: Int
-        val orePerLoop: Long
-
-        // First find a loop of in amount of leftovers
-        do {
-            oreSoFar += create(1, "FUEL", leftOvers)
-            iterations++
-            val state = leftOvers.toMutableMap().apply {
-                values.removeIf { it == 0 }
-            }.toMap()
-
-            if (states.contains(state)) {
-                println("repeating state found at $iterations, oreSoFar: $oreSoFar, matching state was at iter: ${states[state]!!.first}")
-                loopLength = iterations - states[state]!!.first
-                orePerLoop = oreSoFar - states[state]!!.second
-                break
+        while (start < end) {
+            val mid = start + (end - start) / 2
+            val currentValue = create(mid, "FUEL", mutableMapOf())
+            if (currentValue > capacity) {
+                end = mid - 1
             } else {
-                states[state] = iterations to oreSoFar
+                start = mid + 1
+                candidate = mid
             }
-        }while (true)
-
-        // Then continue increasing by the length of the loop
-        while (oreSoFar < 1_000_000_000_000 - orePerLoop) {
-            oreSoFar += orePerLoop
-            iterations += loopLength
         }
 
-        // Finally do the last steps with the data calculated during loop detection
-        val nextOres = states.values.sortedBy { it.first }
-        val tooFar = nextOres.first { oreSoFar + it.second > 1_000_000_000_000 }.first
-        iterations += nextOres[tooFar - 1].first
-        return iterations
+        return candidate
+    }
+
+    private inline fun <T> Iterable<T>.sumByLong(selector: (T) -> Long): Long {
+        var sum = 0L
+        for (element in this) {
+            sum += selector(element)
+        }
+        return sum
     }
 }
