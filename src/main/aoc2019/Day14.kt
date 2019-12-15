@@ -1,5 +1,6 @@
 package aoc2019
 
+import kotlin.math.ceil
 import kotlin.math.min
 
 class Day14(input: List<String>) {
@@ -36,13 +37,9 @@ class Day14(input: List<String>) {
         val toCreate = amount - alreadyAvailable
 
         val reaction = reactions[material] ?: error("Unknown material: $material")
-        var created = 0
-        var oreNeeded = 0
-        while (created < toCreate) {
-            // Run the reaction until enough material have been created
-            oreNeeded += reaction.req.sumBy { create(it.first, it.second, available) }
-            created += reaction.res.first
-        }
+        val numReactions = ceil(toCreate.toFloat() / reaction.res.first).toInt()
+        val oreNeeded = reaction.req.sumBy { create(numReactions * it.first, it.second, available) }
+        val created = numReactions * reaction.res.first
 
         // Store any left over materials for future reactions
         val leftOver = created - toCreate
