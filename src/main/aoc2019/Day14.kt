@@ -37,7 +37,7 @@ class Day14(input: List<String>) {
 
         // Create more materials to fill the need.
         val reaction = reactions[material] ?: error("Unknown material: $material")
-        val numReactions = ceil(toCreate.toFloat() / reaction.res.first).toLong()
+        val numReactions = ceil(toCreate.toDouble() / reaction.res.first).toLong()
         val oreNeeded = reaction.req.sumByLong { create(numReactions * it.first, it.second, available) }
         val created = numReactions * reaction.res.first
 
@@ -60,7 +60,7 @@ class Day14(input: List<String>) {
         var end = lowerBound * 2
         var candidate = 0L
 
-        while (start < end) {
+        while (start <= end) {
             val mid = start + (end - start) / 2
             val currentValue = create(mid, "FUEL", mutableMapOf())
             if (currentValue > capacity) {
