@@ -2,7 +2,7 @@ import java.io.File
 
 fun main() {
     val year = 2019
-    val day = 17
+    val day = 19
     createDayClassFile(year, day)
     createTestFile(year, day)
     createInputFile("$year/day$day.txt")
@@ -32,7 +32,10 @@ fun createDayClassFile(year: Int, day: Int) {
             ?.also { println("$path created") }
 }
 
+
+
 fun getTestCaseContent(year: Int, day: Int): String {
+    val doubleTriple = "\"\"\"\"\"\""
     return """package test.aoc$year
 
 import aoc${year}.Day${day}
@@ -42,10 +45,8 @@ import resourceAsList
 
 class Day${day}Test {
     @Test
-    fun testPartOneExamples() {
-        val input= listOf(
-                ""
-        )
+    fun testPartOneExample1() {
+        val input = $doubleTriple.trimIndent().split("\n")
         assertEquals(0, Day${day}(input).solvePart1())
     }
 
@@ -55,10 +56,8 @@ class Day${day}Test {
     }
 
     @Test
-    fun testPartTwoExamples() {
-        val input = listOf(
-                ""
-        )
+    fun testPartTwoExample1() {
+        val input = $doubleTriple.trimIndent().split("\n")
         assertEquals(0, Day${day}(input).solvePart2())
     }
 
