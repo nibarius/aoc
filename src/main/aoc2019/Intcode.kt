@@ -119,37 +119,45 @@ class Intcode(private val initialMemory: List<Long>, val input: MutableList<Long
         return Pair(instruction, params)
     }
 
+    fun nextInstructionIsInput(): Boolean {
+        return getCurrentInstructionAndParameters().first is Instruction.Input
+    }
+
+    fun runOneInstruction() {
+        val (instruction, params) = getCurrentInstructionAndParameters()
+        when (instruction) {
+            is Instruction.Terminate -> {
+                computerState = ComputerState.Terminated
+                return
+            }
+            is Instruction.Add -> memory[params[2]] = memory[params[0]] + memory[params[1]]
+            is Instruction.Multiply -> memory[params[2]] = memory[params[0]] * memory[params[1]]
+            is Instruction.Input -> {
+                if (input.isEmpty()) {
+                    computerState = ComputerState.WaitingForInput
+                    return
+                } else {
+                    memory[params[0]] = input.removeAt(0)
+                }
+            }
+            is Instruction.Output -> output.add(memory[params[0]])
+            is Instruction.JumpIfTrue -> if (memory[params[0]] != 0L) {
+                instructionPointer = memory[params[1]] - instruction.length()
+            }
+            is Instruction.JumpIfFalse -> if (memory[params[0]] == 0L) {
+                instructionPointer = memory[params[1]] - instruction.length()
+            }
+            is Instruction.LessThan -> memory[params[2]] = if (memory[params[0]] < memory[params[1]]) 1 else 0
+            is Instruction.Equals -> memory[params[2]] = if (memory[params[0]] == memory[params[1]]) 1 else 0
+            is Instruction.AdjustRelativeBase -> relativeBase += memory[params[0]]
+        }
+        instructionPointer += instruction.length()
+    }
+
     fun run() {
         computerState = ComputerState.Running
-        while (true) {
-            val (instruction, params) = getCurrentInstructionAndParameters()
-            when (instruction) {
-                is Instruction.Terminate -> {
-                    computerState = ComputerState.Terminated
-                    return
-                }
-                is Instruction.Add -> memory[params[2]] = memory[params[0]] + memory[params[1]]
-                is Instruction.Multiply -> memory[params[2]] = memory[params[0]] * memory[params[1]]
-                is Instruction.Input -> {
-                    if (input.isEmpty()) {
-                        computerState = ComputerState.WaitingForInput
-                        return
-                    } else {
-                        memory[params[0]] = input.removeAt(0)
-                    }
-                }
-                is Instruction.Output -> output.add(memory[params[0]])
-                is Instruction.JumpIfTrue -> if (memory[params[0]] != 0L) {
-                    instructionPointer = memory[params[1]] - instruction.length()
-                }
-                is Instruction.JumpIfFalse -> if (memory[params[0]] == 0L) {
-                    instructionPointer = memory[params[1]] - instruction.length()
-                }
-                is Instruction.LessThan -> memory[params[2]] = if (memory[params[0]] < memory[params[1]]) 1 else 0
-                is Instruction.Equals -> memory[params[2]] = if (memory[params[0]] == memory[params[1]]) 1 else 0
-                is Instruction.AdjustRelativeBase -> relativeBase += memory[params[0]]
-            }
-            instructionPointer += instruction.length()
+        while (computerState == ComputerState.Running) {
+            runOneInstruction()
         }
     }
 
