@@ -15,7 +15,7 @@ class Day22Test {
         """.trimIndent().split("\n")
         assertEquals(3L, Day22(input).finalPositionForCard(9, 10))
     }
-    
+
     @Test
     fun testPartOneExample2() {
         val input = """
