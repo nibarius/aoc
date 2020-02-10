@@ -1,21 +1,10 @@
 package aoc2018
 
+import Direction
+import Pos
 import next
-import prev
 
 class Day13(input: List<String>) {
-    data class Pos(val x: Int, val y: Int) {
-        override fun toString(): String {
-            return "$x,$y"
-        }
-    }
-
-    enum class Side(val dx: Int, val dy: Int) {
-        UP(0, -1),
-        LEFT(-1, 0),
-        DOWN(0, 1),
-        RIGHT(1, 0)
-    }
 
     enum class Turn {
         LEFT,
@@ -23,8 +12,8 @@ class Day13(input: List<String>) {
         RIGHT
     }
 
-    data class Path(val exits: List<Side>)
-    data class Cart(var pos: Pos, var comingFrom: Side) {
+    data class Path(val exits: List<Direction>)
+    data class Cart(var pos: Pos, var comingFrom: Direction) {
         var removed = false
         var nextTurn = Turn.LEFT
         fun move(map: Map<Pos, Path>) {
@@ -33,17 +22,17 @@ class Day13(input: List<String>) {
                 moveInDirection(possibleDirections.first())
             } else {
                 when (nextTurn) {
-                    Turn.LEFT -> moveInDirection(comingFrom.prev())
-                    Turn.STRAIGHT -> moveInDirection(comingFrom.next().next())
-                    Turn.RIGHT -> moveInDirection(comingFrom.next())
+                    Turn.LEFT -> moveInDirection(comingFrom.turnRight())
+                    Turn.STRAIGHT -> moveInDirection(comingFrom.opposite())
+                    Turn.RIGHT -> moveInDirection(comingFrom.turnLeft())
                 }
                 nextTurn = nextTurn.next()
             }
         }
 
-        private fun moveInDirection(direction: Side) {
+        private fun moveInDirection(direction: Direction) {
             pos = Pos(pos.x + direction.dx, pos.y + direction.dy)
-            comingFrom = direction.next().next()
+            comingFrom = direction.opposite()
         }
     }
 
@@ -56,38 +45,38 @@ class Day13(input: List<String>) {
         for (y in 0 until input.size) {
             for (x in 0 until input[y].length) {
                 when (input[y][x]) {
-                    '-' -> map[Pos(x, y)] = Path(listOf(Side.LEFT, Side.RIGHT))
-                    '|' -> map[Pos(x, y)] = Path(listOf(Side.UP, Side.DOWN))
-                    '+' -> map[Pos(x, y)] = Path(listOf(Side.UP, Side.LEFT, Side.DOWN, Side.RIGHT))
+                    '-' -> map[Pos(x, y)] = Path(listOf(Direction.Left, Direction.Right))
+                    '|' -> map[Pos(x, y)] = Path(listOf(Direction.Up, Direction.Down))
+                    '+' -> map[Pos(x, y)] = Path(listOf(Direction.Up, Direction.Left, Direction.Down, Direction.Right))
                     '/' -> {
                         if (y > 0 && listOf('|', '+').any { it == input[y - 1][x] }) {
-                            map[Pos(x, y)] = Path(listOf(Side.UP, Side.LEFT))
+                            map[Pos(x, y)] = Path(listOf(Direction.Up, Direction.Left))
                         } else {
-                            map[Pos(x, y)] = Path(listOf(Side.DOWN, Side.RIGHT))
+                            map[Pos(x, y)] = Path(listOf(Direction.Down, Direction.Right))
                         }
                     }
                     '\\' -> {
                         if (y > 0 && listOf('|', '+').any { it == input[y - 1][x] }) {
-                            map[Pos(x, y)] = Path(listOf(Side.UP, Side.RIGHT))
+                            map[Pos(x, y)] = Path(listOf(Direction.Up, Direction.Right))
                         } else {
-                            map[Pos(x, y)] = Path(listOf(Side.DOWN, Side.LEFT))
+                            map[Pos(x, y)] = Path(listOf(Direction.Down, Direction.Left))
                         }
                     }
                     '^' -> {
-                        map[Pos(x, y)] = Path(listOf(Side.UP, Side.DOWN))
-                        carts.add(Cart(Pos(x, y), Side.DOWN))
+                        map[Pos(x, y)] = Path(listOf(Direction.Up, Direction.Down))
+                        carts.add(Cart(Pos(x, y), Direction.Down))
                     }
                     'v' -> {
-                        map[Pos(x, y)] = Path(listOf(Side.UP, Side.DOWN))
-                        carts.add(Cart(Pos(x, y), Side.UP))
+                        map[Pos(x, y)] = Path(listOf(Direction.Up, Direction.Down))
+                        carts.add(Cart(Pos(x, y), Direction.Up))
                     }
                     '<' -> {
-                        map[Pos(x, y)] = Path(listOf(Side.LEFT, Side.RIGHT))
-                        carts.add(Cart(Pos(x, y), Side.RIGHT))
+                        map[Pos(x, y)] = Path(listOf(Direction.Left, Direction.Right))
+                        carts.add(Cart(Pos(x, y), Direction.Right))
                     }
                     '>' -> {
-                        map[Pos(x, y)] = Path(listOf(Side.LEFT, Side.RIGHT))
-                        carts.add(Cart(Pos(x, y), Side.LEFT))
+                        map[Pos(x, y)] = Path(listOf(Direction.Left, Direction.Right))
+                        carts.add(Cart(Pos(x, y), Direction.Left))
                     }
                 }
             }
@@ -103,7 +92,7 @@ class Day13(input: List<String>) {
             carts.sortedWith(compareBy({ it.pos.y }, { it.pos.x })).forEach { cart ->
                 cart.move(map)
                 if (carts.filter { it.pos == cart.pos }.size > 1) {
-                    return cart.pos.toString()
+                    return "${cart.pos.x},${cart.pos.y}"
                 }
             }
 
@@ -123,7 +112,7 @@ class Day13(input: List<String>) {
                 }
             }
             if (carts.filterNot { it.removed }.size == 1) {
-                return liveCars.first{!it.removed}.pos.toString()
+                return liveCars.first { !it.removed }.pos.let { "${it.x},${it.y}" }
             }
         }
     }

@@ -3,9 +3,9 @@ package aoc2019
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
+import Pos
 
 class Day10(input: List<String>) {
-    data class Pos(val x: Int, val y: Int)
 
     data class Angle(val value: Double) {
         var pos = Pos(0, 0)
@@ -17,7 +17,7 @@ class Day10(input: List<String>) {
                 // with angle decreasing further while rotating clockwise
                 return Angle(atan2((other.x - self.x).toDouble(), (other.y - self.y).toDouble()) - PI)
                         .apply {
-                            distance = abs((other.x - self.x)) + abs((other.y - self.y))
+                            distance = self.distanceTo(other)
                             pos = other
                         }
             }

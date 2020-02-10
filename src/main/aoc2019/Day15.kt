@@ -1,21 +1,13 @@
 package aoc2019
 
+import Direction
+import Pos
 import org.magicwerk.brownies.collections.GapList
 import kotlin.math.max
 
 class Day15(input: List<String>) {
 
     val program = Intcode(input.map { it.toLong() })
-
-    data class Pos(val x: Int, val y: Int)
-    enum class Dir(val value: Long, val dx: Int, val dy: Int) {
-        North(1, 0, 1),
-        South(2, 0, -1),
-        West(3, -1, 0),
-        East(4, 1, 0);
-
-        fun from(pos: Pos) = Pos(pos.x + dx, pos.y + dy)
-    }
 
     enum class Status(val ch: Char) {
         Wall('#'),
@@ -38,14 +30,20 @@ class Day15(input: List<String>) {
         @Override
         fun copy() = Droid(program.copy(), stepsTaken)
 
-        fun move(direction: Dir): Status {
-            program.input.add(direction.value)
+        fun move(direction: Direction): Status {
+            val dir = when(direction){
+                Direction.Up -> 1L
+                Direction.Down -> 2L
+                Direction.Left -> 3L
+                Direction.Right -> 4L
+            }
+            program.input.add(dir)
             program.run()
             return Status.get(program.output.removeAt(0))
         }
     }
 
-    private data class QueueEntry(val pos: Pos, val droid: Droid, val direction: Dir)
+    private data class QueueEntry(val pos: Pos, val droid: Droid, val direction: Direction)
 
     private fun makeMap(droid: Droid): Triple<Int, Pos, MutableMap<Pos, Char>> {
         val map = mutableMapOf<Pos, Char>()
@@ -59,7 +57,7 @@ class Day15(input: List<String>) {
 
         // Move one step in every direction
         droid.stepsTaken++
-        Dir.values().forEach { queue.add(QueueEntry(it.from(startPos), droid.copy(), it)) }
+        Direction.values().forEach { queue.add(QueueEntry(it.from(startPos), droid.copy(), it)) }
         while (queue.isNotEmpty()) {
             val current = queue.remove()
             if (alreadyChecked.contains(current.pos)) continue
@@ -74,7 +72,7 @@ class Day15(input: List<String>) {
             }
 
             current.droid.stepsTaken++
-            Dir.values().forEach {
+            Direction.values().forEach {
                 val nextPos = it.from(current.pos)
                 if (!alreadyChecked.contains(nextPos)) {
                     queue.add(QueueEntry(nextPos, current.droid.copy(), it))
@@ -94,7 +92,7 @@ class Day15(input: List<String>) {
         var maxDistance = 0
 
         // Move one step in every direction
-        Dir.values().forEach { queue.add(QueueEntry2(it.from(pos), 1)) }
+        Direction.values().forEach { queue.add(QueueEntry2(it.from(pos), 1)) }
         while (queue.isNotEmpty()) {
             val current = queue.remove()
             if (alreadyChecked.contains(current.pos)) continue
@@ -104,7 +102,7 @@ class Day15(input: List<String>) {
             if (result == '#') continue
             maxDistance = max(maxDistance, current.stepsTaken)
 
-            Dir.values().forEach {
+            Direction.values().forEach {
                 val nextPos = it.from(current.pos)
                 if (!alreadyChecked.contains(nextPos)) {
                     queue.add(QueueEntry2(nextPos, current.stepsTaken + 1))

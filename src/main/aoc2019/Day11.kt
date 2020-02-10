@@ -1,23 +1,14 @@
 package aoc2019
 
+import Pos
 import next
 import prev
 
 class Day11(input: List<String>) {
-    private data class Pos(val x: Int, val y: Int)
 
     private data class Robot(private val computer: Intcode, private val map: MutableMap<Pos, Int>) {
-        @Suppress("unused") // All directions are used via the next/prev extension functions
-        enum class Dir(private val dx: Int, private val dy: Int) {
-            UP(0, -1),
-            RIGHT(1, 0),
-            DOWN(0, 1),
-            LEFT(-1, 0);
 
-            fun from(pos: Pos) = Pos(pos.x + dx, pos.y + dy)
-        }
-
-        private var facing = Dir.UP
+        private var facing = Direction.Up
         private var pos = Pos(0, 0)
 
         private fun isNotDoneYet() = computer.computerState != Intcode.ComputerState.Terminated
@@ -37,9 +28,9 @@ class Day11(input: List<String>) {
 
         private fun move(direction: Int) {
             facing = if (direction == 1) {
-                facing.next() // Turn right
+                facing.turnRight()
             } else {
-                facing.prev() // Turn left
+                facing.turnLeft()
             }
             pos = facing.from(pos)
         }

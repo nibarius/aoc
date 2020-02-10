@@ -1,8 +1,7 @@
 package aoc2019
 
-import next
-import prev
-import java.lang.RuntimeException
+import Direction
+import Pos
 
 class Day17(input: List<String>) {
     val parsedInput = input.map { it.toLong() }
@@ -17,23 +16,6 @@ class Day17(input: List<String>) {
             (map.xRange()).joinToString("") { x ->
                 map.getOrDefault(Pos(x, y), '#').toString()
             }
-        }
-    }
-
-    data class Pos(val x: Int, val y: Int)
-    enum class Dir(val dx: Int, val dy: Int) {
-        Up(0, -1),
-        Left(-1, 0),
-        Down(0, 1),
-        Right(1, 0);
-
-        fun from(pos: Pos) = Pos(pos.x + dx, pos.y + dy)
-
-        // facing.turn(left) or facing.turn(right)
-        fun turn(dir: Dir) = when (dir) {
-            Left -> this.next()
-            Right -> this.prev()
-            else -> throw RuntimeException("Left and Right are the only valid directions to turn to")
         }
     }
 
@@ -71,23 +53,21 @@ class Day17(input: List<String>) {
     }
 
     private fun findPath(map: Map<Pos, Char>): List<String> {
-        var facing = Dir.Up // Robot is facing up at first
+        var facing = Direction.Up // Robot is facing up at first
         var pos = map.filterValues { it == '^' }.keys.first()
         val path = mutableListOf<String>()
-        while(true) {
+        while (true) {
             val code: String
-            val toLeft = map.getOrDefault(facing.turn(Dir.Left).from(pos), '.')
-            val toRight = map.getOrDefault(facing.turn(Dir.Right).from(pos), '.')
+            val toLeft = map.getOrDefault(facing.turnLeft().from(pos), '.')
+            val toRight = map.getOrDefault(facing.turnRight().from(pos), '.')
             if (toLeft == '.' && toRight == '.') {
                 // Found the end
                 break
-            }
-            else if (toLeft == '#') {
-                facing = facing.turn(Dir.Left)
+            } else if (toLeft == '#') {
+                facing = facing.turnLeft()
                 code = "L"
-            }
-            else {
-                facing = facing.turn(Dir.Right)
+            } else {
+                facing = facing.turnRight()
                 code = "R"
             }
 
@@ -120,10 +100,10 @@ class Day17(input: List<String>) {
         val maxInstructions = 5
         val minInstructions = 1
         var remaining = path
-        outer@for (i in minInstructions .. maxInstructions) {
+        outer@ for (i in minInstructions..maxInstructions) {
             val candidate1 = path.subList(0, i)
             remaining = dropPrefix(path, candidate1)
-            for (j in minInstructions .. maxInstructions) {
+            for (j in minInstructions..maxInstructions) {
                 var remaining2 = remaining
                 val candidate2 = remaining2.subList(0, j)
                 do {
@@ -135,7 +115,7 @@ class Day17(input: List<String>) {
                 if (remaining2.isEmpty()) {
                     continue@outer
                 }
-                for (k in minInstructions .. maxInstructions) {
+                for (k in minInstructions..maxInstructions) {
                     var remaining3 = remaining2
                     val candidate3 = remaining3.subList(0, k)
                     do {

@@ -1,7 +1,7 @@
 package aoc2018
 
 import ShortestPath
-import ShortestPath.Pos
+import Pos
 
 class Day15(val input: List<String>) {
     data class Player(val team: PlayerType, var pos: Pos, var attackPower: Int = 3, var hp: Int = 200) {
