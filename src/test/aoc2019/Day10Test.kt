@@ -1,5 +1,6 @@
 package test.aoc2019
 
+import Pos
 import aoc2019.Day10
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -97,11 +98,11 @@ class Day10Test {
 
     @Test
     fun testMagic() {
-        val self = Day10.Pos(5, 5)
-        val up = Day10.Pos(5, 0)
-        val right = Day10.Pos(10, 5)
-        val down = Day10.Pos(5, 10)
-        val left = Day10.Pos(0, 5)
+        val self = Pos(5, 5)
+        val up = Pos(5, 0)
+        val right = Pos(10, 5)
+        val down = Pos(5, 10)
+        val left = Pos(0, 5)
         assertEquals(0.0, Day10.Angle.calculate(self, up).value, 0.01)
         assertEquals(-PI / 2, Day10.Angle.calculate(self, right).value, 0.01)
         assertEquals(-PI, Day10.Angle.calculate(self, down).value, 0.01)

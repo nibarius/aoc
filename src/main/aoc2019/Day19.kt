@@ -1,9 +1,9 @@
 package aoc2019
 
+import Pos
+
 class Day19(input: List<String>) {
     val parsedInput = input.map { it.toLong() }
-
-    data class Pos(val x: Int, val y: Int)
 
     private fun scanArea(): MutableMap<Pos, Char> {
         val map = mutableMapOf<Pos, Char>()

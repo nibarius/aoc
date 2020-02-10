@@ -3,11 +3,7 @@ import kotlin.math.abs
 
 class ShortestPath(private val traversable: List<Char>) {
 
-    data class Pos(val x: Int, val y: Int) {
-        override fun toString(): String {
-            return "($x, $y)"
-        }
-    }
+
 
     // Order of directions specifies which is preferred when several paths is shortest
     private enum class Dir(val dx: Int, val dy: Int) {

@@ -1,45 +1,12 @@
 package aoc2016
 
+import Direction
+import Pos
 import org.magicwerk.brownies.collections.GapList
 import java.util.*
 
 class Day24(input: List<String>) {
     val theMap = Map(input)
-
-    data class Coordinate(val x: Int, val y: Int) {
-        fun next(dir: Direction): Coordinate = Coordinate(x + dir.dx, y + dir.dy)
-    }
-
-    enum class Direction {
-        UP {
-            override val dx = 0
-            override val dy = -1
-        },
-        LEFT {
-            override val dx = -1
-            override val dy = 0
-        },
-        DOWN {
-            override val dx = 0
-            override val dy = 1
-        },
-
-        RIGHT {
-            override val dx = 1
-            override val dy = 0
-        };
-
-        abstract val dx: Int
-        abstract val dy: Int
-        fun opposite(): Direction {
-            return when (this) {
-                UP -> DOWN
-                LEFT -> RIGHT
-                DOWN -> UP
-                RIGHT -> LEFT
-            }
-        }
-    }
 
     /**
      * A node in the graph.
@@ -50,7 +17,7 @@ class Day24(input: List<String>) {
      * @property name the name of this node (0, 1, 2, etc), '.' if it doesn't have any name.
      * @property neighbours A list of all this nodes neighbours as a Pair of address, distance
      */
-    data class Node(val address: Coordinate, val name: Char, val neighbours: MutableList<Pair<Coordinate, Int>>)
+    data class Node(val address: Pos, val name: Char, val neighbours: MutableList<Pair<Pos, Int>>)
 
     /**
      * The current state of walking trough the graph while searching for the solution.
@@ -62,25 +29,25 @@ class Day24(input: List<String>) {
      * has been reached.
      * @property goingHome true if we have found all places and are trying to find the way back home
      */
-    data class WalkedPath(val currentAddress: Coordinate, val steps: Int, val visitedPlaces: List<Char>,
-                          val visitedNodes: List<Coordinate>, val goingHome: Boolean = false)
+    data class WalkedPath(val currentAddress: Pos, val steps: Int, val visitedPlaces: List<Char>,
+                          val visitedNodes: List<Pos>, val goingHome: Boolean = false)
 
     // A representation of the map. Takes the ascii map as input and can generate a graph
     // that can be traversed more easily.
     data class Map(val theMap: List<String>) {
-        private val theGraph = mutableMapOf<Coordinate, Node>()
+        private val theGraph = mutableMapOf<Pos, Node>()
 
-        fun findStart(): Coordinate {
+        fun findStart(): Pos {
             theMap.forEachIndexed { y, s ->
                 if (s.contains('0')) {
-                    return Coordinate(s.indexOf('0'), y)
+                    return Pos(s.indexOf('0'), y)
                 }
             }
-            return Coordinate(-1, -1)
+            return Pos(-1, -1)
         }
 
         // Get all the direction that it's possible to move in from the given coordinate
-        private fun getPossibleDirectionsFrom(address: Coordinate): List<Direction> {
+        private fun getPossibleDirectionsFrom(address: Pos): List<Direction> {
             val ret = mutableListOf<Direction>()
             for (direction in Direction.values()) {
                 val next = theMap[address.y + direction.dy][address.x + direction.dx]
@@ -92,7 +59,7 @@ class Day24(input: List<String>) {
         }
 
         // Get the node at the given address and create one if needed
-        private fun createNodeIfNeeded(address: Coordinate): Node {
+        private fun createNodeIfNeeded(address: Pos): Node {
             if (!theGraph.containsKey(address)) {
                 theGraph[address] = Node(address, theMap[address.y][address.x], mutableListOf())
             }
@@ -101,8 +68,8 @@ class Day24(input: List<String>) {
 
         // Start at the given coordinate and walk to the next node. Return the coordinate of the next node
         // and the distance walked to get to that node.
-        private tailrec fun walkToNextNode(address: Coordinate,
-                                           comingFrom: Direction, distanceWalked: Int): Pair<Coordinate, Int>? {
+        private tailrec fun walkToNextNode(address: Pos,
+                                           comingFrom: Direction, distanceWalked: Int): Pair<Pos, Int>? {
             val dirs = getPossibleDirectionsFrom(address).filterNot { it == comingFrom }
             return when {
                 theMap[address.y][address.x] in '0'..'9' || dirs.size > 1 -> {
@@ -111,7 +78,7 @@ class Day24(input: List<String>) {
                 }
                 dirs.isEmpty() -> null
                 dirs.size == 1 -> {
-                    walkToNextNode(address.next(dirs[0]), dirs[0].opposite(), distanceWalked + 1)
+                    walkToNextNode(dirs[0].from(address), dirs[0].opposite(), distanceWalked + 1)
                 }
                 else -> throw(RuntimeException("Unexpected state"))
             }
@@ -124,7 +91,7 @@ class Day24(input: List<String>) {
             val dirs = getPossibleDirectionsFrom(node.address)
             // Room for improvement: No need to walk already known paths
             dirs.forEach { dir ->
-                val nextNode = walkToNextNode(node.address.next(dir), dir.opposite(), 1)
+                val nextNode = walkToNextNode(dir.from(node.address), dir.opposite(), 1)
                 if (nextNode != null) {
                     node.neighbours.add(nextNode)
                 }
@@ -133,7 +100,7 @@ class Day24(input: List<String>) {
         }
 
         // Convert the ascii map into a graph that can be traversed more easily (a map of coordinates to nodes).
-        fun buildGraph(): MutableMap<Coordinate, Node> {
+        fun buildGraph(): MutableMap<Pos, Node> {
             val nodesToCheck = ArrayDeque<Node>()
             nodesToCheck.add(createNodeIfNeeded(findStart()))
             while (nodesToCheck.size > 0) {
@@ -158,9 +125,9 @@ class Day24(input: List<String>) {
     // by each place of interest at least once. Optionally also returns back to the
     // start when all places of interest have been visited.
     // Returns the number of steps required for this.
-    private fun searchGraph(theGraph: MutableMap<Coordinate, Node>, returnToStartWhenAllFound: Boolean = false): Int {
+    private fun searchGraph(theGraph: MutableMap<Pos, Node>, returnToStartWhenAllFound: Boolean = false): Int {
         val numPlacesToVisit = theGraph.filter { it.value.name != '.' }.size
-        val alreadyChecked = mutableSetOf<Pair<Coordinate, List<Char>>>()
+        val alreadyChecked = mutableSetOf<Pair<Pos, List<Char>>>()
         val goingHomeFrom = mutableSetOf<Char>()
         val toCheck = GapList<WalkedPath>() // Time to solve Part 1 with: GapList ~6s, ArrayList: ~7s LinkedList: ~3m
         toCheck.add(WalkedPath(theMap.findStart(), 0, listOf(), listOf()))

@@ -1,5 +1,6 @@
 package test.aoc2016
 
+import Pos
 import aoc2016.Day24
 import org.junit.Assert
 import org.junit.Test
@@ -17,8 +18,8 @@ class Day24Test {
 
     @Test
     fun findStartTest() {
-        Assert.assertEquals(Day24.Coordinate(1, 1), Day24(exampleInput).theMap.findStart())
-        Assert.assertEquals(Day24.Coordinate(1, 19), Day24(resourceAsList("2016/day24.txt")).theMap.findStart())
+        Assert.assertEquals(Pos(1, 1), Day24(exampleInput).theMap.findStart())
+        Assert.assertEquals(Pos(1, 19), Day24(resourceAsList("2016/day24.txt")).theMap.findStart())
     }
 
     @Test

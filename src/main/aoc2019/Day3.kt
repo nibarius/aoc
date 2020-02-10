@@ -1,41 +1,27 @@
 package aoc2019
 
-import kotlin.math.abs
+import Pos
+import toDirection
 
 
 class Day3(input: List<String>) {
-
-    data class Pos(val x: Int, val y: Int) {
-        val distance: Int
-            get() {
-                return abs(x) + abs(y)
-            }
-    }
 
     data class Wire(val path: MutableList<Pos> = mutableListOf()) {
         fun trace(input: List<String>): Wire {
             var x = 0
             var y = 0
             input.forEach {
-                val direction = it.first()
+                val direction = it.first().toDirection()
                 val distance = it.drop(1).toInt()
-                val move: (Pos) -> Pos = when (direction) {
-                    'R' -> { (x, y) -> Pos(x + 1, y) }
-                    'U' -> { (x, y) -> Pos(x, y + 1) }
-                    'L' -> { (x, y) -> Pos(x - 1, y) }
-                    'D' -> { (x, y) -> Pos(x, y - 1) }
-                    else -> throw RuntimeException("Unknown direction: $direction")
-                }
                 var lastPos = Pos(x, y)
                 repeat(distance) {
-                    move(lastPos).let { currentPos ->
+                    direction.from(lastPos).let { currentPos ->
                         path.add(currentPos)
                         lastPos = currentPos
                     }
                 }
                 x = lastPos.x
                 y = lastPos.y
-
             }
             return this
         }
@@ -55,7 +41,7 @@ class Day3(input: List<String>) {
 
     fun solvePart1(): Int {
         return wires.intersections()
-                .map { it.distance }
+                .map { it.distanceToOrigin }
                 .min() ?: -1
     }
 

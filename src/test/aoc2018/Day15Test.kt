@@ -1,6 +1,6 @@
 package test.aoc2018
 
-import ShortestPath
+import Pos
 import aoc2018.Day15
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -19,9 +19,9 @@ class Day15Test {
                 "#######"
         )
         val d = Day15(input)
-        val player = Day15.Player(Day15.PlayerType.ELF, ShortestPath.Pos(1, 1))
+        val player = Day15.Player(Day15.PlayerType.ELF, Pos(1, 1))
         d.takeTurn(player)
-        assertEquals(ShortestPath.Pos(2, 1), player.pos)
+        assertEquals(Pos(2, 1), player.pos)
     }
 
     @Test
@@ -34,9 +34,9 @@ class Day15Test {
                 "#######"
         )
         val d = Day15(input)
-        val player = Day15.Player(Day15.PlayerType.ELF, ShortestPath.Pos(2, 1))
+        val player = Day15.Player(Day15.PlayerType.ELF, Pos(2, 1))
         d.takeTurn(player)
-        assertEquals(ShortestPath.Pos(3, 1), player.pos)
+        assertEquals(Pos(3, 1), player.pos)
     }
 
     @Test
@@ -51,9 +51,9 @@ class Day15Test {
                 "#######"
         )
         val d = Day15(input)
-        val player = Day15.Player(Day15.PlayerType.ELF, ShortestPath.Pos(2, 2))
+        val player = Day15.Player(Day15.PlayerType.ELF, Pos(2, 2))
         d.takeTurn(player)
-        assertEquals(ShortestPath.Pos(3, 2), player.pos)
+        assertEquals(Pos(3, 2), player.pos)
     }
 
     @Test
@@ -65,10 +65,10 @@ class Day15Test {
                 "####"
         )
         val d = Day15(input)
-        val player = Day15.Player(Day15.PlayerType.ELF, ShortestPath.Pos(2, 2))
+        val player = Day15.Player(Day15.PlayerType.ELF, Pos(2, 2))
         d.takeTurn(player)
-        assertEquals(ShortestPath.Pos(2, 2), player.pos)
-        assertEquals(197, d.playerAt(ShortestPath.Pos(2, 1))?.hp)
+        assertEquals(Pos(2, 2), player.pos)
+        assertEquals(197, d.playerAt(Pos(2, 1))?.hp)
     }
 
     @Test
@@ -80,12 +80,12 @@ class Day15Test {
                 "####"
         )
         val d = Day15(input)
-        val player = Day15.Player(Day15.PlayerType.ELF, ShortestPath.Pos(2, 2))
+        val player = Day15.Player(Day15.PlayerType.ELF, Pos(2, 2))
         d.doRound()
-        assertEquals(ShortestPath.Pos(2, 2), player.pos)
-        assertEquals(197, d.playerAt(ShortestPath.Pos(2, 1))?.hp)
-        assertEquals(200, d.playerAt(ShortestPath.Pos(1, 2))?.hp)
-        assertEquals(194, d.playerAt(ShortestPath.Pos(2, 2))?.hp)
+        assertEquals(Pos(2, 2), player.pos)
+        assertEquals(197, d.playerAt(Pos(2, 1))?.hp)
+        assertEquals(200, d.playerAt(Pos(1, 2))?.hp)
+        assertEquals(194, d.playerAt(Pos(2, 2))?.hp)
     }
 
     @Test
@@ -97,9 +97,9 @@ class Day15Test {
                 "########"
         )
         val d = Day15(input)
-        val player = Day15.Player(Day15.PlayerType.ELF, ShortestPath.Pos(3, 1))
+        val player = Day15.Player(Day15.PlayerType.ELF, Pos(3, 1))
         d.takeTurn(player)
-        assertEquals(ShortestPath.Pos(2, 1), player.pos)
+        assertEquals(Pos(2, 1), player.pos)
     }
 
     @Test

@@ -1,28 +1,29 @@
 package aoc2019
 
 import ShortestPath
+import Pos
 import java.util.*
 import kotlin.math.abs
 
 class Day18(input: List<String>) {
 
     private val initialState: State
-    private val map: Map<ShortestPath.Pos, Char>
-    private val doors: Map<Char, ShortestPath.Pos>
-    private val keys: Map<Char, ShortestPath.Pos>
+    private val map: Map<Pos, Char>
+    private val doors: Map<Char, Pos>
+    private val keys: Map<Char, Pos>
 
     init {
-        val tmpMap = mutableMapOf<ShortestPath.Pos, Char>()
-        val tmpKeys = mutableMapOf<Char, ShortestPath.Pos>() // key to key-pos
-        val tmpDoors = mutableMapOf<Char, ShortestPath.Pos>() // door to door-pos
-        var startPos = ShortestPath.Pos(-1, -1)
+        val tmpMap = mutableMapOf<Pos, Char>()
+        val tmpKeys = mutableMapOf<Char, Pos>() // key to key-pos
+        val tmpDoors = mutableMapOf<Char, Pos>() // door to door-pos
+        var startPos = Pos(-1, -1)
         for (y in input.indices) {
             for (x in input[y].indices) {
-                tmpMap[ShortestPath.Pos(x, y)] = input[y][x]
+                tmpMap[Pos(x, y)] = input[y][x]
                 when {
-                    input[y][x] == '@' -> startPos = ShortestPath.Pos(x, y)
-                    ('a'..'z').contains(input[y][x]) -> tmpKeys[input[y][x]] = ShortestPath.Pos(x, y)
-                    ('A'..'Z').contains(input[y][x]) -> tmpDoors[input[y][x]] = ShortestPath.Pos(x, y)
+                    input[y][x] == '@' -> startPos = Pos(x, y)
+                    ('a'..'z').contains(input[y][x]) -> tmpKeys[input[y][x]] = Pos(x, y)
+                    ('A'..'Z').contains(input[y][x]) -> tmpDoors[input[y][x]] = Pos(x, y)
                 }
             }
         }
@@ -32,11 +33,11 @@ class Day18(input: List<String>) {
         initialState = State(startPos)
     }
 
-    data class State(val pos: ShortestPath.Pos, val keysFound: Set<Char> = emptySet()) {
+    data class State(val pos: Pos, val keysFound: Set<Char> = emptySet()) {
         var steps = 0
     }
 
-    fun find(theMap: Map<ShortestPath.Pos, Char>): Int {
+    fun find(theMap: Map<Pos, Char>): Int {
         val toCheck = PriorityQueue<State>(compareBy { state -> state.steps })
         toCheck.add(initialState)
 
@@ -80,11 +81,11 @@ class Day18(input: List<String>) {
         return -1
     }
 
-    data class State2(val pos: List<ShortestPath.Pos>, val keysFound: Set<Char> = emptySet()) {
+    data class State2(val pos: List<Pos>, val keysFound: Set<Char> = emptySet()) {
         var steps = 0
     }
 
-    fun find2(theMap: Map<ShortestPath.Pos, Char>, startPos: List<ShortestPath.Pos>): Int {
+    fun find2(theMap: Map<Pos, Char>, startPos: List<Pos>): Int {
 
         val toCheck = PriorityQueue<State2>(compareBy { state -> state.steps })
         toCheck.add(State2(startPos))
@@ -156,13 +157,13 @@ class Day18(input: List<String>) {
         return -1
     }
 
-    private fun updateMap(map: Map<ShortestPath.Pos, Char>): Pair<Map<ShortestPath.Pos, Char>, MutableList<ShortestPath.Pos>> {
-        val startPos = mutableListOf<ShortestPath.Pos>()
+    private fun updateMap(map: Map<Pos, Char>): Pair<Map<Pos, Char>, MutableList<Pos>> {
+        val startPos = mutableListOf<Pos>()
         val newMap = map.toMutableMap().apply {
             val (x, y) = initialState.pos
             for (dy in -1..1) {
                 for (dx in -1..1) {
-                    val pos = ShortestPath.Pos(x + dx, y + dy)
+                    val pos = Pos(x + dx, y + dy)
                     if (abs(dx) == 1 && abs(dy) == 1) {
                         this[pos] = '@'
                         startPos.add(pos)
