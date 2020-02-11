@@ -2,13 +2,13 @@ package aoc2019
 
 import Direction
 import Pos
+import kotlin.math.min
 
 class Day17(input: List<String>) {
     val parsedInput = input.map { it.toLong() }
 
-
-    fun Map<Pos, Char>.xRange() = keys.minBy { it.x }!!.x..keys.maxBy { it.x }!!.x
-    fun Map<Pos, Char>.yRange() = keys.minBy { it.y }!!.y..keys.maxBy { it.y }!!.y
+    private fun Map<Pos, Char>.xRange() = keys.minBy { it.x }!!.x..keys.maxBy { it.x }!!.x
+    private fun Map<Pos, Char>.yRange() = keys.minBy { it.y }!!.y..keys.maxBy { it.y }!!.y
     // Used for debugging
     @Suppress("unused")
     private fun printArea(map: Map<Pos, Char>): String {
@@ -23,11 +23,9 @@ class Day17(input: List<String>) {
         var sum = 0
         for (y in 1 until map.yRange().last) {
             for (x in 1 until map.xRange().last) {
-                if (map[Pos(x - 1, y)] == '#' &&
-                        map[Pos(x + 1, y)] == '#' &&
-                        map[Pos(x, y - 1)] == '#' &&
-                        map[Pos(x, y + 1)] == '#' &&
-                        map[Pos(x, y)] == '#') {
+                val current = Pos(x, y)
+                if (map[current] == '#' &&
+                        Direction.values().all { dir -> map[dir.from(current)] == '#' }) {
                     sum += x * y
                 }
             }
@@ -42,11 +40,12 @@ class Day17(input: List<String>) {
         var y = 0
         val map = mutableMapOf<Pos, Char>()
         c.output.forEach {
-            if (it == 10L) {
+            val current = it.toChar()
+            if (current == '\n') {
                 y++
                 x = 0
             } else {
-                map[Pos(x++, y)] = it.toChar()
+                map[Pos(x++, y)] = current
             }
         }
         return map
@@ -81,98 +80,101 @@ class Day17(input: List<String>) {
         return path
     }
 
-    private fun dropPrefix(list: List<String>, prefix: List<String>): List<String> {
+    private fun List<String>.startsWith(prefix: List<String>): Boolean {
+        return subList(0, min(size, prefix.size)) == prefix
+    }
+
+    // Drop all occurrences of the given prefixes from the given list.
+    private fun dropPrefixes(list: List<String>, prefixes: List<List<String>>): List<String> {
         var offset = 0
         while (offset < list.size) {
-            for (i in prefix.indices) {
-                if (offset + i >= list.size || list[offset + i] != prefix[i]) {
-                    // This is not a prefix
-                    return list.subList(offset, list.size)
-                }
-            }
-            offset += prefix.size
+            val current = list.subList(offset, list.size)
+
+            // Find first prefix that the list starts with, if it exist advance offset and continue
+            // If there is no prefix all prefixes have been dropped, return the remainder
+            prefixes.firstOrNull { current.startsWith(it) }
+                    .let { prefix ->
+                        if (prefix == null) {
+                            return current
+                        }
+                        offset += prefix.size
+                    }
         }
         return emptyList()
     }
 
-    private fun findPatterns(path: List<String>): List<Pair<String, List<String>>> {
+    // The path needs to be split up in three functions with maximum 20 characters
+    // in each function. Find the three functions that can be repeated several times
+    // to make up the whole path.
+    private fun findFunctions(path: List<String>): List<Pair<String, List<String>>> {
         // Max 20 characters per function means max 5 instructions per function
         val maxInstructions = 5
         val minInstructions = 1
-        var remaining = path
-        outer@ for (i in minInstructions..maxInstructions) {
+
+        for (i in minInstructions..maxInstructions) {
+            // Candidate instructions for the first function
             val candidate1 = path.subList(0, i)
-            remaining = dropPrefix(path, candidate1)
+            val remaining1 = dropPrefixes(path, listOf(candidate1))
+
             for (j in minInstructions..maxInstructions) {
-                var remaining2 = remaining
-                val candidate2 = remaining2.subList(0, j)
-                do {
-                    val remSizeBefore = remaining2.size
-                    remaining2 = dropPrefix(remaining2, candidate2)
-                    remaining2 = dropPrefix(remaining2, candidate1)
-                    val remSizeAfter = remaining2.size
-                } while (remSizeAfter != remSizeBefore)
-                if (remaining2.isEmpty()) {
-                    continue@outer
-                }
+                // candidate instructions for the second function
+                val candidate2 = remaining1.subList(0, j)
+                val remaining2 = dropPrefixes(remaining1, listOf(candidate2, candidate1))
+
                 for (k in minInstructions..maxInstructions) {
-                    var remaining3 = remaining2
-                    val candidate3 = remaining3.subList(0, k)
-                    do {
-                        val remSizeBefore = remaining3.size
-                        remaining3 = dropPrefix(remaining3, candidate3)
-                        remaining3 = dropPrefix(remaining3, candidate2)
-                        remaining3 = dropPrefix(remaining3, candidate1)
-                        val remSizeAfter = remaining3.size
-                    } while (remSizeAfter != remSizeBefore)
+                    // candidate instructions for the third function
+                    val candidate3 = remaining2.subList(0, k)
+                    val remaining3 = dropPrefixes(remaining2, listOf(candidate3, candidate2, candidate1))
+
                     if (remaining3.isEmpty()) {
-                        println("three candidates found")
-                        println("candidate1: $candidate1")
-                        println("candidate2: $candidate2")
-                        println("candidate3: $candidate3")
                         return listOf("A" to candidate1, "B" to candidate2, "C" to candidate3)
-                    }
+                    } // else: these candidates didn't work, try with the next candidate
                 }
             }
         }
-        println("couldn't find anything :(")
         return emptyList()
-
     }
 
-    fun makeFunctions(patterns: List<Pair<String, List<String>>>, path: List<String>): String {
+    private fun makeMainMovementRoutine(patterns: List<Pair<String, List<String>>>, path: List<String>): String {
         var ret = path.joinToString(",")
-        patterns.forEach { (function, pat) ->
-            val old = pat.joinToString(",")
-            ret = ret.replace(old, function)
+        patterns.forEach { (functionName, instructionList) ->
+            val instructions = instructionList.joinToString(",")
+            // Replace the identified movement functions in the path with the function names
+            ret = ret.replace(instructions, functionName)
         }
         return ret
     }
 
     fun solvePart1(): Int {
-        val map = generateMap()
-        println(printArea(map))
-        return countIntersections(map)
+        return countIntersections(generateMap())
     }
 
     fun solvePart2(): Long {
         val map = generateMap()
         val path = findPath(map)
-        println(path.joinToString(","))
-        val patterns = findPatterns(path)
-        val functions = makeFunctions(patterns, path).map { it.toLong() }.toMutableList().apply { add(10L) }
-        println(functions)
+        val functions = findFunctions(path)
+        val mainRoutine = makeMainMovementRoutine(functions, path)
+                .map { it.toLong() }
+                .toMutableList()
+                .apply { add('\n'.toLong()) }
+        val movementFunctions = functions
+                .map { (_, instructions) ->
+                    instructions.joinToString(",")
+                            .map { it.toLong() }
+                            .toMutableList()
+                            .apply { add('\n'.toLong()) }
+                }
+
+        // Change the value at address 0 to 2 to wake the robot up
         val actualProgram = parsedInput.toMutableList().apply { this[0] = 2L }.toList()
-        val c = Intcode(actualProgram)
-        c.input.addAll(functions)
-        patterns.forEach { (fn, moves) ->
-            val input = moves.joinToString(",").map { it.toLong() }.toMutableList().apply { add(10L) }
-                    .also { println("Function $fn: $it") }
-            c.input.addAll(input)
+
+        Intcode(actualProgram).run {
+            input.addAll(mainRoutine)
+            movementFunctions.forEach { input.addAll(it) }
+            input.add('n'.toLong()) // No video feed please
+            input.add('\n'.toLong())
+            run()
+            return output.last()
         }
-        c.input.add(110L) //n
-        c.input.add(10L) // newline
-        c.run()
-        return c.output.last()
     }
 }
