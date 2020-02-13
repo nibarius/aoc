@@ -2,6 +2,7 @@ package aoc2019
 
 import Direction
 import Pos
+import AMap
 import org.magicwerk.brownies.collections.GapList
 import kotlin.math.max
 
@@ -45,8 +46,8 @@ class Day15(input: List<String>) {
 
     private data class QueueEntry(val pos: Pos, val droid: Droid, val direction: Direction)
 
-    private fun makeMap(droid: Droid): Triple<Int, Pos, MutableMap<Pos, Char>> {
-        val map = mutableMapOf<Pos, Char>()
+    private fun makeMap(droid: Droid): Triple<Int, Pos, AMap> {
+        val map = AMap()
 
         // Queue is position, (droid + movement)
         val queue = GapList<QueueEntry>()
@@ -80,13 +81,12 @@ class Day15(input: List<String>) {
             }
         }
 
-        //println(printArea(map))
         return Triple(stepsToOxygen, oxygenPosition, map)
     }
 
     data class QueueEntry2(val pos: Pos, val stepsTaken: Int)
 
-    private fun maxDistanceFrom(pos: Pos, map: Map<Pos, Char>): Int {
+    private fun maxDistanceFrom(pos: Pos, map: AMap): Int {
         val queue = GapList<QueueEntry2>()
         val alreadyChecked = mutableSetOf<Pos>()
         var maxDistance = 0
@@ -110,18 +110,6 @@ class Day15(input: List<String>) {
             }
         }
         return maxDistance
-    }
-
-    // Used for debugging
-    @Suppress("unused")
-    private fun printArea(map: Map<Pos, Char>): String {
-        fun Map<Pos, Char>.xRange() = keys.minBy { it.x }!!.x..keys.maxBy { it.x }!!.x
-        fun Map<Pos, Char>.yRange() = keys.minBy { it.y }!!.y..keys.maxBy { it.y }!!.y
-        return (map.yRange()).joinToString("\n") { y ->
-            (map.xRange()).joinToString("") { x ->
-                map.getOrDefault(Pos(x, y), '#').toString()
-            }
-        }
     }
 
     fun solvePart1(): Int {

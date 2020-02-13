@@ -1,12 +1,13 @@
 package aoc2019
 
 import Pos
+import AMap
 
 class Day19(input: List<String>) {
     val parsedInput = input.map { it.toLong() }
 
-    private fun scanArea(): MutableMap<Pos, Char> {
-        val map = mutableMapOf<Pos, Char>()
+    private fun scanArea(): AMap {
+        val map = AMap()
         for (y in 0 until 50) {
             for (x in 0 until 50) {
                 Intcode(parsedInput).run {

@@ -2,24 +2,13 @@ package aoc2019
 
 import Direction
 import Pos
+import AMap
 import kotlin.math.min
 
 class Day17(input: List<String>) {
     val parsedInput = input.map { it.toLong() }
 
-    private fun Map<Pos, Char>.xRange() = keys.minBy { it.x }!!.x..keys.maxBy { it.x }!!.x
-    private fun Map<Pos, Char>.yRange() = keys.minBy { it.y }!!.y..keys.maxBy { it.y }!!.y
-    // Used for debugging
-    @Suppress("unused")
-    private fun printArea(map: Map<Pos, Char>): String {
-        return (map.yRange()).joinToString("\n") { y ->
-            (map.xRange()).joinToString("") { x ->
-                map.getOrDefault(Pos(x, y), '#').toString()
-            }
-        }
-    }
-
-    private fun countIntersections(map: Map<Pos, Char>): Int {
+    private fun countIntersections(map: AMap): Int {
         var sum = 0
         for (y in 1 until map.yRange().last) {
             for (x in 1 until map.xRange().last) {
@@ -33,12 +22,12 @@ class Day17(input: List<String>) {
         return sum
     }
 
-    private fun generateMap(): Map<Pos, Char> {
+    private fun generateMap(): AMap {
         val c = Intcode(parsedInput)
         c.run()
         var x = 0
         var y = 0
-        val map = mutableMapOf<Pos, Char>()
+        val map = AMap()
         c.output.forEach {
             val current = it.toChar()
             if (current == '\n') {
@@ -51,9 +40,9 @@ class Day17(input: List<String>) {
         return map
     }
 
-    private fun findPath(map: Map<Pos, Char>): List<String> {
+    private fun findPath(map: AMap): List<String> {
         var facing = Direction.Up // Robot is facing up at first
-        var pos = map.filterValues { it == '^' }.keys.first()
+        var pos = map.toMap().filterValues { it == '^' }.keys.first()
         val path = mutableListOf<String>()
         while (true) {
             val code: String
