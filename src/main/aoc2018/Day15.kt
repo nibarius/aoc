@@ -63,7 +63,7 @@ class Day15(val input: List<String>) {
     }
 
     private fun attack(player: Player) {
-        val target = players.filter { it.team != player.team && it.isAlive() && pathfinder.adjacentTo(player.pos, it.pos) }
+        val target = players.filter { it.team != player.team && it.isAlive() && player.pos isAdjacentTo it.pos }
                 .sortedWith(compareBy({ it.pos.y }, { it.pos.x })) // If many adjacent and same hp, do reading order
                 .minBy { it.hp }!!
         target.hp -= player.attackPower
@@ -85,7 +85,7 @@ class Day15(val input: List<String>) {
         }
 
         // If adjacent to at least one target, attack without moving
-        if (targets.any { enemy -> pathfinder.adjacentTo(player.pos, enemy.pos) }) {
+        if (targets.any { enemy -> player.pos isAdjacentTo enemy.pos }) {
             attack(player)
             lastAction += " without moving"
             return false
@@ -111,7 +111,7 @@ class Day15(val input: List<String>) {
         move(player, chosenPath.first())
 
         // If in range of enemy, attack
-        if (targets.any { enemy -> pathfinder.adjacentTo(player.pos, enemy.pos) }) {
+        if (targets.any { enemy -> player.pos isAdjacentTo enemy.pos }) {
             attack(player)
             lastAction += " after moving from $posBeforeMove"
         } else {
