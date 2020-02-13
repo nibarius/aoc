@@ -1,22 +1,13 @@
 import org.magicwerk.brownies.collections.GapList
 import kotlin.math.abs
 
-class ShortestPath(private val traversable: List<Char>) {
+// traversable specifies which characters in the map are traversable
+// order specifies which direction have priority if two different directions result in the same length path
+class ShortestPath(private val traversable: List<Char>,
+                   private val order: List<Direction> = listOf(Direction.Up, Direction.Left, Direction.Right, Direction.Down)) {
 
-
-
-    // Order of directions specifies which is preferred when several paths is shortest
-    private enum class Dir(val dx: Int, val dy: Int) {
-        UP(0, -1),
-        LEFT(-1, 0),
-        RIGHT(1, 0),
-        DOWN(0, 1);
-
-        fun from(pos: Pos) = Pos(pos.x + dx, pos.y + dy)
-    }
-
-    fun availableNeighbours(map: Map<Pos, Char>, pos: Pos): List<Pos> {
-        return Dir.values().map { dir -> dir.from(pos) }
+    fun availableNeighbours(map: AMap, pos: Pos): List<Pos> {
+        return order.map { dir -> dir.from(pos) }
                 .filter { newPos -> map.containsKey(newPos) && traversable.contains(map[newPos]) }
     }
 
@@ -27,7 +18,7 @@ class ShortestPath(private val traversable: List<Char>) {
 
     private data class State(val currentPos: Pos, val previous: List<Pos>)
 
-    fun find(map: Map<Pos, Char>, from: Pos, to: Pos): List<Pos> {
+    fun find(map: AMap, from: Pos, to: Pos): List<Pos> {
 
         val toCheck = GapList<State>()
         availableNeighbours(map, from).forEach { toCheck.add(State(it, listOf())) }
@@ -45,5 +36,4 @@ class ShortestPath(private val traversable: List<Char>) {
         }
         return emptyList()
     }
-
 }

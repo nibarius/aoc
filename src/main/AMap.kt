@@ -15,6 +15,7 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
     fun yRange() = map.yRange()
     fun toMap() = map.toMap()
     fun copy() = AMap(map.toMutableMap())
+    fun containsKey(key: Pos) = map.containsKey(key)
 
     fun toString(emptySpace: Char = '#'): String {
         return (yRange()).joinToString("\n") { y ->

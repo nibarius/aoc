@@ -1,5 +1,6 @@
 package aoc2018
 
+import AMap
 import ShortestPath
 import Pos
 
@@ -14,13 +15,13 @@ class Day15(val input: List<String>) {
     }
 
     private val players = mutableListOf<Player>()
-    private val map = mutableMapOf<Pos, Char>()
+    private val map = AMap()
     private val pathfinder = ShortestPath(listOf('.'))
     private var lastAction = "Start of game" // Only used for debugging
 
     init {
-        for (y in 0 until input.size) {
-            for (x in 0 until input[0].length) {
+        for (y in input.indices) {
+            for (x in input[0].indices) {
                 val char = input[y][x]
                 val pos = Pos(x, y)
                 map[pos] = char
