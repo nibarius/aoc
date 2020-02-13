@@ -2,18 +2,19 @@ package aoc2019
 
 import ShortestPath
 import Pos
+import AMap
 import java.util.*
 import kotlin.math.abs
 
 class Day18(input: List<String>) {
 
     private val initialState: State
-    private val map: Map<Pos, Char>
+    private val map: AMap
     private val doors: Map<Char, Pos>
     private val keys: Map<Char, Pos>
 
     init {
-        val tmpMap = mutableMapOf<Pos, Char>()
+        val tmpMap = AMap()
         val tmpKeys = mutableMapOf<Char, Pos>() // key to key-pos
         val tmpDoors = mutableMapOf<Char, Pos>() // door to door-pos
         var startPos = Pos(-1, -1)
@@ -37,7 +38,7 @@ class Day18(input: List<String>) {
         var steps = 0
     }
 
-    fun find(theMap: Map<Pos, Char>): Int {
+    fun find(theMap: AMap): Int {
         val toCheck = PriorityQueue<State>(compareBy { state -> state.steps })
         toCheck.add(initialState)
 
@@ -66,7 +67,7 @@ class Day18(input: List<String>) {
                         }
                     }
                 }
-                val len = ShortestPath(traversable).find(theMap, currentState.pos, position).size
+                val len = ShortestPath(traversable).find(theMap.toMap(), currentState.pos, position).size
                 if (len > 0) {
                     // It was possible to find a path to this key, pick it up
                     // and continue searching paths from it
@@ -85,7 +86,7 @@ class Day18(input: List<String>) {
         var steps = 0
     }
 
-    fun find2(theMap: Map<Pos, Char>, startPos: List<Pos>): Int {
+    fun find2(theMap: AMap, startPos: List<Pos>): Int {
 
         val toCheck = PriorityQueue<State2>(compareBy { state -> state.steps })
         toCheck.add(State2(startPos))
@@ -139,7 +140,7 @@ class Day18(input: List<String>) {
                             }
                         }
                     }
-                    val len = ShortestPath(traversable).find(theMap, robotPos, position).size
+                    val len = ShortestPath(traversable).find(theMap.toMap(), robotPos, position).size
                     if (len > 0) {
                         // It was possible to find a path to this key, pick it up
                         // and continue searching paths from it
@@ -157,9 +158,9 @@ class Day18(input: List<String>) {
         return -1
     }
 
-    private fun updateMap(map: Map<Pos, Char>): Pair<Map<Pos, Char>, MutableList<Pos>> {
+    private fun updateMap(map: AMap): Pair<AMap, MutableList<Pos>> {
         val startPos = mutableListOf<Pos>()
-        val newMap = map.toMutableMap().apply {
+        val newMap = map.copy().apply {
             val (x, y) = initialState.pos
             for (dy in -1..1) {
                 for (dx in -1..1) {
@@ -172,7 +173,7 @@ class Day18(input: List<String>) {
                     }
                 }
             }
-        }.toMap()
+        }
         return newMap to startPos
     }
 

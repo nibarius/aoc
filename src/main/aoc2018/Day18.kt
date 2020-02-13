@@ -1,28 +1,16 @@
 package aoc2018
 
-class Day18(input: List<String>) {
-    data class Pos(val x: Int, val y: Int)
+import Pos
+import AMap
 
-    private var area: Map<Pos, Char>
-    private val size: Int = input.size
+class Day18(input: List<String>) {
+    private var area = AMap()
 
     init {
-        val mutableMap = mutableMapOf<Pos, Char>()
-        for (y in 0 until input.size) {
-            for (x in 0 until input[0].length) {
-                mutableMap[Pos(x, y)] = input[y][x]
+        for (y in input.indices) {
+            for (x in input[0].indices) {
+                area[Pos(x, y)] = input[y][x]
             }
-        }
-        area = mutableMap
-    }
-
-    @Suppress("unused")
-    fun printArea() {
-        for (y in 0 until size) {
-            for (x in 0 until size) {
-                print("${area.getOrDefault(Pos(x, y), '.')}")
-            }
-            println()
         }
     }
 
@@ -47,7 +35,7 @@ class Day18(input: List<String>) {
 
     private fun letTimePass(minutes: Int) {
         repeat(minutes) {
-            val nextState = mutableMapOf<Pos, Char>()
+            val nextState = AMap()
             area.keys.forEach { pos -> nextState[pos] = nextState(pos) }
             area = nextState
         }
@@ -57,7 +45,7 @@ class Day18(input: List<String>) {
         val scores = mutableListOf<Int>()
         var numSame = 0
         for (second in 1 until startAt + 100) {
-            val nextState = mutableMapOf<Pos, Char>()
+            val nextState = AMap()
             area.keys.forEach { pos -> nextState[pos] = nextState(pos) }
             area = nextState
             val score = getScore()
@@ -82,7 +70,6 @@ class Day18(input: List<String>) {
         letTimePass(10)
         return getScore()
     }
-
 
     fun solvePart2(): Int {
         val startAt = 500
