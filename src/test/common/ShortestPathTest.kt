@@ -2,10 +2,10 @@ import org.junit.Assert
 import org.junit.Test
 
 class ShortestPathTest {
-    private fun List<String>.createMap(): Map<Pos, Char> {
-        val ret = mutableMapOf<Pos, Char>()
+    private fun List<String>.createMap(): AMap {
+        val ret = AMap()
         for (y in 0 until size) {
-            for (x in 0 until this[0].length) {
+            for (x in this[0].indices) {
                 ret[Pos(x, y)] = this[y][x]
             }
         }

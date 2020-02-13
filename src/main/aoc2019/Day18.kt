@@ -67,7 +67,7 @@ class Day18(input: List<String>) {
                         }
                     }
                 }
-                val len = ShortestPath(traversable).find(theMap.toMap(), currentState.pos, position).size
+                val len = ShortestPath(traversable).find(theMap, currentState.pos, position).size
                 if (len > 0) {
                     // It was possible to find a path to this key, pick it up
                     // and continue searching paths from it
@@ -140,7 +140,7 @@ class Day18(input: List<String>) {
                             }
                         }
                     }
-                    val len = ShortestPath(traversable).find(theMap.toMap(), robotPos, position).size
+                    val len = ShortestPath(traversable).find(theMap, robotPos, position).size
                     if (len > 0) {
                         // It was possible to find a path to this key, pick it up
                         // and continue searching paths from it
