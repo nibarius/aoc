@@ -12,5 +12,10 @@ data class Pos(val x: Int, val y: Int) {
     // Return the position at the given amount of steps in the given direction
     fun move(dir: Direction, steps: Int = 1) = dir.from(this, steps)
 
+    infix fun isAdjacentTo(other: Pos): Boolean {
+        return (x == other.x && abs(y - other.y) == 1) ||
+                (abs(x - other.x) == 1 && y == other.y)
+    }
+
     override fun toString() = "($x, $y)"
 }

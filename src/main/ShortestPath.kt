@@ -11,11 +11,6 @@ class ShortestPath(private val traversable: List<Char>,
                 .filter { newPos -> map.containsKey(newPos) && traversable.contains(map[newPos]) }
     }
 
-    fun adjacentTo(pos1: Pos, pos2: Pos): Boolean {
-        return (pos1.x == pos2.x && abs(pos1.y - pos2.y) == 1) ||
-                (abs(pos1.x - pos2.x) == 1 && pos1.y == pos2.y)
-    }
-
     private data class State(val currentPos: Pos, val previous: List<Pos>)
 
     fun find(map: AMap, from: Pos, to: Pos): List<Pos> {
