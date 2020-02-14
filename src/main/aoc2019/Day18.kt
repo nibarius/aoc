@@ -1,14 +1,15 @@
 package aoc2019
 
-import ShortestPath
-import Pos
 import AMap
+import Direction
+import Pos
+import org.magicwerk.brownies.collections.GapList
 import java.util.*
 import kotlin.math.abs
 
 class Day18(input: List<String>) {
 
-    private val initialState: State
+    private val startPos: Pos
     private val map: AMap
     private val doors: Map<Char, Pos>
     private val keys: Map<Char, Pos>
@@ -17,12 +18,12 @@ class Day18(input: List<String>) {
         val tmpMap = AMap()
         val tmpKeys = mutableMapOf<Char, Pos>() // key to key-pos
         val tmpDoors = mutableMapOf<Char, Pos>() // door to door-pos
-        var startPos = Pos(-1, -1)
+        var tmpStartPos = Pos(-1, -1)
         for (y in input.indices) {
             for (x in input[y].indices) {
                 tmpMap[Pos(x, y)] = input[y][x]
                 when {
-                    input[y][x] == '@' -> startPos = Pos(x, y)
+                    input[y][x] == '@' -> tmpStartPos = Pos(x, y)
                     ('a'..'z').contains(input[y][x]) -> tmpKeys[input[y][x]] = Pos(x, y)
                     ('A'..'Z').contains(input[y][x]) -> tmpDoors[input[y][x]] = Pos(x, y)
                 }
@@ -31,158 +32,149 @@ class Day18(input: List<String>) {
         map = tmpMap
         doors = tmpDoors
         keys = tmpKeys
-        initialState = State(startPos)
+        startPos = tmpStartPos
     }
 
-    data class State(val pos: Pos, val keysFound: Set<Char> = emptySet()) {
-        var steps = 0
-    }
-
-    fun find(theMap: AMap): Int {
-        val toCheck = PriorityQueue<State>(compareBy { state -> state.steps })
-        toCheck.add(initialState)
-
-        val alreadyChecked = mutableSetOf<State>()
-
-        while (toCheck.isNotEmpty()) {
-            val currentState = toCheck.remove()
-            if (currentState.keysFound.size == keys.size) {
-                // All keys found, return length traveled
-                return currentState.steps
-            }
-            if (alreadyChecked.contains(currentState)) {
-                continue
-            }
-            alreadyChecked.add(currentState)
-
-            val remainingKeys = keys.filterNot { currentState.keysFound.contains(it.key) }
-            remainingKeys.forEach { (key, position) ->
-                val traversable = mutableListOf('.', '@').apply {
-                    add(key) // The key we want to go to is traversable
-                    addAll(currentState.keysFound)
-                    doors.forEach { (door, _) ->
-                        if (currentState.keysFound.contains(door.toLowerCase())) {
-                            // all doors that we have keys to are traversable
-                            add(door)
-                        }
-                    }
-                }
-                val len = ShortestPath(traversable).find(theMap, currentState.pos, position).size
-                if (len > 0) {
-                    // It was possible to find a path to this key, pick it up
-                    // and continue searching paths from it
-                    toCheck.add(State(position, currentState.keysFound.toMutableSet().apply { add(key) })
-                            .apply {
-                                steps = currentState.steps + len
-                            }
-                    )
-                }
-            }
-        }
-        return -1
-    }
-
-    data class State2(val pos: List<Pos>, val keysFound: Set<Char> = emptySet()) {
-        var steps = 0
-    }
-
-    fun find2(theMap: AMap, startPos: List<Pos>): Int {
-
-        val toCheck = PriorityQueue<State2>(compareBy { state -> state.steps })
-        toCheck.add(State2(startPos))
-
-        val alreadyChecked = mutableSetOf<State2>()
-
-        while (toCheck.isNotEmpty()) {
-            val currentState = toCheck.remove()
-            if (currentState.keysFound.size == keys.size) {
-                // All keys found, return length traveled
-                return currentState.steps
-            }
-            if (alreadyChecked.contains(currentState)) {
-                continue
-            }
-            alreadyChecked.add(currentState)
-
-            for ((robotIndex, robotPos) in currentState.pos.withIndex()) {
-
-                val remainingKeys = keys
-                        .filterNot { currentState.keysFound.contains(it.key) }
-                        .filter {
-                            // Only look at keys in the robot's quadrant (one example allows the robot to go into
-                            // the horizontal divider so do a +/- 1 in the y-axis to support this case
-                            when (robotIndex) {
-                                0 -> { // upper left
-                                    it.value.x <= startPos[robotIndex].x && it.value.y <= startPos[robotIndex].y + 1
-                                }
-                                1 -> { // upper right
-                                    it.value.x >= startPos[robotIndex].x && it.value.y <= startPos[robotIndex].y + 1
-                                }
-                                2 -> { // lower left
-                                    it.value.x <= startPos[robotIndex].x && it.value.y >= startPos[robotIndex].y - 1
-                                }
-                                3 -> { // lower right
-                                    it.value.x >= startPos[robotIndex].x && it.value.y >= startPos[robotIndex].y - 1
-                                }
-                                else -> throw RuntimeException("Unknown robot index: $robotIndex")
-                            }
-                        }
-
-
-                remainingKeys.forEach { (key, position) ->
-                    val traversable = mutableListOf('.', '@').apply {
-                        add(key) // The key we want to go to is traversable
-                        addAll(currentState.keysFound)
-                        doors.forEach { (door, _) ->
-                            if (currentState.keysFound.contains(door.toLowerCase())) {
-                                // all doors that we have keys to are traversable
-                                add(door)
-                            }
-                        }
-                    }
-                    val len = ShortestPath(traversable).find(theMap, robotPos, position).size
-                    if (len > 0) {
-                        // It was possible to find a path to this key, pick it up
-                        // and continue searching paths from it
-                        toCheck.add(State2(
-                                currentState.pos.toMutableList().apply { this[robotIndex] = position },
-                                currentState.keysFound.toMutableSet().apply { add(key) })
-                                .apply {
-                                    steps = currentState.steps + len
-                                }
-                        )
-                    }
-                }
-            }
-        }
-        return -1
-    }
-
+    // Part 2: Update the map to the variant used in Part 2
     private fun updateMap(map: AMap): Pair<AMap, MutableList<Pos>> {
-        val startPos = mutableListOf<Pos>()
+        val tmpStartPos = mutableListOf<Pos>()
         val newMap = map.copy().apply {
-            val (x, y) = initialState.pos
+            val (x, y) = startPos
             for (dy in -1..1) {
                 for (dx in -1..1) {
                     val pos = Pos(x + dx, y + dy)
                     if (abs(dx) == 1 && abs(dy) == 1) {
                         this[pos] = '@'
-                        startPos.add(pos)
+                        tmpStartPos.add(pos)
                     } else {
                         this[pos] = '#'
                     }
                 }
             }
         }
-        return newMap to startPos
+        return newMap to tmpStartPos
+    }
+
+    // Part 2: Find which robot a position belongs to based on it's location
+    private fun robotForPos(pos: Pos): Int {
+        return when {
+            pos.x <= startPos.x && pos.y <= startPos.y -> 0 // Upper left
+            pos.x >= startPos.x && pos.y <= startPos.y -> 1 // Upper right
+            pos.x <= startPos.x && pos.y >= startPos.y -> 2 // Lower left
+            pos.x >= startPos.x && pos.y >= startPos.y -> 3 // Right
+            else -> throw RuntimeException("Unexpected position: $pos")
+        }
+    }
+
+    private data class ExplorationState(val currentPos: Pos, val steps: Int, val blockingDoors: Set<Char>)
+    private data class PathToKey(val key: Char, val steps: Int, val doors: Set<Char>)
+
+    // Walk trough the whole map from the given position and record the distance and doors passed
+    // to each of the keys.
+    private fun exploreFrom(map: AMap, initialPos: Pos, traversable: Set<Char>, numKeysToFind: Int): MutableSet<PathToKey> {
+        val toCheck = GapList<ExplorationState>()
+        toCheck.add(ExplorationState(initialPos, 0, setOf()))
+        val alreadyChecked = mutableSetOf<Pos>() // Never move back to a position already visited
+
+        // All the keys found so far, including the interesting data about them
+        val keysFound = mutableSetOf<PathToKey>()
+
+        // Only explore the area until all keys are found
+        while (toCheck.isNotEmpty() && keysFound.size < numKeysToFind) {
+            val current = toCheck.remove()
+            val item = map[current.currentPos]!!
+            val newDoors = current.blockingDoors.toMutableSet()
+            if (alreadyChecked.contains(current.currentPos)) continue
+            else if (doors.containsKey(item)) {
+                // A door found, keep track of it for all movements from this position
+                newDoors.add(item)
+            } else if (current.currentPos != initialPos && keys.containsKey(item)) {
+                // A key found, record all relevant information about it and continue exploring
+                keysFound.add(PathToKey(item, current.steps, current.blockingDoors))
+            }
+            alreadyChecked.add(current.currentPos)
+
+            // Try moving in all directions from here
+            Direction.values()
+                    .map { dir -> dir.from(current.currentPos) }
+                    .filter { newPos -> traversable.contains(map[newPos]) }
+                    .forEach { toCheck.add(ExplorationState(it, current.steps + 1, newDoors)) }
+        }
+        return keysFound
+
+    }
+
+    data class ShortestPathState(val standingAtKeys: List<Char>, val keysFound: Set<Char> = emptySet()) {
+        var steps = 0
+    }
+
+    // robotKeyPaths is a list with one entry per robot.
+    // Each list entry is a map of all keys reachable for the robot
+    // Each map entry holds information about the path to the other key
+    private fun findShortestPathToAllKeys(robotKeyPaths: List<Map<Char, Set<PathToKey>>>): Int {
+        val toCheck = PriorityQueue<ShortestPathState>(compareBy { state -> state.steps })
+                .apply { add(ShortestPathState(List(robotKeyPaths.size) { '@' })) }
+
+        val alreadyChecked = mutableSetOf<ShortestPathState>()
+        while (toCheck.isNotEmpty()) {
+            val current = toCheck.remove()
+            if (alreadyChecked.contains(current)) continue
+            if (current.keysFound.size == keys.size) {
+                // found all keys
+                return current.steps
+            }
+            alreadyChecked.add(current)
+
+            // For each robot
+            robotKeyPaths.withIndex().forEach { (robot, distancesToKeys) ->
+                distancesToKeys[current.standingAtKeys[robot]]!!
+                        // Only consider keys that are not blocked by locked doors
+                        .filter { it.doors.all { doors -> current.keysFound.contains(doors.toLowerCase()) } }
+                        .forEach { (key, steps, _) ->
+                            // For each reachable key from the current robot, queue it for checking.
+                            val keysHeld = current.keysFound.toMutableSet().apply { add(key) }
+                            val currentKeys = current.standingAtKeys.toMutableList()
+                            currentKeys[robot] = key
+                            val state = ShortestPathState(currentKeys, keysHeld).apply { this.steps = current.steps + steps }
+                            if (!alreadyChecked.contains(state)) {
+                                toCheck.add(state)
+                            }
+                        }
+            }
+        }
+        return -1
+    }
+
+    private fun findAllKeys(map: AMap, startPos: List<Pos>, keyReachableByRobot: (Pos, Int) -> Boolean): Int {
+        val traversable = mutableSetOf('.', '@').apply {
+            addAll(keys.keys)
+            addAll(doors.keys)
+        }
+
+        // For each robot -  calculate the distance between all reachable keys
+        val distances = startPos.withIndex().map { (robot, startPos) ->
+            val keysForThisRobot = keys.filterValues { keyReachableByRobot(it, robot) }
+                    .toMutableMap()
+                    // Include start pos to get distances from start pos to all keys, important for part 2
+                    // where there are some robots that can't reach a key without someone else picking up a
+                    // key first.
+                    .apply { this['@'] = startPos }
+            keysForThisRobot.map { (key, pos) ->
+                // Calculate distance by walking trough the whole reachable map once from each key
+                key to exploreFrom(map, pos, traversable, keysForThisRobot.size)
+            }.toMap()
+        }
+
+        // Now that all distances are known, do a BFS to find the shortest path that picks up all keys
+        return findShortestPathToAllKeys(distances)
     }
 
     fun solvePart1(): Int {
-        return find(map)
+        return findAllKeys(map, listOf(startPos)) { _, _ -> true } // There is only one robot, all keys belong to it
     }
 
     fun solvePart2(): Int {
         val (newMap, startPos) = updateMap(map)
-        return find2(newMap, startPos)
+        return findAllKeys(newMap, startPos) { pos, robot -> robotForPos(pos) == robot }
     }
 }
