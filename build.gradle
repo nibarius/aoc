@@ -14,7 +14,9 @@ repositories {
 
 sourceSets {
     main.java.srcDirs += 'src/main'
+    test.java.srcDirs += 'src/test/aoc2015'
     test.java.srcDirs += 'src/test/aoc2016'
+    test.java.srcDirs += 'src/test/aoc2017'
     test.java.srcDirs += 'src/test/aoc2018'
     test.java.srcDirs += 'src/test/aoc2019'
     test.java.srcDirs += 'src/test/common'
