@@ -2,7 +2,7 @@ import java.io.File
 
 fun main() {
     val year = 2015
-    val day = 13
+    val day = 14
     createDayClassFile(year, day)
     createTestFile(year, day)
     createInputFile("$year/day$day.txt")
