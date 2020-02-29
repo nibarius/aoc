@@ -17,5 +17,18 @@ data class Pos(val x: Int, val y: Int) {
                 (abs(x - other.x) == 1 && y == other.y)
     }
 
+    fun allNeighbours(includeDiagonals: Boolean = false): List<Pos> {
+        val ret = mutableListOf<Pos>()
+        for (dy in -1..1) {
+            for (dx in -1..1) {
+                if (dy == 0 && dx == 0) continue
+                if (includeDiagonals || dy == 0 || dx == 0) {
+                    ret.add(Pos(x + dx, y + dy))
+                }
+            }
+        }
+        return ret
+    }
+
     override fun toString() = "($x, $y)"
 }

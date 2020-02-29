@@ -17,6 +17,16 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
     fun copy() = AMap(map.toMutableMap())
     fun containsKey(key: Pos) = map.containsKey(key)
 
+    /**
+     * Returns the number of neighbours with the given value. Neighbours outside of
+     * the map are not counted.
+     */
+    fun numNeighboursWithValue(pos: Pos, value: Char, includeDiagonals: Boolean = false): Int {
+        return pos.allNeighbours(includeDiagonals)
+                .filter { map[it] == value }
+                .size
+    }
+
     fun toString(emptySpace: Char = '#'): String {
         return (yRange()).joinToString("\n") { y ->
             (xRange()).joinToString("") { x ->
@@ -32,4 +42,16 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
 
     private fun Map<Pos, Char>.xRange() = keys.minBy { it.x }!!.x..keys.maxBy { it.x }!!.x
     private fun Map<Pos, Char>.yRange() = keys.minBy { it.y }!!.y..keys.maxBy { it.y }!!.y
+
+    companion object {
+        fun parse(input: List<String>): AMap {
+            val map = AMap()
+            for (y in input.indices) {
+                for (x in input[0].indices) {
+                    map[Pos(x, y)] = input[y][x]
+                }
+            }
+            return map
+        }
+    }
 }
