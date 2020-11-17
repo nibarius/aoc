@@ -67,6 +67,6 @@ class Day5Test {
 
     @Test
     fun partTwoRealInput() {
-        assertEquals(0, Day5(resourceAsList("2015/day5.txt")).solvePart2())
+        assertEquals(55, Day5(resourceAsList("2015/day5.txt")).solvePart2())
     }
 }
