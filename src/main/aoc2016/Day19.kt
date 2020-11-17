@@ -2,6 +2,7 @@ package aoc2016
 
 import org.magicwerk.brownies.collections.GapList
 import java.util.*
+import kotlin.math.pow
 
 class Day19(private val numElves: Int) {
 
@@ -60,20 +61,20 @@ class Day19(private val numElves: Int) {
 
     private fun getPowReminder(i: Int): Int {
         var power = 0
-        while (Math.pow(2.toDouble(), (power + 1).toDouble()) <= i) {
+        while (2.toDouble().pow((power + 1).toDouble()) <= i) {
             power++
         }
 
-        return i % Math.pow(2.toDouble(), power.toDouble()).toInt()
+        return i % 2.toDouble().pow(power.toDouble()).toInt()
     }
 
     private fun getPowBaseAndReminder(i: Int): Pair<Int, Int> {
         var power = 0
-        while (Math.pow(3.toDouble(), (power + 1).toDouble()) <= i) {
+        while (3.toDouble().pow((power + 1).toDouble()) <= i) {
             power++
         }
 
-        val base = Math.pow(3.toDouble(), power.toDouble()).toInt()
+        val base = 3.toDouble().pow(power.toDouble()).toInt()
         return Pair(base, i - base)
     }
 

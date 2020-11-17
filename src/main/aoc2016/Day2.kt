@@ -21,7 +21,7 @@ class Day2(val input: List<String>) {
                 else -> throw(IllegalArgumentException("invalid input: $steps"))
             }
         }
-        return dialPad[Pair(currX, currY)]!!
+        return dialPad.getValue(Pair(currX, currY))
     }
 
     private fun solve(dialPad: Map<Pair<Int, Int>, Char>): String {

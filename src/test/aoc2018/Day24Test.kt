@@ -1,7 +1,6 @@
 package test.aoc2018
 
 import aoc2018.Day24
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import resourceAsList
@@ -21,28 +20,28 @@ class Day24Test {
     fun testParseGroup(){
         val input = "17 units each with 5390 hit points (weak to radiation, bludgeoning) with an attack that does 4507 fire damage at initiative 2"
         val expected = Day24.Group("a", 1, 17, 5390, 4507, "fire", 2, setOf("radiation", "bludgeoning"), setOf())
-        Assert.assertEquals(expected, Day24(testInput).parseGroup("a", 1, input))
+        assertEquals(expected, Day24(testInput).parseGroup("a", 1, input))
     }
 
     @Test
     fun testParseGroup2(){
         val input = "17 units each with 5390 hit points (immune to radiation, bludgeoning; weak to fire) with an attack that does 4507 fire damage at initiative 2"
         val expected = Day24.Group("a", 1, 17, 5390, 4507, "fire", 2, setOf("fire"), setOf("radiation", "bludgeoning"))
-        Assert.assertEquals(expected, Day24(testInput).parseGroup("a", 1, input))
+        assertEquals(expected, Day24(testInput).parseGroup("a", 1, input))
     }
 
     @Test
     fun testParseGroup3(){
         val input = "17 units each with 5390 hit points (weak to fire) with an attack that does 4507 fire damage at initiative 2"
         val expected = Day24.Group("a", 1, 17, 5390, 4507, "fire", 2, setOf("fire"), setOf())
-        Assert.assertEquals(expected, Day24(testInput).parseGroup("a", 1, input))
+        assertEquals(expected, Day24(testInput).parseGroup("a", 1, input))
     }
 
     @Test
     fun testParseGroup4(){
         val input = "17 units each with 5390 hit points with an attack that does 4507 fire damage at initiative 2"
         val expected = Day24.Group("a", 1, 17, 5390, 4507, "fire", 2, setOf(), setOf())
-        Assert.assertEquals(expected, Day24(testInput).parseGroup("a", 1, input))
+        assertEquals(expected, Day24(testInput).parseGroup("a", 1, input))
     }
 
     @Test

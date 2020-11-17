@@ -40,17 +40,17 @@ class Day14(input: List<String>) {
     }
 
     fun solvePart1(seconds: Int = 2503): Int {
-        return reindeers.map { it.distanceAfter(seconds) }.max()!!
+        return reindeers.map { it.distanceAfter(seconds) }.maxOrNull()!!
     }
 
     private fun race(time: Int): Int {
         repeat(time) {
             reindeers.forEach { it.tick() }
-            val leadingDistance = reindeers.maxBy { it.currentDistance }!!.currentDistance
+            val leadingDistance = reindeers.maxByOrNull { it.currentDistance }!!.currentDistance
             reindeers.filter { it.currentDistance == leadingDistance }
                     .forEach { it.score++ }
         }
-        return reindeers.maxBy { it.score }!!.score
+        return reindeers.maxByOrNull { it.score }!!.score
     }
 
     fun solvePart2(seconds: Int = 2503): Int {

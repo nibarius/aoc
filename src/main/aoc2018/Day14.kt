@@ -30,7 +30,7 @@ class Day14(val input: String) {
     }
 
     private fun startsWith(buffer:ByteArray, offset: Int, str: String): Boolean {
-        for (i in 0 until str.length) {
+        for (i in str.indices) {
             if (buffer[offset + i] != str[i].toString().toByte()) {
                 return false
             }

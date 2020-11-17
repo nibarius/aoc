@@ -1,12 +1,10 @@
 package aoc2018
 
-import java.lang.Math.abs
-
 class Day25(input: List<String>) {
 
     data class Point(val coord: List<Int>) {
         fun distanceTo(other: Point): Int {
-            return coord.zip(other.coord).map { abs(it.first - it.second) }.sum()
+            return coord.zip(other.coord).map { kotlin.math.abs(it.first - it.second) }.sum()
         }
     }
 
@@ -23,7 +21,9 @@ class Day25(input: List<String>) {
     private fun makeConstellations(points: Set<Point>): List<Set<Point>> {
         val constellations = mutableListOf<MutableSet<Point>>()
         points.forEach { point ->
-            val partOf = constellations.filter { it.map { it.distanceTo(point) }.any { it <= 3 } }
+            val partOf = constellations.filter {constellation ->
+                constellation.map { it.distanceTo(point) }.any { it <= 3 }
+            }
             when {
                 partOf.isEmpty() -> constellations.add(mutableSetOf(point))
                 partOf.size == 1 -> partOf.first().add(point)

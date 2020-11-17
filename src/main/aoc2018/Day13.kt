@@ -15,9 +15,9 @@ class Day13(input: List<String>) {
     data class Path(val exits: List<Direction>)
     data class Cart(var pos: Pos, var comingFrom: Direction) {
         var removed = false
-        var nextTurn = Turn.LEFT
+        private var nextTurn = Turn.LEFT
         fun move(map: Map<Pos, Path>) {
-            val possibleDirections = map[pos]!!.exits.filterNot { it == comingFrom }
+            val possibleDirections = map.getValue(pos).exits.filterNot { it == comingFrom }
             if (possibleDirections.size == 1) {
                 moveInDirection(possibleDirections.first())
             } else {
@@ -42,8 +42,8 @@ class Day13(input: List<String>) {
     init {
         val map = mutableMapOf<Pos, Path>()
         val carts = mutableListOf<Cart>()
-        for (y in 0 until input.size) {
-            for (x in 0 until input[y].length) {
+        for (y in input.indices) {
+            for (x in input[y].indices) {
                 when (input[y][x]) {
                     '-' -> map[Pos(x, y)] = Path(listOf(Direction.Left, Direction.Right))
                     '|' -> map[Pos(x, y)] = Path(listOf(Direction.Up, Direction.Down))

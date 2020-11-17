@@ -1,5 +1,4 @@
 import org.magicwerk.brownies.collections.GapList
-import kotlin.math.abs
 
 // traversable specifies which characters in the map are traversable
 // order specifies which direction have priority if two different directions result in the same length path

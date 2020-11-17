@@ -48,8 +48,8 @@ class Day16(input: List<String>) {
             var found = true
             memory.second.forEach { (key, value) ->
                 found = when (key) {
-                    "cat", "trees" -> found && value > realSue[key]!!
-                    "pomeranians", "goldfish" -> found && value < realSue[key]!!
+                    "cat", "trees" -> found && value > realSue.getValue(key)
+                    "pomeranians", "goldfish" -> found && value < realSue.getValue(key)
                     else -> found && realSue[key] == value
                 }
             }

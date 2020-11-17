@@ -31,7 +31,7 @@ class Day9(input: String) {
             }
             currentPlayer = (currentPlayer + 1) % players
         }
-        return scores.values.max()!!
+        return scores.values.maxOrNull()!!
     }
 
     fun solvePart1(): Long {

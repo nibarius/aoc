@@ -39,7 +39,7 @@ class Day5(private val input: String) {
                             react(input.replace("$toRemove", "", true)).length
                         }
                     }
-                    .minBy { it.await() }!!.await() // return the shortest length
+                    .minByOrNull { it.await() }!!.await() // return the shortest length
         }
     }
 }

@@ -1,9 +1,6 @@
 package test.aoc2017
 
-import aoc2017.Day1
-import org.junit.Assert.assertEquals
 import org.junit.Test
-import resourceAsList
 
 class Day1Test {
     @Test

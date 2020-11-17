@@ -111,7 +111,7 @@ class Day16(input: List<String>) {
     private tailrec fun reduceInstructions(instructions: Map<Int, List<InstructionName>>): Map<Int, List<InstructionName>> {
         val ret = mutableMapOf<Int, List<InstructionName>>()
         val known = instructions.filter { it.value.size == 1 }.values.flatten()
-        instructions.forEach { key, value ->
+        instructions.forEach { (key, value) ->
             if (value.size == 1) {
                 ret[key] = value
             } else {
@@ -129,7 +129,7 @@ class Day16(input: List<String>) {
     }
 
     private fun runProgram(instructions: Map<Int, List<InstructionName>>) {
-        program.forEach { doInstruction(it) { instruction -> instructions[instruction]!!.first() } }
+        program.forEach { doInstruction(it) { instruction -> instructions.getValue(instruction).first() } }
     }
 
     fun solvePart1(): Int {

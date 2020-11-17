@@ -31,8 +31,8 @@ class Day4(input: List<String>) {
     }
 
     private fun findGuardMinuteCombination(strategy: (Map.Entry<Int, IntArray>) -> Int): Int {
-        val snooziestGuard = guards.maxBy { strategy(it) }!!
-        val snooziestMinute = snooziestGuard.value.withIndex().maxBy { it.value }!!.index
+        val snooziestGuard = guards.maxByOrNull { strategy(it) }!!
+        val snooziestMinute = snooziestGuard.value.withIndex().maxByOrNull { it.value }!!.index
         return snooziestGuard.key * snooziestMinute
     }
 
@@ -43,6 +43,6 @@ class Day4(input: List<String>) {
 
     fun solvePart2(): Int {
         // Find the guard with the maximum sleep time for a given minute
-        return findGuardMinuteCombination { guards -> guards.value.max()!! }
+        return findGuardMinuteCombination { guards -> guards.value.maxOrNull()!! }
     }
 }

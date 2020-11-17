@@ -42,18 +42,18 @@ class Day10(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return asteroids.map { asteroids.inSightOf(it) }.max() ?: 0
+        return asteroids.map { asteroids.inSightOf(it) }.maxOrNull() ?: 0
     }
 
     fun solvePart2(): Int {
-        val best = asteroids.map { it to asteroids.inSightOf(it) }.maxBy { it.second }!!.first
+        val best = asteroids.map { it to asteroids.inSightOf(it) }.maxByOrNull { it.second }!!.first
         val targets: MutableMap<Double, MutableList<Angle>> = asteroids.filterNot { it == best }
                 .map { Angle.calculate(best, it) }
                 // smallest angle (from up) first, then smallest distance
                 .sortedWith(compareBy({ abs(it.value) }, { it.distance }))
                 .groupByTo(mutableMapOf()) { it.value }
 
-        var key: Double = 1.0
+        var key = 1.0
         var lastKill = best
         repeat(200) {
             // Keep moving clockwise to next angle each time, or wrap around if needed

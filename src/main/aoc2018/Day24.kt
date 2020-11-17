@@ -91,7 +91,6 @@ class Day24(input: List<String>) {
             if (target != null) {
                 selectedTargets[attacker] = target
                 availableTargets.remove(target)
-            } else {
             }
         }
         return selectedTargets

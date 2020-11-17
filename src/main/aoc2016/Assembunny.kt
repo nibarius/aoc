@@ -6,7 +6,7 @@ import increase
 class Assembunny(private val instructions: MutableList<String>) {
 
     val registers = mutableMapOf("a" to 0, "b" to 0, "c" to 0, "d" to 0)
-    var numPrintouts = 0
+    private var numPrintouts = 0
 
     private fun doInstruction(instructionPointer: Int, instruction: String, params: List<String>): Int {
         when (instruction) {

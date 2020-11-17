@@ -48,9 +48,10 @@ class Day13(input: List<String>) {
             computer.output.clear()
         }
 
-        private fun Map<Pair<Long, Long>, Long>.xRange() = keys.minBy { it.first }!!.first..keys.maxBy { it.first }!!.first
-        private fun Map<Pair<Long, Long>, Long>.yRange() = keys.minBy { it.second }!!.second..keys.maxBy { it.second }!!.second
+        private fun Map<Pair<Long, Long>, Long>.xRange() = keys.minByOrNull { it.first }!!.first..keys.maxByOrNull { it.first }!!.first
+        private fun Map<Pair<Long, Long>, Long>.yRange() = keys.minByOrNull { it.second }!!.second..keys.maxByOrNull { it.second }!!.second
 
+        @Suppress("unused")
         fun drawStuff(toDraw: Map<Pair<Long, Long>, Long>, frame: Int) {
             val yrange = toDraw.yRange()
             val xrange = toDraw.xRange()

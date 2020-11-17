@@ -27,10 +27,10 @@ class Day3(input: List<String>) {
     }
 
     private fun setupFabric(claims: List<Claim>): Array<Array<MutableList<Int>>> {
-        val maxX = claims.maxBy { it.w + it.x }!!
-        val maxY = claims.maxBy { it.h + it.y }!!
+        val maxX = claims.maxByOrNull { it.w + it.x }!!
+        val maxY = claims.maxByOrNull { it.h + it.y }!!
         return Array(maxY.y + maxY.h + 1) {
-            Array(maxX.x + maxX.w + 1) { mutableListOf<Int>() }
+            Array(maxX.x + maxX.w + 1) { mutableListOf() }
         }
     }
 
@@ -53,7 +53,7 @@ class Day3(input: List<String>) {
         // Create a set of all claim ids
         val ids = claims.map { it.id }.toMutableSet()
         // Remove all claim ids that are overlapped by another claim
-        fabric.flatten().filter { it.size > 1 }.forEach { it.forEach { ids.remove(it) } }
+        fabric.flatten().filter { it.size > 1 }.forEach { id -> id.forEach { ids.remove(it) } }
         // Only the claim with no overlap remains
         return ids.first()
     }

@@ -44,7 +44,7 @@ class Day20(input: String) {
     }
 
     fun solvePart1(): Int {
-        return map.values.max()!!
+        return map.values.maxOrNull()!!
     }
 
 

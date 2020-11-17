@@ -5,8 +5,8 @@ class Day3(private val input: List<String>) {
 
     private fun process(input: List<String>): List<Shape> {
         val shapes = mutableListOf<Shape>()
-        input.forEach {
-            val entry = it.trim().split(" ").filter { it != "" }.sortedWith(compareBy { it.toInt() })
+        input.forEach { line ->
+            val entry = line.trim().split(" ").filter { it != "" }.sortedWith(compareBy { it.toInt() })
             shapes.add(Shape(entry[0].trim().toInt(),
                     entry[1].trim().toInt(),
                     entry[2].trim().toInt())

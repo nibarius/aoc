@@ -40,8 +40,8 @@ class Day10(input: List<String>) {
     }
 
     private fun printMessage(points: Set<Pos>) {
-        for (y in points.minBy { it.y }!!.y..points.maxBy { it.y }!!.y) {
-            for (x in points.minBy { it.x }!!.x..points.maxBy { it.x }!!.x) {
+        for (y in points.minByOrNull { it.y }!!.y..points.maxByOrNull { it.y }!!.y) {
+            for (x in points.minByOrNull { it.x }!!.x..points.maxByOrNull { it.x }!!.x) {
                 print(if (points.contains(Pos(x, y))) '#' else ' ')
             }
             println()

@@ -65,7 +65,7 @@ class Day14(private val salt: String) {
                 val keyCandidateIndex = range.first - 1
                 val charToSearchFor = interestingIndices[keyCandidateIndex]!!.three
                 val isKey = interestingIndices
-                        .filterKeys { it >= range.first && it <= range.endInclusive }
+                        .filterKeys { it >= range.first && it <= range.last }
                         .filter { it.value.five.contains(charToSearchFor) }
                         .isNotEmpty()
                 if (isKey) {

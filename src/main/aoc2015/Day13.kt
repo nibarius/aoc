@@ -38,7 +38,7 @@ class Day13(input: List<String>) {
                 // ones where one given person is is first.
                 .filter { it.first() == persons.first() }
                 .map { totalHappiness(it) }
-                .max()!!
+                .maxOrNull()!!
 
         // A much better approach would be to implement Sawada's algorithm for generating
         // all unique necklaces (seating orders). But since this solution runs in less than

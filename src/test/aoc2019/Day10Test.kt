@@ -6,8 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import resourceAsList
 import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.atan
 
 class Day10Test {
     @Test

@@ -6,7 +6,7 @@ import org.junit.Test
 
 class Day13Test {
 
-    val exampleMap = """  0123456789
+    private val exampleMap = """  0123456789
 0 .#.####.##
 1 ..#..#...#
 2 #....##...

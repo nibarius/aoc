@@ -9,8 +9,8 @@ class Day20(input: List<String>) {
     val parsedInput = parseInput(input)
     private val bounds = findBounds(parsedInput)
 
-    private fun Map<Pos, Char>.maxY() = keys.maxBy { it.y }!!.y
-    private fun Map<Pos, Char>.maxX() = keys.maxBy { it.x }!!.x
+    private fun Map<Pos, Char>.maxY() = keys.maxByOrNull { it.y }!!.y
+    private fun Map<Pos, Char>.maxX() = keys.maxByOrNull { it.x }!!.x
 
     private fun parseInput(input: List<String>): Map<Pos, Char> {
         val ret = mutableMapOf<Pos, Char>()

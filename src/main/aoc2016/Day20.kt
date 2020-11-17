@@ -27,10 +27,10 @@ class Day20(input: List<String>) {
     private fun findFirstAllowed(): Long {
         var toTest = 0L
         for (range in blacklist) {
-            if (toTest < range.start) {
+            if (toTest < range.first) {
                 return toTest
             }
-            toTest = range.endInclusive + 1
+            toTest = range.last + 1
         }
         return toTest
     }
@@ -39,10 +39,10 @@ class Day20(input: List<String>) {
         val ret = mutableListOf<LongRange>()
         var toTest = 0L
         blacklist.forEach { range ->
-            if (toTest < range.start) {
-                ret.add(toTest until range.start)
+            if (toTest < range.first) {
+                ret.add(toTest until range.first)
             }
-            toTest = range.endInclusive + 1
+            toTest = range.last + 1
         }
         if (toTest < 4294967295) {
             ret.add(toTest..4294967295)

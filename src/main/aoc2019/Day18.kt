@@ -127,7 +127,7 @@ class Day18(input: List<String>) {
 
             // For each robot
             robotKeyPaths.withIndex().forEach { (robot, distancesToKeys) ->
-                distancesToKeys[current.standingAtKeys[robot]]!!
+                distancesToKeys.getValue(current.standingAtKeys[robot])
                         // Only consider keys that are not blocked by locked doors
                         .filter { it.doors.all { doors -> current.keysFound.contains(doors.toLowerCase()) } }
                         .forEach { (key, steps, _) ->
