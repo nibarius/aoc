@@ -11,9 +11,9 @@ class Day22(input: List<String>) {
 
         companion object {
             fun typeForErosionLevel(level: Int) = when (level % 3) {
-                0 -> Type.ROCKY
-                1 -> Type.WET
-                2 -> Type.NARROW
+                0 -> ROCKY
+                1 -> WET
+                2 -> NARROW
                 else -> throw RuntimeException("invalid terrain type")
             }
         }
@@ -125,7 +125,7 @@ class Day22(input: List<String>) {
     }
 
     private fun find(from: State, to: State): Int {
-        val toCheck = PriorityQueue<State>(compareBy<State> { state ->
+        val toCheck = PriorityQueue(compareBy<State> { state ->
             // Estimate of the minimum required time to get to the target from current position
             // This heuristic speeds up finding the target with 4x
             state.timeSpent +

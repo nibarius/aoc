@@ -7,8 +7,8 @@ class Day17(input: List<String>, isGraph: Boolean = false) {
 
     init {
         if (isGraph) {
-            for (y in 0 until input.size) {
-                for (x in 0 until input[0].length) {
+            for (y in input.indices) {
+                for (x in input[0].indices) {
                     area[Pos(x, y)] = input[y][x]
                 }
             }
@@ -21,8 +21,8 @@ class Day17(input: List<String>, isGraph: Boolean = false) {
                         line.first() to first..first,
                         line.substringAfter(", ").first() to second1..second2)
 
-                for (y in ranges['y']!!) {
-                    for (x in ranges['x']!!) {
+                for (y in ranges.getValue('y')) {
+                    for (x in ranges.getValue('x')) {
                         area[Pos(x, y)] = '#'
                     }
                 }
@@ -32,8 +32,8 @@ class Day17(input: List<String>, isGraph: Boolean = false) {
     }
 
     fun printArea() {
-        for (y in area.keys.minBy { it.y }!!.y..area.keys.maxBy { it.y }!!.y) {
-            for (x in area.keys.minBy { it.x }!!.x..area.keys.maxBy { it.x }!!.x) {
+        for (y in area.keys.minByOrNull { it.y }!!.y..area.keys.maxByOrNull { it.y }!!.y) {
+            for (x in area.keys.minByOrNull { it.x }!!.x..area.keys.maxByOrNull { it.x }!!.x) {
                 print("${area.getOrDefault(Pos(x, y), '.')}")
             }
             println()
@@ -47,7 +47,7 @@ class Day17(input: List<String>, isGraph: Boolean = false) {
         while (true) {
             currY++
             val content = area.getOrDefault(Pos(from.x, currY), '.')
-            if (currY > area.keys.maxBy { it.y }!!.y) {
+            if (currY > area.keys.maxByOrNull { it.y }!!.y) {
                 // Stop when it falls to infinity
                 return Pos(from.x, -1)
             }
@@ -130,7 +130,7 @@ class Day17(input: List<String>, isGraph: Boolean = false) {
 
     fun solvePart1(): Int {
         fillEverything()
-        val minY = area.filter { it.value == '#' }.minBy { it.key.y }!!.key.y
+        val minY = area.filter { it.value == '#' }.minByOrNull { it.key.y }!!.key.y
         return area.filter { it.key.y >= minY }.count { it.value == '|' || it.value == '~' }
     }
 

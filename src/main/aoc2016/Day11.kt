@@ -50,7 +50,7 @@ class Day11(input: List<String>) {
 
         // minor optimization: elevator never need to go down below the lowest floor with an item
         fun elevatorCanMoveTo(floor: Int): Boolean {
-            return floor >= items.min()!! && floor <= 4 && abs(elevatorPosition - floor) == 1
+            return floor >= items.minOrNull()!! && floor <= 4 && abs(elevatorPosition - floor) == 1
         }
     }
 

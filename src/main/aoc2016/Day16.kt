@@ -49,7 +49,7 @@ class Day16(private val length: Int, private val input: String) {
     fun checksumOptimized(input: String): String {
         var checksum = input.toList()
         while (checksum.size % 2 == 0) {
-            val checksum2 = (0 until checksum.size step 2).map {
+            val checksum2 = (checksum.indices step 2).map {
                 when (checksum[it] == checksum[it + 1]) {
                     true -> '1'
                     false -> '0'
@@ -64,7 +64,7 @@ class Day16(private val length: Int, private val input: String) {
     // Takes about the same time as the iterative approach.
     fun checksumOptimized2(input: String) = checksumTailRec(input.toList()).joinToString("")
     private tailrec fun checksumTailRec(input: List<Char>): List<Char> {
-        val checksum = (0 until input.size step 2).map { if (input[it] == input[it + 1]) '1' else '0' }
+        val checksum = (input.indices step 2).map { if (input[it] == input[it + 1]) '1' else '0' }
         if (checksum.size % 2 != 0) {
             return checksum
         }

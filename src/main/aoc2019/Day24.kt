@@ -25,8 +25,8 @@ class Day24(input: List<String>) {
 
     private fun tick(grids: Map<Int, IntArray>): Map<Int, IntArray> {
         val noEmpty = grids.filterNot { it.value.contentEquals(emptyGrid) }
-        val min = noEmpty.keys.min()!! - 1
-        val max = noEmpty.keys.max()!! + 1
+        val min = noEmpty.keys.minOrNull()!! - 1
+        val max = noEmpty.keys.maxOrNull()!! + 1
         val nextState = mutableMapOf<Int, IntArray>()
         for (level in min..max) {
             val nextLevel = IntArray(25)
@@ -67,7 +67,7 @@ class Day24(input: List<String>) {
         var diversity: Int
         while (true) {
             ret = tick(ret)
-            diversity = ret[0]!!.withIndex().sumBy { 2.0.pow(it.index).toInt() * it.value }
+            diversity = ret.getValue(0).withIndex().sumBy { 2.0.pow(it.index).toInt() * it.value }
             if (!seen.add(diversity)) {
                 break
             }

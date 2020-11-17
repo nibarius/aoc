@@ -3,7 +3,6 @@ package test.aoc2018
 import aoc2018.Day5
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import resourceAsList
 import resourceAsString
 
 class Day5Test {

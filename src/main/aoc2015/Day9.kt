@@ -45,7 +45,7 @@ class Day9(input: List<String>) {
             }
             parsedInput.filterKeys { !current.visited.contains(it) }
                     .forEach { (nextCity, distances) ->
-                        val dist = current.distance + distances[current.visited.last()]!!
+                        val dist = current.distance + distances.getValue(current.visited.last())
                         val visited = current.visited.toMutableList().apply { add(nextCity) }
                         toCheck.add(State(visited).apply { distance = dist })
                     }

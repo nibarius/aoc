@@ -36,10 +36,10 @@ class Day15(val input: List<String>) {
     fun playerAt(pos: Pos) = players.find { it.pos == pos && it.isAlive() }
     fun printableMap(withHp: Boolean = false): List<String> {
         val ret = mutableListOf<String>()
-        for (y in 0..map.keys.maxBy { it.y }!!.y) {
+        for (y in 0..map.keys.maxByOrNull { it.y }!!.y) {
             val hp = mutableListOf<Pair<Char, Int>>()
             ret.add("")
-            for (x in 0..map.keys.maxBy { it.x }!!.x) {
+            for (x in 0..map.keys.maxByOrNull { it.x }!!.x) {
                 val pos = Pos(x, y)
                 val char = map[pos]!!
                 ret[y] = ret[y] + char
@@ -65,7 +65,7 @@ class Day15(val input: List<String>) {
     private fun attack(player: Player) {
         val target = players.filter { it.team != player.team && it.isAlive() && player.pos isAdjacentTo it.pos }
                 .sortedWith(compareBy({ it.pos.y }, { it.pos.x })) // If many adjacent and same hp, do reading order
-                .minBy { it.hp }!!
+                .minByOrNull { it.hp }!!
         target.hp -= player.attackPower
         if (target.hp <= 0) {
             map[target.pos] = '.'
@@ -103,8 +103,8 @@ class Day15(val input: List<String>) {
         }
 
         // Choose closest open space (reading order if tied for distance) for moving toward
-        val chosenPath = adjacent.groupBy { it.size }.minBy { it.key }!!.value // closest distance
-                .minWith(compareBy({ it.last().y }, { it.last().x }))!! // positions in reading order
+        val chosenPath = adjacent.groupBy { it.size }.minByOrNull { it.key }!!.value // closest distance
+                .minWithOrNull(compareBy({ it.last().y }, { it.last().x }))!! // positions in reading order
 
         val posBeforeMove = player.pos
         // Take one step toward chosen position (reading order if many different paths are available

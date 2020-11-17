@@ -31,7 +31,7 @@ class Day14(input: List<String>) {
         }
 
         // If there is already some of the desired material created since an earlier reaction use that.
-        val alreadyAvailable = min(amount, available.getOrDefault(material, 0).toLong())
+        val alreadyAvailable = min(amount, available.getOrDefault(material, 0))
         available[material] = available.getOrDefault(material, 0) - alreadyAvailable
         val toCreate = amount - alreadyAvailable
 

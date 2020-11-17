@@ -128,8 +128,8 @@ class Day22(input: List<String>) {
     // generalizations can be done in my case to be able to solve the problem.
     fun investigateMap() {
         val pairs = getViablePairs(fileSystem)
-        val minDataToMove = pairs.minBy { it.first.used }!!.first.used
-        val nodeWithMostFree = pairs.maxBy { it.first.size - it.first.used }!!.first
+        val minDataToMove = pairs.minByOrNull { it.first.used }!!.first.used
+        val nodeWithMostFree = pairs.maxByOrNull { it.first.size - it.first.used }!!.first
         val maxFreeSpace = nodeWithMostFree.size - nodeWithMostFree.used
         val numEmptyNodes = pairs.flatMap { listOf(it.second) }.toSet().size
         println("Min data: $minDataToMove, Max free: $maxFreeSpace, Empty nodes: $numEmptyNodes")
@@ -137,12 +137,12 @@ class Day22(input: List<String>) {
         // Which means there is only one empty node which data can be moved to. There are no
         // two nodes with data who's data can fit into each others.
 
-        val maxMovableCapacity = pairs.maxBy { it.first.size }!!.first.size
+        val maxMovableCapacity = pairs.maxByOrNull { it.first.size }!!.first.size
         val bigNodes = fileSystem.flatten().filter { it.used > maxMovableCapacity }
-        val minX = bigNodes.minBy { it.x }!!.x
-        val maxX = bigNodes.maxBy { it.x }!!.x
-        val minY = bigNodes.minBy { it.y }!!.y
-        val maxY = bigNodes.maxBy { it.y }!!.y
+        val minX = bigNodes.minByOrNull { it.x }!!.x
+        val maxX = bigNodes.maxByOrNull { it.x }!!.x
+        val minY = bigNodes.minByOrNull { it.y }!!.y
+        val maxY = bigNodes.maxByOrNull { it.y }!!.y
         val hole = pairs.flatMap { listOf(it.second) }.toSet().first()
         println("minX: $minX, maxX: $maxX, minY: $minY, maxY: $maxY, holeX: ${hole.x}, holeY: ${hole.y}")
         // With my input: minX: 9, maxX: 31, minY: 12, maxY: 12, holeX: 24, holeY: 22
@@ -155,9 +155,9 @@ class Day22(input: List<String>) {
     fun solveMyPart2(): Int {
         val pairs = getViablePairs(fileSystem)
         val hole = pairs.flatMap { listOf(it.second) }.toSet().first()
-        val maxMovableCapacity = pairs.maxBy { it.first.size }!!.first.size
+        val maxMovableCapacity = pairs.maxByOrNull { it.first.size }!!.first.size
         val bigNodes = fileSystem.flatten().filter { it.used > maxMovableCapacity }
-        val leftOfWall = bigNodes.minBy { it.x }!!.x - 1
+        val leftOfWall = bigNodes.minByOrNull { it.x }!!.x - 1
         val goalData = Pair(31, 0)
 
         var steps = 0

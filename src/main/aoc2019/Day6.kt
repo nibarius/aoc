@@ -9,7 +9,7 @@ class Day6(input: List<String>) {
         return if (child == "COM") {
             parents
         } else {
-            countParents(parsedInput[child]!!, 1 + parents)
+            countParents(parsedInput.getValue(child), 1 + parents)
         }
     }
 
@@ -21,7 +21,7 @@ class Day6(input: List<String>) {
         val parents = mutableListOf<String>()
         var currentChild = child
         do {
-            currentChild = parsedInput[currentChild]!!
+            currentChild = parsedInput.getValue(currentChild)
             parents.add(currentChild)
         } while (currentChild != "COM")
         return parents.reversed()

@@ -3,7 +3,7 @@ package aoc2018
 import increase
 import kotlin.math.abs
 
-class Day6(private val input: List<String>) {
+class Day6(input: List<String>) {
     data class Location(val x: Int, val y: Int) {
         fun distanceTo(other: Location) = abs(x - other.x) + abs(y - other.y)
         fun withinFovUp(other: Location): Boolean {
@@ -47,8 +47,8 @@ class Day6(private val input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        val xRange = locations.minBy { it.x }!!.x..locations.maxBy { it.x }!!.x
-        val yRange = locations.minBy { it.y }!!.y..locations.maxBy { it.y }!!.y
+        val xRange = locations.minByOrNull { it.x }!!.x..locations.maxByOrNull { it.x }!!.x
+        val yRange = locations.minByOrNull { it.y }!!.y..locations.maxByOrNull { it.y }!!.y
         val finiteLocations = findNonInfiniteLocations(locations)
         val areas = mutableMapOf<Location, Int>()
         for (y in yRange) {
@@ -62,12 +62,12 @@ class Day6(private val input: List<String>) {
                 }
             }
         }
-        return areas.toList().maxBy { it.second }!!.second
+        return areas.toList().maxByOrNull { it.second }!!.second
     }
 
     fun solvePart2(totalDistance: Int): Int {
-        val xRange = locations.minBy { it.x }!!.x..locations.maxBy { it.x }!!.x
-        val yRange = locations.minBy { it.y }!!.y..locations.maxBy { it.y }!!.y
+        val xRange = locations.minByOrNull { it.x }!!.x..locations.maxByOrNull { it.x }!!.x
+        val yRange = locations.minByOrNull { it.y }!!.y..locations.maxByOrNull { it.y }!!.y
         var safeArea = 0
         for (y in yRange) {
             for (x in xRange) {

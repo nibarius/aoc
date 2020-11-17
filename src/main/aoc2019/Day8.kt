@@ -6,7 +6,7 @@ class Day8(input: String, private val w: Int, private val h: Int) {
 
     fun solvePart1(): Int {
         return image
-                .minBy { layer -> layer.count { it == 0 } }!!
+                .minByOrNull { layer -> layer.count { it == 0 } }!!
                 .let { digits -> digits.count { it == 1 } * digits.count { it == 2 } }
     }
 

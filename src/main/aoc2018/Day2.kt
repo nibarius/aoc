@@ -24,7 +24,7 @@ class Day2(private val input: List<String>) {
     }
 
     private fun findBoxes(ids: List<String>): String {
-        for (i in 0 until ids.size) {
+        for (i in ids.indices) {
             for (j in i + 1 until ids.size) {
                 if (idsAreClose(ids[i], ids[j])) {
                     return sameCharacters(ids[i], ids[j])

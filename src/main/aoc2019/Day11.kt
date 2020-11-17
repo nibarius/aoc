@@ -1,8 +1,7 @@
 package aoc2019
 
+import Direction
 import Pos
-import next
-import prev
 
 class Day11(input: List<String>) {
 
@@ -45,8 +44,8 @@ class Day11(input: List<String>) {
     private val parsedInput = Intcode(input.map { it.toLong() })
     private val map = mutableMapOf<Pos, Int>()
 
-    private fun Map<Pos, Int>.xRange() = keys.minBy { it.x }!!.x..keys.maxBy { it.x }!!.x
-    private fun Map<Pos, Int>.yRange() = keys.minBy { it.y }!!.y..keys.maxBy { it.y }!!.y
+    private fun Map<Pos, Int>.xRange() = keys.minByOrNull { it.x }!!.x..keys.maxByOrNull { it.x }!!.x
+    private fun Map<Pos, Int>.yRange() = keys.minByOrNull { it.y }!!.y..keys.maxByOrNull { it.y }!!.y
     private fun printArea(map: Map<Pos, Int>): String {
         return (map.yRange()).joinToString("\n") { y ->
             (map.xRange()).joinToString("") { x ->

@@ -126,7 +126,7 @@ class Day21(private val start: String, private val input: List<String>) {
                         .......x 7 ==> 0 x.......  9
                     */
                     val index = scrambler.getCurrentValue().indexOf(words.last())
-                    val toRotate = mapOf(1 to 1, 3 to 2, 5 to 3, 7 to 4, 2 to 6, 4 to 7, 6 to 8, 0 to 9)[index]!!
+                    val toRotate = mapOf(1 to 1, 3 to 2, 5 to 3, 7 to 4, 2 to 6, 4 to 7, 6 to 8, 0 to 9).getValue(index)
 
                     scrambler.rotate(-1 * toRotate)
                 }

@@ -40,7 +40,7 @@ class Day24(input: List<String>) {
     private fun balance(target: Int): Long {
         val candidates = mutableListOf<List<Int>>()
         makeGroup(listOf(), parsedInput, candidates, target)
-        return candidates.map { it.qe() }.min()!!
+        return candidates.map { it.qe() }.minOrNull()!!
     }
 
     fun solvePart1(): Long {

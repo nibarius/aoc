@@ -2,7 +2,7 @@ package aoc2018
 
 import java.util.*
 
-class Day7(private val input: List<String>) {
+class Day7(input: List<String>) {
     // Letter is key, list of requirements is value
     private val steps = parseInput(input)
 
@@ -38,7 +38,7 @@ class Day7(private val input: List<String>) {
         fun isIdle() = workingOn == null
         fun startWork(which: String, currentTime: Int): Int {
             workingOn = which
-            done = currentTime + durations[which]!!
+            done = currentTime + durations.getValue(which)
             return done!!
         }
 
@@ -77,7 +77,7 @@ class Day7(private val input: List<String>) {
 
             if ((available.isEmpty() || workers.all { it.isWorking() }) && finishedWork.isEmpty()) {
                 // No work to start or finish this second, advance time
-                currentTime = workLog.minBy { it.second }!!.second
+                currentTime = workLog.minByOrNull { it.second }!!.second
             }
         }
         return currentTime

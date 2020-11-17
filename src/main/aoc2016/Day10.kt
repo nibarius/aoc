@@ -10,13 +10,13 @@ class Day10(input: List<String>) {
     private data class Output(val name: Int, var holds: Int = 0)
     private data class Bot(val name: Int, val holds: MutableList<Int> = mutableListOf()) {
         fun popSmall(): Int {
-            val min = holds.min()!!
+            val min = holds.minOrNull()!!
             holds.removeIf { it == min }
             return min
         }
 
         fun popLarge(): Int {
-            val max = holds.max()!!
+            val max = holds.maxOrNull()!!
             holds.removeIf { it == max }
             return max
         }
@@ -48,8 +48,7 @@ class Day10(input: List<String>) {
     }
 
     private fun initializeBots(): Array<Bot> {
-        instructions.filter { it is GetInstruction }.forEach {
-            it as GetInstruction
+        instructions.filterIsInstance<GetInstruction>().forEach {
             bots[it.to].holds.add(it.value)
             if (bots[it.to].isReady()) {
                 botQueue.add(it.to)
@@ -67,8 +66,7 @@ class Day10(input: List<String>) {
                 // return when the bot to search for is found
                 return botToProcess
             }
-            val inst = instructions.filter { it is GiveInstruction }.find {
-                it as GiveInstruction
+            val inst = instructions.filterIsInstance<GiveInstruction>().find {
                 it.who == botToProcess
             } as GiveInstruction
             if (inst.highIsBot) {

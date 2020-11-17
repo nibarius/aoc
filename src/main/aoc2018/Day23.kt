@@ -63,43 +63,43 @@ class Day23(input: List<String>) {
             }
 
             return setOf(
-                    Cube(clamp(xRange.first..(xRange.first + xRange.size() / 2 - 1)),
-                            clamp(yRange.first..(yRange.first + yRange.size() / 2 - 1)),
-                            clamp(zRange.first..(zRange.first + zRange.size() / 2 - 1)),
+                    Cube(clamp(xRange.first until xRange.first + xRange.size() / 2),
+                            clamp(yRange.first until yRange.first + yRange.size() / 2),
+                            clamp(zRange.first until zRange.first + zRange.size() / 2),
                             botsInRangeOfWholeParent + botsInRangeOfWholeCube,
                             botsWithPartialIntersection
                     ),
                     Cube((xRange.first + xRange.size() / 2)..xRange.last,
-                            clamp(yRange.first..(yRange.first + yRange.size() / 2 - 1)),
-                            clamp(zRange.first..(zRange.first + zRange.size() / 2 - 1)),
+                            clamp(yRange.first until yRange.first + yRange.size() / 2),
+                            clamp(zRange.first until zRange.first + zRange.size() / 2),
                             botsInRangeOfWholeParent + botsInRangeOfWholeCube,
                             botsWithPartialIntersection
                     ),
-                    Cube(clamp(xRange.first..(xRange.first + xRange.size() / 2 - 1)),
+                    Cube(clamp(xRange.first until xRange.first + xRange.size() / 2),
                             (yRange.first + yRange.size() / 2)..yRange.last,
-                            clamp(zRange.first..(zRange.first + zRange.size() / 2 - 1)),
+                            clamp(zRange.first until zRange.first + zRange.size() / 2),
                             botsInRangeOfWholeParent + botsInRangeOfWholeCube,
                             botsWithPartialIntersection
                     ),
-                    Cube(clamp(xRange.first..(xRange.first + xRange.size() / 2 - 1)),
-                            clamp(yRange.first..(yRange.first + yRange.size() / 2 - 1)),
+                    Cube(clamp(xRange.first until xRange.first + xRange.size() / 2),
+                            clamp(yRange.first until yRange.first + yRange.size() / 2),
                             (zRange.first + zRange.size() / 2)..zRange.last,
                             botsInRangeOfWholeParent + botsInRangeOfWholeCube,
                             botsWithPartialIntersection
                     ),
                     Cube((xRange.first + xRange.size() / 2)..xRange.last,
                             (yRange.first + yRange.size() / 2)..yRange.last,
-                            clamp(zRange.first..(zRange.first + zRange.size() / 2 - 1)),
+                            clamp(zRange.first until zRange.first + zRange.size() / 2),
                             botsInRangeOfWholeParent + botsInRangeOfWholeCube,
                             botsWithPartialIntersection
                     ),
                     Cube((xRange.first + xRange.size() / 2)..xRange.last,
-                            clamp(yRange.first..(yRange.first + yRange.size() / 2 - 1)),
+                            clamp(yRange.first until yRange.first + yRange.size() / 2),
                             (zRange.first + zRange.size() / 2)..zRange.last,
                             botsInRangeOfWholeParent + botsInRangeOfWholeCube,
                             botsWithPartialIntersection
                     ),
-                    Cube(clamp(xRange.first..(xRange.first + xRange.size() / 2 - 1)),
+                    Cube(clamp(xRange.first until xRange.first + xRange.size() / 2),
                             (yRange.first + yRange.size() / 2)..yRange.last,
                             (zRange.first + zRange.size() / 2)..zRange.last,
                             botsInRangeOfWholeParent + botsInRangeOfWholeCube,
@@ -138,14 +138,14 @@ class Day23(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        val strongest = nanobots.maxBy { it.range }!!
+        val strongest = nanobots.maxByOrNull { it.range }!!
         return nanobots.filter { strongest.inRange(it) }.size
     }
 
 
     fun solvePart2(): Int {
         val spaces = findSpacesWithMostBotsInRange()
-        return spaces.map { it.shortestDistance(Pos(0, 0, 0)) }.min()!!
+        return spaces.map { it.shortestDistance(Pos(0, 0, 0)) }.minOrNull()!!
     }
 
 
@@ -153,9 +153,9 @@ class Day23(input: List<String>) {
         var largestSoFar = -1
         val cubesInRangeOfMostNanobots = mutableSetOf<Cube>()
         val boundingCube = Cube(
-                nanobots.minBy { it.pos.x }!!.pos.x..nanobots.maxBy { it.pos.x }!!.pos.x,
-                nanobots.minBy { it.pos.y }!!.pos.y..nanobots.maxBy { it.pos.y }!!.pos.y,
-                nanobots.minBy { it.pos.z }!!.pos.z..nanobots.maxBy { it.pos.z }!!.pos.z,
+                nanobots.minByOrNull { it.pos.x }!!.pos.x..nanobots.maxByOrNull { it.pos.x }!!.pos.x,
+                nanobots.minByOrNull { it.pos.y }!!.pos.y..nanobots.maxByOrNull { it.pos.y }!!.pos.y,
+                nanobots.minByOrNull { it.pos.z }!!.pos.z..nanobots.maxByOrNull { it.pos.z }!!.pos.z,
                 0,
                 nanobots
         )

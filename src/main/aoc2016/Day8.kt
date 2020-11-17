@@ -4,9 +4,9 @@ class Day8(input: List<String>) {
     private data class Instruction(val action: Action, val a: Int, val b: Int) {
         fun execute(display: Array<IntArray>) {
             when (action) {
-                Day8.Action.Rect -> createRect(display, a, b)
-                Day8.Action.RotateRow -> rotateRow(display, a, b)
-                Day8.Action.RotateColumn -> rotateColumn(display, a, b)
+                Action.Rect -> createRect(display, a, b)
+                Action.RotateRow -> rotateRow(display, a, b)
+                Action.RotateColumn -> rotateColumn(display, a, b)
             }
         }
 
@@ -20,7 +20,7 @@ class Day8(input: List<String>) {
 
         fun rotateRow(display: Array<IntArray>, row: Int, distance: Int) {
             val copy = display[row].copyOf()
-            for (i in 0 until copy.size) {
+            for (i in copy.indices) {
                 display[row][(i + distance) % copy.size] = copy[i]
             }
         }
@@ -28,7 +28,7 @@ class Day8(input: List<String>) {
         fun Array<IntArray>.copy() = Array(size) { get(it).clone() }
         fun rotateColumn(display: Array<IntArray>, column: Int, distance: Int) {
             val copy = display.copy()
-            for (i in 0 until copy.size) {
+            for (i in copy.indices) {
                 display[(i + distance) % copy.size][column] = copy[i][column]
             }
         }
@@ -39,7 +39,7 @@ class Day8(input: List<String>) {
         RotateColumn
     }
 
-    private val display = Array(6) { _ -> IntArray(50) { _ -> 0 } }
+    private val display = Array(6) { IntArray(50) { 0 } }
     private val instructions = parseInput(input)
 
 

@@ -15,7 +15,7 @@ class Day13Test {
             "  \\------/   "
     )
 
-    val testInput2 = listOf(
+    private val testInput2 = listOf(
             "/>-<\\  ",
             "|   |  ",
             "| /<+-\\",

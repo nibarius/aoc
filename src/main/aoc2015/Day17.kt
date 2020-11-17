@@ -39,7 +39,7 @@ class Day17(input: List<String>) {
 
     fun solvePart2(totalCapacity: Int = 150): Int {
         val combinations = findAllCombinations(totalCapacity)
-        val min = combinations.minBy { it.size }!!.size
+        val min = combinations.minByOrNull { it.size }!!.size
         return combinations.filter { it.size == min }.size
     }
 }

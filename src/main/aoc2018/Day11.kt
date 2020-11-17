@@ -87,6 +87,6 @@ class Day11(input: String) {
     }
 
     fun solvePart2(): String {
-        return (1..300).map { findMaxSquare(it) }.maxBy { it.second }!!.first
+        return (1..300).map { findMaxSquare(it) }.maxByOrNull { it.second }!!.first
     }
 }
