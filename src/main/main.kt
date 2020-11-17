@@ -1,8 +1,8 @@
 import java.io.File
 
 fun main() {
-    val year = 2015
-    val day = 25
+    val year = 2020
+    val day = 1
     createDayClassFile(year, day)
     createTestFile(year, day)
     createInputFile("$year/day$day.txt")
