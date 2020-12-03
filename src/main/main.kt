@@ -1,19 +1,45 @@
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.Headers
+import com.github.kittinunf.result.Result
 import java.io.File
 
-fun main() {
+fun main(args: Array<String>) {
     val year = 2020
     val day = 4
-    createDayClassFile(year, day)
-    createTestFile(year, day)
-    createInputFile("$year/day$day.txt")
+    if(args.firstOrNull() == "download") {
+        readInputFileFromInternet(year, day)
+    }
+    else {
+        createDayClassFile(year, day)
+        createTestFile(year, day)
+    }
+
 }
 
-fun createInputFile(fileName: String) {
-    val path = "src/test/resources/$fileName"
-    File(path)
-            .takeIf { !it.exists() }
-            ?.createNewFile()
-            ?.also { println("$path created") }
+fun readInputFileFromInternet(year: Int, day: Int) {
+    val path = "src/test/resources/$year/day$day.txt"
+    val file = File(path)
+    if (file.exists()) {
+        println("Input file download aborted, file already exists")
+        return
+    }
+
+    val sessionCookie = resourceAsString("session_cookie.txt")
+    Fuel.download("https://adventofcode.com/$year/day/$day/input")
+            .fileDestination {_, _ -> file}
+            .header(Headers.USER_AGENT to "nibarius' input downloader")
+            .header(Headers.COOKIE to "session=$sessionCookie")
+            .response { _, response, result ->
+                when (result) {
+                    is Result.Failure -> {
+                        println("Failed to download input: ${response.statusCode} ${response.responseMessage}")
+                    }
+                    is Result.Success -> {
+                        println("$path downloaded successfully")
+                    }
+                }
+            }
+            .join()
 }
 
 fun createTestFile(year: Int, day: Int) {
@@ -31,7 +57,6 @@ fun createDayClassFile(year: Int, day: Int) {
             ?.writeText(getDayClassContent(year, day))
             ?.also { println("$path created") }
 }
-
 
 
 fun getTestCaseContent(year: Int, day: Int): String {
