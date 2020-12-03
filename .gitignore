@@ -81,3 +81,6 @@ gradle-app.setting
 
 ### Gradle Patch ###
 **/build/
+
+# My sensitive files
+src/main/resources/session_cookie.txt
