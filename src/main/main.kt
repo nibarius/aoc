@@ -2,7 +2,7 @@ import java.io.File
 
 fun main() {
     val year = 2020
-    val day = 3
+    val day = 4
     createDayClassFile(year, day)
     createTestFile(year, day)
     createInputFile("$year/day$day.txt")
@@ -44,26 +44,28 @@ import org.junit.Test
 import resourceAsList
 
 class Day${day}Test {
+    private val exampleInput = $doubleTriple.trimIndent().split("\n")
+    private val exampleDay$day = Day$day(exampleInput)
+    private val day$day = Day$day(resourceAsList("${year}/day${day}.txt"))
+
     @Test
     fun testPartOneExample1() {
-        val input = $doubleTriple.trimIndent().split("\n")
-        assertEquals(0, Day${day}(input).solvePart1())
+        assertEquals(0, exampleDay$day.solvePart1())
     }
 
     @Test
     fun partOneRealInput() {
-        assertEquals(0, Day${day}(resourceAsList("${year}/day${day}.txt")).solvePart1())
+        assertEquals(0, day$day.solvePart1())
     }
 
     @Test
     fun testPartTwoExample1() {
-        val input = $doubleTriple.trimIndent().split("\n")
-        assertEquals(0, Day${day}(input).solvePart2())
+        assertEquals(0, exampleDay$day.solvePart2())
     }
 
     @Test
     fun partTwoRealInput() {
-        assertEquals(0, Day${day}(resourceAsList("${year}/day${day}.txt")).solvePart2())
+        assertEquals(0, day$day.solvePart2())
     }
 }""".replace("\n", System.getProperty("line.separator"))
 }
