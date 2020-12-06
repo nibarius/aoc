@@ -5,7 +5,7 @@ import java.io.File
 
 fun main(args: Array<String>) {
     val year = 2020
-    val day = 6
+    val day = 7
     if(args.firstOrNull() == "download") {
         readInputFileFromInternet(year, day)
     }
@@ -70,26 +70,28 @@ import resourceAsList
 
 class Day${day}Test {
     private val exampleInput = $doubleTriple.trimIndent().split("\n")
-    private val exampleDay$day = Day$day(exampleInput)
-    private val day$day = Day$day(resourceAsList("${year}/day${day}.txt"))
 
     @Test
     fun testPartOneExample1() {
-        assertEquals(0, exampleDay$day.solvePart1())
+        val day$day = Day$day(exampleInput)
+        assertEquals(0, day$day.solvePart1())
     }
 
     @Test
     fun partOneRealInput() {
+        val day$day = Day$day(resourceAsList("${year}/day${day}.txt"))
         assertEquals(0, day$day.solvePart1())
     }
 
     @Test
     fun testPartTwoExample1() {
-        assertEquals(0, exampleDay$day.solvePart2())
+        val day$day = Day$day(exampleInput)
+        assertEquals(0, day$day.solvePart2())
     }
 
     @Test
     fun partTwoRealInput() {
+        val day$day = Day$day(resourceAsList("${year}/day${day}.txt"))
         assertEquals(0, day$day.solvePart2())
     }
 }""".replace("\n", System.getProperty("line.separator"))
