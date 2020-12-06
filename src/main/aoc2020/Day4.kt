@@ -24,7 +24,7 @@ class Day4(input: List<String>) {
         }
     }
 
-    private data class Passport(private val fields: Set<Field>) {
+    private data class Passport(private val fields: List<Field>) {
         val hasAllMandatoryFields = fields.count { it.isMandatory() } == 7
         val isValid = hasAllMandatoryFields && fields.all { it.isValid() }
     }
@@ -32,22 +32,11 @@ class Day4(input: List<String>) {
     private val passports = parseInput(input)
 
     private fun parseInput(input: List<String>): List<Passport> {
-        val fields = mutableSetOf<Field>()
-        val ret = mutableListOf<Passport>()
-        for (line in input) {
-            if (line.isEmpty()) {
-                ret.add(Passport(fields.toSet()))
-                fields.clear()
-                continue
-            }
-            line.split(" ").forEach { pair ->
-                pair.split(":").let { (key, value) ->
-                    fields.add(Field(key, value))
-                }
-            }
+        return input.map { passport ->
+            passport.split(" ", "\n")
+                    .map { it.split(":").let { (key, value) -> Field(key, value) } }
+                    .let { Passport(it) }
         }
-        ret.add(Passport(fields.toSet()))
-        return ret
     }
 
     fun solvePart1(): Int {
