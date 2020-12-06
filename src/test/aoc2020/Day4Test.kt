@@ -4,6 +4,7 @@ import aoc2020.Day4
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import resourceAsList
+import resourceSplitOnBlankLines
 
 class Day4Test {
     private val exampleInput = """
@@ -20,17 +21,17 @@ class Day4Test {
 
         hcl:#cfa07d eyr:2025 pid:166559648
         iyr:2011 ecl:brn hgt:59in
-    """.trimIndent().split("\n")
-    private val exampleDay4 = Day4(exampleInput)
-    private val day4 = Day4(resourceAsList("2020/day4.txt"))
+    """.trimIndent().split("\n\n")
 
     @Test
     fun testPartOneExample1() {
+        val exampleDay4 = Day4(exampleInput)
         assertEquals(2, exampleDay4.solvePart1())
     }
 
     @Test
     fun partOneRealInput() {
+        val day4 = Day4(resourceSplitOnBlankLines("2020/day4.txt"))
         assertEquals(260, day4.solvePart1())
     }
 
@@ -50,7 +51,7 @@ class Day4Test {
             hgt:59cm ecl:zzz
             eyr:2038 hcl:74454a iyr:2023
             pid:3556412378 byr:2007
-        """.trimIndent().split("\n")
+        """.trimIndent().split("\n\n")
         val day4 = Day4(input)
         assertEquals(0, day4.solvePart2())
     }
@@ -71,13 +72,14 @@ class Day4Test {
             eyr:2022
 
             iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
-        """.trimIndent().split("\n")
+        """.trimIndent().split("\n\n")
         val day4 = Day4(input)
         assertEquals(4, day4.solvePart2())
     }
 
     @Test
     fun partTwoRealInput() {
+        val day4 = Day4(resourceSplitOnBlankLines("2020/day4.txt"))
         assertEquals(153, day4.solvePart2())
     }
 }
