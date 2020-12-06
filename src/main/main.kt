@@ -25,16 +25,19 @@ fun readInputFileFromInternet(year: Int, day: Int) {
     }
 
     val sessionCookie = resourceAsString("session_cookie.txt")
-    Fuel.download("https://adventofcode.com/$year/day/$day/input")
-            .fileDestination {_, _ -> file}
+    Fuel.get("https://adventofcode.com/$year/day/$day/input")
             .header(Headers.USER_AGENT to "nibarius' input downloader")
             .header(Headers.COOKIE to "session=$sessionCookie")
-            .response { _, response, result ->
+            .responseString { _, response, result ->
                 when (result) {
                     is Result.Failure -> {
                         println("Failed to download input: ${response.statusCode} ${response.responseMessage}")
                     }
                     is Result.Success -> {
+                        // Make sure to use same line separators as the system
+                        result.value
+                                .replace("\n", System.getProperty("line.separator"))
+                                .also { File(path).writeText(it) }
                         println("$path downloaded successfully")
                     }
                 }
