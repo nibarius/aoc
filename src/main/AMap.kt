@@ -27,6 +27,20 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
                 .size
     }
 
+    /**
+     * Return the number of visible items with the given value in all directions.
+     */
+    fun numVisibleWithValue(pos: Pos, value: Char, transparent: List<Char>, includeDiagonals: Boolean = false): Int {
+        return Pos.allDeltas(includeDiagonals)
+                .map { delta ->
+                    generateSequence(pos) { Pos(it.x + delta.x, it.y + delta.y) }
+                            .drop(1)
+                            .map { map[it] }
+                            .first { it !in transparent }
+                }
+                .sumBy { if (it == value) 1 else 0 }
+    }
+
     fun toString(emptySpace: Char = '#'): String {
         return (yRange()).joinToString("\n") { y ->
             (xRange()).joinToString("") { x ->
