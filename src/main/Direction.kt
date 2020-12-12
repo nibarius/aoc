@@ -20,10 +20,10 @@ enum class Direction(val dx: Int, val dy: Int) {
 
     companion object {
         fun fromChar(dir: Char): Direction = when (dir) {
-            in setOf('R', '>') -> Right
-            in setOf('U', '^') -> Up
-            in setOf('L', '<') -> Left
-            in setOf('D', 'v') -> Down
+            in setOf('R', '>', 'E') -> Right
+            in setOf('U', '^', 'N') -> Up
+            in setOf('L', '<', 'W') -> Left
+            in setOf('D', 'v', 'S') -> Down
             else -> throw IllegalArgumentException("Unknown direction: $dir")
         }
     }
