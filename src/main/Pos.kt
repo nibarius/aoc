@@ -22,10 +22,25 @@ data class Pos(val x: Int, val y: Int) {
     }
 
     fun allNeighbours(includeDiagonals: Boolean = false): List<Pos> {
-        return allDeltas(includeDiagonals).map { delta ->  Pos(x + delta.x, y + delta.y) }
+        return allDeltas(includeDiagonals).map { delta -> Pos(x + delta.x, y + delta.y) }
     }
 
     override fun toString() = "($x, $y)"
+
+    operator fun times(other: Int) = Pos(x * other, y * other)
+    operator fun plus(other: Pos) = Pos(x + other.x, y + other.y)
+
+    /**
+     * Rotates the position around origin in the given direction and returns the result as a new position.
+     * Left is counter-clockwise and right is clockwise.
+     */
+    fun rotate(dir: Direction): Pos {
+        return when (dir) {
+            Direction.Left -> Pos(y, -x)
+            Direction.Right -> Pos(-y, x)
+            else -> throw IllegalArgumentException("Not possible to rotate $dir, Left and Right are the only valid directions")
+        }
+    }
 
     companion object {
         fun allDeltas(includeDiagonals: Boolean = false): List<Pos> {

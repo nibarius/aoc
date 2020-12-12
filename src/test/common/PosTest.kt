@@ -35,4 +35,31 @@ class PosTest {
         Assert.assertEquals(listOf(Pos(9, 9), Pos(10, 9), Pos(11, 9), Pos(9, 10), Pos(11, 10), Pos(9, 11), Pos(10, 11), Pos(11, 11)),
                 Pos(10, 10).allNeighbours(includeDiagonals = true))
     }
+
+    @Test
+    fun plus() {
+        Assert.assertEquals(Pos(5, 5), Pos(5, 0) + Pos(0, 5))
+        Assert.assertEquals(Pos(5, 5), Pos(0, 0) + Pos(5, 5))
+        Assert.assertEquals(Pos(5, 5), Pos(10, 10) + Pos(-5, -5))
+    }
+
+    @Test
+    fun times() {
+        Assert.assertEquals(Pos(5, 5), Pos(1, 1) * 5)
+        Assert.assertEquals(Pos(5, 5), Pos(-5, -5) * -1)
+        Assert.assertEquals(Pos(0, 0), Pos(10, 10) * 0)
+    }
+
+    @Test
+    fun rotate() {
+        Assert.assertEquals(Pos(1, -1), Pos(1, 1).rotate(Direction.Left))
+        Assert.assertEquals(Pos(-10, -10), Pos(10, -10).rotate(Direction.Left))
+        Assert.assertEquals(Pos(-19, 1), Pos(-1, -19).rotate(Direction.Left))
+        Assert.assertEquals(Pos(1, 21), Pos(-21, 1).rotate(Direction.Left))
+
+        Assert.assertEquals(Pos(1, 16), Pos(16, -1).rotate(Direction.Right))
+        Assert.assertEquals(Pos(91, -12), Pos(-12, -91).rotate(Direction.Right))
+        Assert.assertEquals(Pos(-61, -16), Pos(-16, 61).rotate(Direction.Right))
+        Assert.assertEquals(Pos(-1, 1), Pos(1, 1).rotate(Direction.Right))
+    }
 }
