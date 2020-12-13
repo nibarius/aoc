@@ -94,21 +94,6 @@ class Day12(input: List<String>) {
                 }
             }
         }
-        println(loops)
-        return lcm(loops.values)
-    }
-
-    // Least common multiplier for a collection of ints
-    private fun lcm(numbers: Collection<Int>): Long {
-        return numbers.fold(BigInteger("1")) { acc, i ->
-            lcm(acc, BigInteger(i.toString()))
-        }.toString().toLong()
-    }
-
-    // From https://www.baeldung.com/java-least-common-multiple#lcm-biginteger
-    private fun lcm(number1: BigInteger, number2: BigInteger): BigInteger {
-        val gcd = number1.gcd(number2)
-        val absProduct = number1.multiply(number2).abs()
-        return absProduct.divide(gcd)
+        return MyMath.lcm(loops.values)
     }
 }

@@ -38,4 +38,13 @@ class MyMathTest {
         val input = listOf(Pair(1789, 0), Pair(37, 36), Pair(47, 45), Pair(1889, 1886))
         Assert.assertEquals(1202161486, MyMath.chineseRemainder(input))
     }
+
+    @Test
+    fun testLCM() {
+        Assert.assertEquals(2, MyMath.lcm(setOf(2)))
+        Assert.assertEquals(16, MyMath.lcm(setOf(2, 4, 8, 16)))
+        Assert.assertEquals(36, MyMath.lcm(setOf(12, 18)))
+        Assert.assertEquals(80, MyMath.lcm(setOf(16, 20)))
+        Assert.assertEquals(2520, MyMath.lcm((1..10).toList()))
+    }
 }
