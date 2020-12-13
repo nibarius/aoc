@@ -28,4 +28,16 @@ object MyMath {
     fun chineseRemainder(pairs: Collection<Pair<Int, Int>>): Long {
         return chineseRemainder(pairs.map { it.first.toBigInteger() to it.second.toBigInteger() }).toLong()
     }
+
+    /**
+     * Calculates the least common multiple of a collection of ints.
+     */
+    fun lcm(numbers: Collection<Int>): Long {
+        return numbers.fold(1.toBigInteger()) { acc, i -> lcm(acc, i.toBigInteger()) }.toLong()
+    }
+
+    // Based on https://www.baeldung.com/java-least-common-multiple#lcm-biginteger
+    private fun lcm(n1: BigInteger, n2: BigInteger): BigInteger {
+        return (n1 * n2).abs() / n1.gcd(n2)
+    }
 }
