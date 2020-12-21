@@ -2,8 +2,8 @@ package aoc2020
 
 class Day19(input: List<String>) {
 
-    // For rules where there is no second option, option2 is an empty list
-    data class Rule(val option1: List<String>, val option2: List<String>)
+    // options is a list of options available
+    data class Rule(val options: List<List<String>>)
 
     private val messages: List<String> = input.last().split("\n")
     private val rules: Map<String, Rule>
@@ -15,9 +15,10 @@ class Day19(input: List<String>) {
     init {
         rules = input.first().split("\n").map { line ->
             val id = line.substringBefore(":")
-            val options = line.substringAfter(": ").split(" | ")
-            id to Rule(options.first().replace("\"", "").split(" "),
-                    options.getOrNull(1)?.split(" ") ?: listOf())
+            val options = line.substringAfter(": ")
+                    .split(" | ")
+                    .map { it.replace("\"", "").split(" ") }
+            id to Rule(options)
         }.toMap()
     }
 
@@ -36,15 +37,14 @@ class Day19(input: List<String>) {
                 // There are still required rules left, but we've run trough the whole string
                 return Pair(false, -1)
             }
-            currentRule.option1.first().isLetter() -> {
+            currentRule.options.first().first().isLetter() -> {
                 // This rule is a leaf node, check if it matches the letter at the current position
-                val letterMatches = msg[startIndex].toString() == currentRule.option1.first()
+                val letterMatches = msg[startIndex].toString() == currentRule.options.first().first()
                 return Pair(letterMatches && letterMatches, startIndex + 1)
             }
         }
 
-        val options = listOf(currentRule.option1, currentRule.option2)
-        for (option in options) {
+        for (option in currentRule.options) {
             var index = startIndex
 
             // for the current option, check if all it's requirements are fulfilled
@@ -61,7 +61,9 @@ class Day19(input: List<String>) {
                 // the recently consumed rule.
                 index = newIndex
 
-                if (i == currentRule.option1.size - 1) {
+                //todo: was previously currentRule.option1 even if looking at option 2. That feels wrong, best
+                // to look at the current option instead. Both works for part 1 though.
+                if (i == option.size - 1) {
                     // We've checked all rules available for this option and they are all valid since we
                     // haven't bailed out yet. This option is valid and the next character to check
                     // is at newIndex.
@@ -85,8 +87,8 @@ class Day19(input: List<String>) {
 
     private fun changeRules(): Map<String, Rule> {
         return rules.toMutableMap().apply {
-            this["8"] = Rule(listOf("42"), listOf("42", "8"))
-            this["11"] = Rule(listOf("42", "31"), listOf("42", "11", "31"))
+            this["8"] = Rule(listOf(listOf("42"), listOf("42", "8")))
+            this["11"] = Rule(listOf(listOf("42", "31"), listOf("42", "11", "31")))
         }
     }
 
