@@ -19,11 +19,11 @@ enum class Direction(val dx: Int, val dy: Int) {
     }
 
     companion object {
-        fun fromChar(dir: Char): Direction = when (dir) {
+        fun fromChar(dir: Char): Direction = when (dir.toUpperCase()) {
             in setOf('R', '>', 'E') -> Right
             in setOf('U', '^', 'N') -> Up
             in setOf('L', '<', 'W') -> Left
-            in setOf('D', 'v', 'S') -> Down
+            in setOf('D', 'V', 'S') -> Down
             else -> throw IllegalArgumentException("Unknown direction: $dir")
         }
     }
