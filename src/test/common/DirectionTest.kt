@@ -60,4 +60,12 @@ class DirectionTest {
         Assert.assertEquals(Pos(10, 3), right.from(Pos(3, 3), 7))
         Assert.assertEquals(Pos(-3, -4), up.from(Pos(-3, 3), 7))
     }
+
+    @Test
+    fun fromChar(){
+        Assert.assertEquals(true, setOf('U', 'u', 'n', 'N', '^').all { it.toDirection() == Direction.Up })
+        Assert.assertEquals(true, setOf('D', 'd', 's', 'S', 'v', 'V').all { it.toDirection() == Direction.Down })
+        Assert.assertEquals(true, setOf('L', 'l', 'W', 'w', '<').all { it.toDirection() == Direction.Left })
+        Assert.assertEquals(true, setOf('R', 'r', 'E', 'e', '>').all { it.toDirection() == Direction.Right })
+    }
 }
