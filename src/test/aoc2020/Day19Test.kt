@@ -3,7 +3,6 @@ package test.aoc2020
 import aoc2020.Day19
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import resourceAsList
 import resourceSplitOnBlankLines
 
 class Day19Test {
@@ -90,8 +89,36 @@ class Day19Test {
     }
 
     @Test
+    fun testPartOneMinimalExample() {
+        val exampleInput = """
+            0: 8
+            8: 42 | 42 42
+            42: "a"
+
+            aa
+        """.trimIndent().split("\n\n")
+        val day19 = Day19(exampleInput)
+        assertEquals(1, day19.solvePart1())
+    }
+
+    @Test
+    fun testPartTwoMinimalExample() {
+        val exampleInput = """
+            0: 8 11
+            8: 42
+            11: 42 31
+            42: "a"
+            31: "b"
+
+            aaaaabb
+        """.trimIndent().split("\n\n")
+        val day19 = Day19(exampleInput)
+        assertEquals(1, day19.solvePart2())
+    }
+
+    @Test
     fun partTwoRealInput() {
         val day19 = Day19(resourceSplitOnBlankLines("2020/day19.txt"))
-        assertEquals(0, day19.solvePart2())
+        assertEquals(367, day19.solvePart2())
     }
 }
