@@ -20,7 +20,7 @@ class Day25Test {
     @Test
     fun partOneRealInput() {
         val day25 = Day25(resourceAsList("2020/day25.txt"))
-        assertEquals(0, day25.solvePart1())
+        assertEquals(18862163, day25.solvePart1())
     }
 
 }
