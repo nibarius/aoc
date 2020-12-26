@@ -54,9 +54,6 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
         toString(emptySpace).split('\n').forEach { println(it) }
     }
 
-    private fun Map<Pos, Char>.xRange() = keys.minByOrNull { it.x }!!.x..keys.maxByOrNull { it.x }!!.x
-    private fun Map<Pos, Char>.yRange() = keys.minByOrNull { it.y }!!.y..keys.maxByOrNull { it.y }!!.y
-
     companion object {
         fun parse(input: List<String>): AMap {
             val map = AMap()
