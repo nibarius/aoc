@@ -3,40 +3,28 @@ package aoc2020
 import Direction
 import Grid
 import Pos
+import xRange
+import yRange
 
 class Day20(input: List<String>) {
 
-    data class Tile(val id: Long, val data: Grid) {
+    private data class Tile(val id: Long, val data: Grid) {
         var rotation: Grid.Transformation.Rotation = Grid.Transformation.NoRotation
         var flip: Grid.Transformation.Flip = Grid.Transformation.NoFlip
-
-        fun print() {
-            println("Tile $id:")
-            data.print()
-        }
 
         /**
          * Get this tile as a grid without any borders and it's transformations applied
          */
-        fun withoutBorders(): Grid {
-            return data
-                    .toString(listOf(rotation, flip)) // Apply transformations
-                    .split("\n")
-                    .drop(1) // remove top and bottom border
-                    .dropLast(1)
-                    .map { line -> // remove left and right border
-                        line.drop(1).dropLast(1)
-                    }
-                    .let { Grid.parse(it) }
-        }
+        fun withoutBorders() = data.subGrid(listOf(rotation, flip), Pos(1, 1), data.size - 2)
 
-        fun getSide(dir: Direction): String {
-            return data.getSide(dir, listOf(rotation, flip))
-        }
+        fun getSide(dir: Direction) = data.getSide(dir, listOf(rotation, flip))
 
-        // test all rotation/flip combinations and see if any match. If it does update the rotation/flip info and return true
+        /**
+         * Test all rotation/flip combinations and see if any match.
+         * If it does update the rotation/flip info for this tile and return true
+         */
         fun anyTransformationMatchingSide(side: String, direction: Direction): Boolean {
-            data.possibleTransformations.forEach { transformations ->
+            Grid.possibleTransformations.forEach { transformations ->
                 if (side == data.getSide(direction, transformations)) {
                     rotation = transformations.filterIsInstance<Grid.Transformation.Rotation>().single()
                     flip = transformations.filterIsInstance<Grid.Transformation.Flip>().single()
@@ -47,11 +35,22 @@ class Day20(input: List<String>) {
         }
     }
 
+    private val tiles = input.map { rawTile ->
+        val lines = rawTile.split("\n")
+        val id = lines.first().substringAfter("Tile ").dropLast(1).toLong()
+        val tile = Grid.parse(lines.drop(1).dropLastWhile { it.isEmpty() }) // real input has a trailing blank line
+        Tile(id, tile)
+    }
+
+    /**
+     * Returns a Pos to tile id map that orders the tiles in the correct order.
+     * Coordinates of the tiles forms a square and Pos(0,0) is located somewhere inside the square.
+     */
     private fun sortTiles(): Map<Pos, Long> {
-        val startTile = tiles.first()
         val tilesLeft = tiles.map { it.id to it }.toMap().toMutableMap() // id to tile map
+        // Start with the first tile without rotating it, and fix it's location to (0, 0)
+        val found = mutableMapOf(Pos(0, 0) to tiles.first().id)
         val positionsToFindNeighboursOf = mutableListOf(Pos(0, 0))
-        val found = mutableMapOf(Pos(0, 0) to startTile.id) // position to tile id. position of the first tile is 0,0
         while (tilesLeft.isNotEmpty()) {
             val currentPos = positionsToFindNeighboursOf.removeFirst()
             val matchAgainst = tilesLeft.remove(found[currentPos])!!
@@ -68,7 +67,6 @@ class Day20(input: List<String>) {
                     val sideToMatch = matchAgainst.getSide(direction)
                     if (otherTile.anyTransformationMatchingSide(sideToMatch, direction.opposite())) {
                         found[checkPos] = id
-                        //tilesLeft.remove(id) //todo: not doing this means it's included in checks where it's not needed (all other directions)
                         positionsToFindNeighboursOf.add(checkPos)
                         break
                     }
@@ -80,19 +78,18 @@ class Day20(input: List<String>) {
 
     private fun getMergedImage(): Grid {
         val sorted = sortTiles()
-        val minx = sorted.keys.minByOrNull { it.x }!!.x
-        val maxx = sorted.keys.maxByOrNull { it.x }!!.x
-        val miny = sorted.keys.minByOrNull { it.y }!!.y
-        val maxy = sorted.keys.maxByOrNull { it.y }!!.y
         val tileDataSize = tiles.first().data.size - 2
         val numTilesInARow = kotlin.math.sqrt(tiles.size.toDouble()).toInt()
         val mergedGrid = Grid(tileDataSize * numTilesInARow)
-        for ((yy, y) in (miny..maxy).withIndex()) {
-            for ((xx, x) in (minx..maxx).withIndex()) {
-                val tileId = sorted[Pos(x, y)]!!
+
+        // tileY, tileX are the coordinates within the the sorted tiles map
+        // indexY, indexX is rebased so that (0, 0) is in the top left corner
+        for ((indexY, tileY) in (sorted.yRange()).withIndex()) {
+            for ((indexX, tileX) in (sorted.xRange()).withIndex()) {
+                val tileId = sorted[Pos(tileX, tileY)]!!
                 val currentTile = tiles.find { it.id == tileId }!!
                 val data = currentTile.withoutBorders()
-                val offset = Pos(xx * tileDataSize, yy * tileDataSize)
+                val offset = Pos(indexX * tileDataSize, indexY * tileDataSize)
                 mergedGrid.writeAllWithOffset(data, offset)
             }
         }
@@ -105,8 +102,8 @@ class Day20(input: List<String>) {
             .#..#..#..#..#..#...
         """.trimIndent()
 
-    private fun getSeaMonsterPattern(): List<Pos> {
-        val pattern = mutableListOf<Pos>()
+    private fun getSeaMonsterPattern(): Set<Pos> {
+        val pattern = mutableSetOf<Pos>()
         val monster = monsterString.split("\n")
         for (y in monster.indices) {
             for (x in monster[0].indices) {
@@ -118,12 +115,13 @@ class Day20(input: List<String>) {
         return pattern
     }
 
-    private fun countMonsters(pattern: List<Pos>, grid: Grid): Int {
+    private fun countMonsters(grid: Grid): Int {
         var count = 0
+        val pattern = getSeaMonsterPattern()
         // pattern is 3 times 20 in size
         for (y in 0 until grid.size - 3) {
             for (x in 0 until grid.size - 20) {
-                if (pattern.all { grid.data[y + it.y][x + it.x] == '#' }) {
+                if (pattern.all { grid[y + it.y][x + it.x] == '#' }) {
                     count++
                 }
             }
@@ -131,31 +129,21 @@ class Day20(input: List<String>) {
         return count
     }
 
-    val tiles = input.map { rawTile ->
-        val lines = rawTile.split("\n")
-        val id = lines.first().substringAfter("Tile ").dropLast(1).toLong()
-        val tile = Grid.parse(lines.drop(1).dropLastWhile { it.isEmpty() }) // real input has a trailing blank line
-        Tile(id, tile)
-    }
-
     fun solvePart1(): Long {
         val sorted = sortTiles()
-        val minx = sorted.keys.minByOrNull { it.x }!!.x
-        val maxx = sorted.keys.maxByOrNull { it.x }!!.x
-        val miny = sorted.keys.minByOrNull { it.y }!!.y
-        val maxy = sorted.keys.maxByOrNull { it.y }!!.y
+        val minx = sorted.xRange().first
+        val maxx = sorted.xRange().last
+        val miny = sorted.yRange().first
+        val maxy = sorted.yRange().last
         return sorted[Pos(minx, miny)]!! * sorted[Pos(minx, maxy)]!! * sorted[Pos(maxx, miny)]!! * sorted[Pos(maxx, maxy)]!!
     }
 
     fun solvePart2(): Int {
         val mergedImage = getMergedImage()
-        val pattern = getSeaMonsterPattern()
-        val numberOfMonsters = mergedImage.possibleTransformations
+        val numberOfMonsters = Grid.possibleTransformations
                 .map { mergedImage.transformed(it) }
-                .map { countMonsters(pattern, it) }
+                .map { countMonsters(it) }
                 .maxOrNull()!!
-        val patternCount = monsterString.count { it == '#' }
-        val totalCount = mergedImage.count('#')
-        return totalCount - patternCount * numberOfMonsters
+        return mergedImage.count('#') - monsterString.count { it == '#' } * numberOfMonsters
     }
 }

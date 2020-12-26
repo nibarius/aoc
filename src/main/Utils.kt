@@ -32,6 +32,9 @@ inline fun <reified T> MutableMap<T, Int>.decrease(what: T) {
     }
 }
 
+fun <T> Map<Pos, T>.xRange() = keys.minByOrNull { it.x }!!.x..keys.maxByOrNull { it.x }!!.x
+fun <T> Map<Pos, T>.yRange() = keys.minByOrNull { it.y }!!.y..keys.maxByOrNull { it.y }!!.y
+
 fun String.md5(): String {
     val md = MessageDigest.getInstance("MD5")
     return BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')

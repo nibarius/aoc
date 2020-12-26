@@ -1,15 +1,13 @@
+/**
+ * A fixed square grid of Chars
+ * @param size specifies the size of each side of the grid.
+ */
 class Grid(val size: Int) {
-    val possibleTransformations = setOf(
-            listOf(Transformation.NoRotation, Transformation.NoFlip),
-            listOf(Transformation.RotateLeft, Transformation.NoFlip),
-            listOf(Transformation.Rotate180, Transformation.NoFlip),
-            listOf(Transformation.RotateRight, Transformation.NoFlip),
-            listOf(Transformation.NoRotation, Transformation.FlipHorizontal), // Same as 180 flip vertical
-            listOf(Transformation.NoRotation, Transformation.FlipVertical), // Same as 180 flip horizontal
-            listOf(Transformation.RotateLeft, Transformation.FlipHorizontal), // Same as right + vertical flip
-            listOf(Transformation.RotateLeft, Transformation.FlipVertical), // Same as right + horizontal flip
-    )
+    private val data: Array<CharArray> = Array(size) { CharArray(size) { '.' } }
 
+    /**
+     * Transformations that can be applied to a Grid.
+     */
     sealed class Transformation {
         abstract class Rotation : Transformation()
         abstract class Flip : Transformation()
@@ -22,8 +20,21 @@ class Grid(val size: Int) {
         object FlipVertical : Flip()
     }
 
-    val data: Array<CharArray> = Array(size) { CharArray(size) { '.' } }
+    /**
+     * Get the value at the given position, using a Pos for addressing.
+     */
+    operator fun get(pos: Pos): Char = data[pos.y][pos.x]
 
+    /**
+     * Get the row for the given y coordinate, used for Grid[y][x] addressing.
+     */
+    operator fun get(y: Int): CharArray = data[y]
+
+    /**
+     * Get all the given side of the Grid as a string
+     * @param side the side to return
+     * @param transformations a list of transformations that should be applied on the Grid before returning the side
+     */
     fun getSide(side: Direction, transformations: List<Transformation>): String {
         val coordinates = when (side) {
             Direction.Up -> List(size) { Pos(it, 0) }
@@ -32,10 +43,67 @@ class Grid(val size: Int) {
             Direction.Right -> List(size) { Pos(size - 1, it) }
         }
         return coordinates
-                .applyTransformations(transformations)
-                .map { data[it.y][it.x] }.joinToString("")
+                .map { transform(it, transformations) }
+                .map { this[it] }.joinToString("")
     }
 
+    /**
+     * Returns a new grid with the given transformations applied.
+     */
+    fun transformed(transformations: List<Transformation>): Grid {
+        return subGrid(transformations, Pos(0, 0), size)
+    }
+
+    /**
+     * Returns a new Grid with the given size that is a sub section of the current grid starting from
+     * the offset (upper-left corner). The subGrid must be fully contained in this Grid.
+     */
+    fun subGrid(transformations: List<Transformation>, offset: Pos, newSize: Int): Grid {
+        val new = Grid(newSize)
+        for (y in 0 until newSize) {
+            for (x in 0 until newSize) {
+                val transformed = transform(Pos(x + offset.x, y + offset.y), transformations)
+                new[y][x] = this[transformed]
+            }
+        }
+        return new
+    }
+
+    /**
+     * Count the number of occurrences of ch in this Grid
+     */
+    fun count(ch: Char) = data.sumBy { row -> row.count { it == ch } }
+
+    /**
+     * Return this Grid as a string.
+     * @param transformations a list of transformations to apply to the returned grid
+     */
+    fun toString(transformations: List<Transformation> = listOf()): String {
+        return transformed(transformations).data.joinToString("\n") { it.joinToString("") }
+    }
+
+    @Suppress("unused") // Useful for debugging
+    fun print(transformations: List<Transformation> = listOf()) {
+        println(toString(transformations))
+    }
+
+    /**
+     * Write all the data in the otherGrid to this grid. The other grid must fit completely within
+     * this grid when starting at the given offset.
+     * @param otherGrid source grid to copy data from
+     * @param offset offset for where to start writing the other grid's data (top left corner)
+     */
+    fun writeAllWithOffset(otherGrid: Grid, offset: Pos) {
+        for (y in 0 until otherGrid.size) {
+            for (x in 0 until otherGrid.size) {
+                this[offset.y + y][offset.x + x] = otherGrid[y][x]
+            }
+        }
+    }
+
+    /**
+     * Apply the given transformation the given position and return the resulting position.
+     */
     private fun transform(pos: Pos, transformation: Transformation): Pos {
         return when (transformation) {
             Transformation.NoRotation -> pos
@@ -49,52 +117,17 @@ class Grid(val size: Int) {
         }
     }
 
-    private fun List<Pos>.applyTransformations(transformations: List<Transformation>): List<Pos> {
-        return map { pos -> transformations.fold(pos) { acc, trans -> transform(acc, trans) } }
-    }
-
-    // Return a new grid with the given transformations applied
-    fun transformed(transformations: List<Transformation>): Grid {
-        val str = toString(transformations)
-        return Grid.parse(str.split("\n"))
-    }
-
-    fun count(ch: Char): Int {
-        return data.sumBy { row -> row.count { it == ch } }
-    }
-
-    fun toString(transformations: List<Transformation> = listOf()): String {
-        val coordinates = mutableListOf<Pos>()
-        for (y in data.indices) {
-            for (x in data[0].indices) {
-                coordinates.add(Pos(x, y))
-            }
-        }
-        val transformed = coordinates.applyTransformations(transformations)
-        val ret = StringBuilder(size * size + size)
-        for ((i, pos) in transformed.withIndex()) {
-            if (i % size == 0 && i > 0) {
-                ret.append("\n")
-            }
-            ret.append(data[pos.y][pos.x])
-        }
-        return ret.toString()
-    }
-
-    @Suppress("unused") // Useful for debugging
-    fun print(transformations: List<Transformation> = listOf()) {
-        println(toString(transformations))
-    }
-
-    fun writeAllWithOffset(otherData: Grid, offset: Pos) {
-        for (y in 0 until otherData.size) {
-            for (x in 0 until otherData.size) {
-                data[offset.y + y][offset.x + x] = otherData.data[y][x]
-            }
-        }
+    /**
+     * Apply all the transformations on the given position and return the resulting position.
+     */
+    private fun transform(pos: Pos, transformations: List<Transformation>): Pos {
+        return transformations.fold(pos) { acc, trans -> transform(acc, trans) }
     }
 
     companion object {
+        /**
+         * Generates a new Grid based on the given input. The input must be square.
+         */
         fun parse(input: List<String>): Grid {
             val grid = Grid(input.size)
             for (y in input.indices) {
@@ -104,5 +137,19 @@ class Grid(val size: Int) {
             }
             return grid
         }
+
+        /**
+         * Set of all possible transformations that can be applied to this Grid that would result in a different Grid.
+         */
+        val possibleTransformations = setOf(
+                listOf(Transformation.NoRotation, Transformation.NoFlip),
+                listOf(Transformation.RotateLeft, Transformation.NoFlip),
+                listOf(Transformation.Rotate180, Transformation.NoFlip),
+                listOf(Transformation.RotateRight, Transformation.NoFlip),
+                listOf(Transformation.NoRotation, Transformation.FlipHorizontal), // Same as 180 flip vertical
+                listOf(Transformation.NoRotation, Transformation.FlipVertical), // Same as 180 flip horizontal
+                listOf(Transformation.RotateLeft, Transformation.FlipHorizontal), // Same as right + vertical flip
+                listOf(Transformation.RotateLeft, Transformation.FlipVertical), // Same as right + horizontal flip
+        )
     }
 }

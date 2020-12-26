@@ -84,7 +84,7 @@ class GridTest {
             abc
             ABC
         """.trimIndent().split("\n"))
-        val all = grid.possibleTransformations.map { grid.toString(it) to it }.sortedBy { it.first }
+        val all = Grid.possibleTransformations.map { grid.toString(it) to it }.sortedBy { it.first }
         assertEquals(8, all.size)
         assertEquals(all.size, all.map { it.first }.toSet().size)
     }
