@@ -1,31 +1,35 @@
 package aoc2020
 
-import AMap
+import Grid
 
 class Day11(input: List<String>) {
-    private val room = AMap.parse(input)
+    private val room = Grid.parse(input)
 
     private fun count(neighbours: Boolean = false, visible: Boolean = false): Int {
-        var current = room
+        val a = room.copy()
+        val b = room.copy()
+        var current = a
+        var next = b
         while (true) {
-            val next = current.copy()
             for (pos in next.keys) {
                 val numSeen = when {
                     neighbours -> current.numNeighboursWithValue(pos, '#', true)
-                    visible -> current.numVisibleWithValue(pos, '#', listOf('.'),true)
+                    visible -> current.numVisibleWithValue(pos, '#', listOf('.'), true)
                     else -> 0
                 }
-                when {
-                    next[pos] == 'L' && numSeen == 0 -> next[pos] = '#'
-                    next[pos] == '#' && numSeen >= if(neighbours) 4 else 5 -> next[pos] = 'L'
+                next[pos] = when {
+                    current[pos] == 'L' && numSeen == 0 -> '#'
+                    current[pos] == '#' && numSeen >= if (neighbours) 4 else 5 -> 'L'
+                    else -> current[pos]
                 }
             }
-            if (current.toMap() == next.toMap()) {
+            if (current == next) {
                 break
             }
             current = next
+            next = if (current == a) b else a
         }
-        return current.values.count { it == '#' }
+        return current.count('#')
     }
 
     fun solvePart1(): Int {
