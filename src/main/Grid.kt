@@ -1,9 +1,11 @@
+import java.lang.Integer.max
+
 /**
- * A fixed square grid of Chars
+ * A fixed square grid of Chars. All Chars are initialized to null when created.
  * @param size specifies the size of each side of the grid.
  */
 class Grid(val size: Int) {
-    private val data: Array<CharArray> = Array(size) { CharArray(size) { '.' } }
+    private val data: Array<CharArray> = Array(size) { CharArray(size) { '\u0000' } }
 
     /**
      * Transformations that can be applied to a Grid.
@@ -26,9 +28,43 @@ class Grid(val size: Int) {
     operator fun get(pos: Pos): Char = data[pos.y][pos.x]
 
     /**
+     * Set the value at the given position, using a Pos for addressing.
+     */
+    operator fun set(pos: Pos, ch: Char) {
+        data[pos.y][pos.x] = ch
+    }
+
+    /**
      * Get the row for the given y coordinate, used for Grid[y][x] addressing.
      */
     operator fun get(y: Int): CharArray = data[y]
+
+    /**
+     * A list of all the positions in this grid
+     */
+    val keys: List<Pos> by lazy {
+        (0 until size).flatMap { y -> (0 until size).map { x -> Pos(x, y) } }
+    }
+
+    private fun Pos.isInGrid() = x in 0 until size && y in 0 until size
+
+    fun numNeighboursWithValue(pos: Pos, value: Char, includeDiagonals: Boolean = false): Int {
+        return pos.allNeighbours(includeDiagonals)
+                .count { it.isInGrid() && this[it] == value }
+    }
+
+    /**
+     * Return the number of visible items with the given value in all directions.
+     */
+    fun numVisibleWithValue(pos: Pos, value: Char, transparent: List<Char>, includeDiagonals: Boolean = false): Int {
+        return Pos.allDeltas(includeDiagonals)
+                .mapNotNull { delta ->
+                    generateSequence(pos) { Pos(it.x + delta.x, it.y + delta.y).takeIf { next -> next.isInGrid() } }
+                            .drop(1)
+                            .firstOrNull { this[it] !in transparent }
+                }
+                .count { this[it] == value }
+    }
 
     /**
      * Get all the given side of the Grid as a string
@@ -55,6 +91,13 @@ class Grid(val size: Int) {
     }
 
     /**
+     * Returns a copy of this grid.
+     */
+    fun copy(): Grid {
+        return subGrid(listOf(), Pos(0, 0), size)
+    }
+
+    /**
      * Returns a new Grid with the given size that is a sub section of the current grid starting from
      * the offset (upper-left corner). The subGrid must be fully contained in this Grid.
      */
@@ -70,7 +113,7 @@ class Grid(val size: Int) {
     }
 
     /**
-     * Count the number of occurrences of ch in this Grid
+     * Count the number of occurrences of the given character in this Grid
      */
     fun count(ch: Char) = data.sumBy { row -> row.count { it == ch } }
 
@@ -80,6 +123,18 @@ class Grid(val size: Int) {
      */
     fun toString(transformations: List<Transformation> = listOf()): String {
         return transformed(transformations).data.joinToString("\n") { it.joinToString("") }
+    }
+
+    override fun toString(): String {
+        return toString(listOf())
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Grid && data contentDeepEquals other.data
+    }
+
+    override fun hashCode(): Int {
+        return data.contentDeepHashCode()
     }
 
     @Suppress("unused") // Useful for debugging
@@ -126,10 +181,11 @@ class Grid(val size: Int) {
 
     companion object {
         /**
-         * Generates a new Grid based on the given input. The input must be square.
+         * Generates a new Grid based on the given input. If the input is not square the
+         * parts not covered by the input will be left un-initialized (null characters)
          */
         fun parse(input: List<String>): Grid {
-            val grid = Grid(input.size)
+            val grid = Grid(max(input.size, input[0].length))
             for (y in input.indices) {
                 for (x in input[0].indices) {
                     grid.data[y][x] = input[y][x]

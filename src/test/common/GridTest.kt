@@ -88,4 +88,60 @@ class GridTest {
         assertEquals(8, all.size)
         assertEquals(all.size, all.map { it.first }.toSet().size)
     }
+
+    @Test
+    fun testNumVisibleAllSeenWithDiagonals() {
+        val grid = Grid.parse("""
+            .......#.
+            ...#.....
+            .#.......
+            .........
+            ..#L....#
+            ....#....
+            .........
+            #........
+            ...#.....
+        """.trimIndent().split("\n"))
+        assertEquals(8, grid.numVisibleWithValue(Pos(3, 4), '#', listOf('.'), true))
+    }
+
+    @Test
+    fun testNumVisibleAllSeenNoDiagonals() {
+        val grid = Grid.parse("""
+            .......#.
+            ...#.....
+            .#.......
+            .........
+            ..#L....#
+            ....#....
+            .........
+            #........
+            ...#.....
+        """.trimIndent().split("\n"))
+        assertEquals(4, grid.numVisibleWithValue(Pos(3, 4), '#', listOf('.'), false))
+    }
+
+    @Test
+    fun testNumVisibleBlockingNonTransparent() {
+        val grid = Grid.parse("""
+            .............
+            .L.L.#.#.#.#.
+            .............
+        """.trimIndent().split("\n"))
+        assertEquals(0, grid.numVisibleWithValue(Pos(1, 1), '#', listOf('.'), true))
+    }
+
+    @Test
+    fun testNumVisibleNoVisible() {
+        val grid = Grid.parse("""
+            .##.##.
+            #.#.#.#
+            ##...##
+            ...L...
+            ##...##
+            #.#.#.#
+            .##.##.
+        """.trimIndent().split("\n"))
+        assertEquals(0, grid.numVisibleWithValue(Pos(3, 3), '#', listOf('.'), true))
+    }
 }
