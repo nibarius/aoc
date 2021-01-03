@@ -21,8 +21,26 @@ data class Pos(val x: Int, val y: Int) {
                 (abs(x - other.x) == 1 && y == other.y)
     }
 
+    private lateinit var allNb: List<Pos>
+    private lateinit var strictNb: List<Pos>
+
+    /**
+     * Returns all neighbours of this point. The neighbours are cached after calculated the first time
+     * so calling this several times is quick.
+     * @param includeDiagonals if diagonals should be seen as neighbours or not.
+     */
     fun allNeighbours(includeDiagonals: Boolean = false): List<Pos> {
-        return allDeltas(includeDiagonals).map { delta -> Pos(x + delta.x, y + delta.y) }
+        return if (includeDiagonals) {
+            if (!this::allNb.isInitialized) {
+                allNb = allDeltas(includeDiagonals).map { delta -> Pos(x + delta.x, y + delta.y) }
+            }
+            allNb
+        } else {
+            if (!this::strictNb.isInitialized) {
+                strictNb = allDeltas(includeDiagonals).map { delta -> Pos(x + delta.x, y + delta.y) }
+            }
+            strictNb
+        }
     }
 
     override fun toString() = "($x, $y)"
