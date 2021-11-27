@@ -20,6 +20,7 @@ sourceSets {
     test.java.srcDirs += 'src/test/aoc2018'
     test.java.srcDirs += 'src/test/aoc2019'
     test.java.srcDirs += 'src/test/aoc2020'
+    test.java.srcDirs += 'src/test/aoc2021'
     test.java.srcDirs += 'src/test/common'
     test.resources.srcDirs += 'src/test/resources'
 }
@@ -43,5 +44,8 @@ compileTestKotlin {
 
 // https://discuss.gradle.org/t/gradle-7-fail-for-duplicates-in-copy-specs-has-no-duplicates-in-project/39834/9
 rootProject.tasks.named("processTestResources") {
+    duplicatesStrategy = 'include'
+}
+rootProject.tasks.named("processResources") {
     duplicatesStrategy = 'include'
 }
