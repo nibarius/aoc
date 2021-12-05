@@ -1,4 +1,5 @@
 import kotlin.math.abs
+import kotlin.math.sign
 
 data class Pos(val x: Int, val y: Int) {
     val distanceToOrigin: Int
@@ -47,6 +48,7 @@ data class Pos(val x: Int, val y: Int) {
 
     operator fun times(other: Int) = Pos(x * other, y * other)
     operator fun plus(other: Pos) = Pos(x + other.x, y + other.y)
+    operator fun minus(other: Pos) = Pos(x - other.x, y - other.y)
 
     /**
      * Rotates the position around origin in the given direction and returns the result as a new position.
@@ -59,6 +61,12 @@ data class Pos(val x: Int, val y: Int) {
             else -> throw IllegalArgumentException("Not possible to rotate $dir, Left and Right are the only valid directions")
         }
     }
+
+    /**
+     * Returns the sign of the position. Positive values becomes 1, negative -1 and zero stays 0.
+     * Example: Pos(5,-23).sign() ==> Pos(1, -1)
+     */
+    fun sign() = Pos(x.sign, y.sign)
 
     companion object {
         fun allDeltas(includeDiagonals: Boolean = false): List<Pos> {
