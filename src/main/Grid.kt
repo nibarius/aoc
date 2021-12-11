@@ -48,6 +48,10 @@ class Grid(val size: Int) {
 
     private fun Pos.isInGrid() = x in 0 until size && y in 0 until size
 
+    fun neighboursInGrid(pos: Pos, includeDiagonals: Boolean = false): List<Pos> {
+        return pos.allNeighbours(includeDiagonals).filter { it.isInGrid() }
+    }
+
     fun numNeighboursWithValue(pos: Pos, value: Char, includeDiagonals: Boolean = false): Int {
         return pos.allNeighbours(includeDiagonals)
                 .count { it.isInGrid() && this[it] == value }
