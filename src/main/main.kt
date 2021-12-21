@@ -5,7 +5,7 @@ import java.io.File
 
 fun main(args: Array<String>) {
     val year = 2021
-    val day = 20
+    val day = 21
     if(args.firstOrNull() == "download") {
         readInputFileFromInternet(year, day)
     }
