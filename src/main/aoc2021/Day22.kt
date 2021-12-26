@@ -2,7 +2,9 @@ package aoc2021
 
 class Day22(input: List<String>) {
     data class Cuboid(val xr: IntRange, val yr: IntRange, val zr: IntRange) {
-        fun size() = xr.count().toLong() * yr.count() * zr.count()
+        // The ranges are continuous and fairly large, avoid using count() which iterates over the whole range.
+        private fun IntRange.size(): Int = last - first + 1
+        fun size() = xr.size().toLong() * yr.size() * zr.size()
         fun isInInitializationArea(): Boolean {
             return xr.first >= -50 && zr.last <= 50 &&
                     yr.first >= -50 && yr.last <= 50 &&
