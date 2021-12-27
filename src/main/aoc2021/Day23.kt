@@ -5,7 +5,11 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-class Day23(private val rawInput: List<String>) {
+class Day23(private val rawInput: List<String>, roomSizeToUse: Int = 2) {
+    init {
+        roomSize = roomSizeToUse
+    }
+
     val initialMap = parseInput(rawInput)
 
     private fun Char.getType(): Int = when (this) {
@@ -30,8 +34,8 @@ class Day23(private val rawInput: List<String>) {
 
      The value indicates who is in the position, -1 means empty, A is 0, B is 1 and so on.
      */
-    fun parseInput(input: List<String>): IntArray {
-        val ret = IntArray(15)
+    fun parseInput(input: List<String>): List<Int> {
+        val ret = MutableList(15) { -1 }
         ret[0] = input[1][1].getType()
         ret[1] = input[1][2].getType()
         ret[2] = input[1][4].getType()
@@ -50,8 +54,9 @@ class Day23(private val rawInput: List<String>) {
         return ret
     }
 
-    fun parseInput2(input: List<String>): IntArray {
-        val ret = IntArray(23)
+    // Parse part2 input (used by tests)
+    private fun parseInput2(input: List<String>): List<Int> {
+        val ret = MutableList(23) { -1 }
         ret[0] = input[1][1].getType()
         ret[1] = input[1][2].getType()
         ret[2] = input[1][4].getType()
@@ -78,8 +83,11 @@ class Day23(private val rawInput: List<String>) {
         return ret
     }
 
-    class GameState(val positions: IntArray) {
+    data class Move(val destination: Int, val steps: Int)
+
+    data class GameState(val positions: List<Int>) {
         var totalCost = 0
+        val amphipodPositions = positions.indices.filter { positions[it].isAmphipod() }
         val estimatedRemainingCost = heuristic()
         fun isDone(): Boolean {
             return (0..3).all { type ->
@@ -87,24 +95,21 @@ class Day23(private val rawInput: List<String>) {
             }
         }
 
-        fun tostr() = positions.joinToString("")
-
         fun move(from: Int, to: Int, stepsRequired: Int): GameState {
-            val newPositions = positions.copyOf().apply {
-                if (this[to] != -1) error("moving to an occupied space")
+            val newPositions = positions.toMutableList().apply {
                 this[to] = this[from]
                 this[from] = -1
             }
-            return GameState(newPositions).let {
+            return GameState(newPositions).also {
                 it.totalCost = totalCost + stepsRequired * energyFor(positions[from])
-                it
             }
         }
 
         // Estimates the minimum cost to finish the game. Just the shortest distance for everyone disregarding any
         // blockage. Only counts the steps to the first slot in the room
         private fun heuristic(): Int {
-            return positions.withIndex().filterNot { it.value == -1 }.sumOf { (pos, type) ->
+            return amphipodPositions.sumOf { pos ->
+                val type = positions[pos]
                 val ownHomePositions = homePositionsFor(type)
                 if (pos in ownHomePositions) {
                     0 // already home, cost to move is zero
@@ -116,6 +121,37 @@ class Day23(private val rawInput: List<String>) {
                 } else {
                     countSteps(pos, ownHomePositions[0]) * energyFor(type)
                 }
+            }
+        }
+
+        // Index of upper slot in home is odd, lower slot is even
+        // Find all the positions that can be reached for 'toMove'
+        fun allPossibleMoves(toMove: Int): List<Move> {
+            val type = positions[toMove]
+            val ownHomePositions = homePositionsFor(type)
+            if (toMove < 7) { // Moving back to the own room
+                if (ownHomePositions.any { positions[it].isAmphipod() && positions[it] != type }) {
+                    return listOf() // There are other types in the room, can't enter
+                }
+                val entrance = homeEntranceFor(type)
+                if (toMove <= entrance && (toMove + 1..entrance).any { positions[it].isAmphipod() }) {
+                    return listOf() // The room is to the right, but path is blocked
+                } else if (toMove > entrance && (entrance + 1 until toMove).any { positions[it].isAmphipod() }) {
+                    return listOf() // The room is to the left, but path is blocked
+                }
+                // Move as far as possible into the room
+                val destination = ownHomePositions.last { positions[it].isEmpty() }
+                return listOf(Move(destination, countSteps(toMove, destination)))
+            } else { // Moving out of a home
+                if (toMove in ownHomePositions && ownHomePositions.all { positions[it].isEmpty() || positions[it] == type }) {
+                    return listOf() // Not possible to move out of a completed home
+                } else if (positionsOfTheHomeWith(toMove).any { it < toMove && positions[it].isAmphipod() }) {
+                    return listOf() // There's someone higher up in the home blocking the way out
+                }
+                val exit = exitForPosition(toMove)
+                val leftBlocker = amphipodPositions.lastOrNull { it <= exit } ?: -1
+                val rightBlocker = amphipodPositions.firstOrNull { it in exit + 1..6 } ?: 7
+                return (leftBlocker + 1 until rightBlocker).map { to -> Move(to, countSteps(toMove, to)) }
             }
         }
 
@@ -141,15 +177,20 @@ class Day23(private val rawInput: List<String>) {
     }
 
     companion object {
+        // Not nice with a static variable shared between all instances that varies between instances
+        // but works in this case and saves me having to pass around roomSize as parameter all the time.
         var roomSize = 2 // Set to 4 by part 2 for bigger rooms
 
         // The home positions are accessed fairly frequently, create them only once.
         private val homePositions2 by lazy { buildHomePositions(2) }
-        private val homePositions4 by lazy {  buildHomePositions(4) }
+        private val homePositions4 by lazy { buildHomePositions(4) }
+
+        private fun Int.isEmpty() = this == -1
+        private fun Int.isAmphipod() = this != -1
 
         private fun buildHomePositions(size: Int) = buildMap {
             (0..3).forEach { type ->
-                this[type] = (0 until size).map { 7 + it + size * type } // todo: needs update
+                this[type] = (0 until size).map { 7 + it + size * type }
             }
         }
 
@@ -158,38 +199,34 @@ class Day23(private val rawInput: List<String>) {
             return if (roomSize == 2) homePositions2.getValue(type) else homePositions4.getValue(type)
         }
 
+        private val energyMap = mapOf(0 to 1, 1 to 10, 2 to 100, 3 to 1000)
         // Return the energy required for each step for the given type of amphipod
         fun energyFor(type: Int): Int {
-            return mapOf(0 to 1, 1 to 10, 2 to 100, 3 to 1000).getValue(type)
+            return energyMap.getValue(type)
         }
 
         // Returns all positions in the home that 'position' is located in
         private fun positionsOfTheHomeWith(position: Int): List<Int> {
-            if (position < 7) error("position is not in a home")
-            return homePositionsFor((position - 7) / roomSize) // todo: needs update
+            return homePositionsFor((position - 7) / roomSize)
         }
 
         // Returns how far into the room the given position is (the distance to the exit)
         private fun distanceIntoRoom(position: Int): Int {
-            if (position < 7) error("position is not in a room")
             return ((position - 7) % roomSize) + 1
-            //return if ((position % 2) == 0) 2 else 1 // todo: needs update
         }
 
         // Return where the exit to the home of the specified position
         // 7-8 => 1, 9-10 => 2, ...
-        private fun exitForPosition(position: Int): Int { //todo: needs update
+        private fun exitForPosition(position: Int): Int {
             return (position - 7) / roomSize + 1
         }
 
         // Return where the entrance to the home is. The entrance is after the given index, but before the next.
         private fun homeEntranceFor(type: Int): Int {
-            // Entrance for type 0 is after 1, for type 1 after 2 and so on
-            return type + 1
+            return type + 1 // Entrance for type 0 is after 1, for type 1 after 2 and so on
         }
 
         private fun countSteps(from: Int, to: Int): Int {
-            if (from > 6 && to > 6) error("can't count room to room")
             val hallway = min(from, to)
             val room = max(from, to)
             val exit = exitForPosition(room)
@@ -204,64 +241,21 @@ class Day23(private val rawInput: List<String>) {
         }
     }
 
-
-    data class Move(val destination: Int, val steps: Int)
-
-    // Index of upper slot in home is odd, lower slot is even
-    // Find all the positions that can be reached for 'toMove'
-    fun findDestinations(positions: IntArray, toMove: Int): List<Move> {
-        val type = positions[toMove]
-        val ownHomePositions = homePositionsFor(type)
-        if (type !in 0..3) error("trying to move empty space")
-        if (toMove < 7) { // Moving back to the own room
-            if (ownHomePositions.any { positions[it] !in listOf(-1, type) }) {
-                return listOf() // There are other types in the room, can't enter
-            }
-            val entrance = homeEntranceFor(type)
-            if (toMove <= entrance && (toMove + 1..entrance).any { positions[it] != -1 }) {
-                return listOf() // The room is to the right, but path is blocked
-            } else if (toMove > entrance && (entrance + 1 until toMove).any { positions[it] != -1 }) {
-                return listOf() // The room is to the left, but path is blocked
-            }
-            // Move as far as possible into the room
-            val destination = ownHomePositions.last { positions[it] == -1 }
-            return listOf(Move(destination, countSteps(toMove, destination)))
-        } else { // Moving out of a home
-            if (toMove in ownHomePositions && ownHomePositions.all { positions[it] in listOf(-1, type) }) {
-                return listOf() // Not possible to move out of a completed home
-            } else if (positionsOfTheHomeWith(toMove).any { it < toMove && positions[it] != -1 }) {
-                return listOf() // There's someone higher up in the home blocking the way out
-            }
-            val exit = exitForPosition(toMove)
-            val leftBlocker = positions.withIndex().lastOrNull { it.index <= exit && it.value != -1 }?.index ?: -1
-            val rightBlocker =
-                positions.withIndex().firstOrNull { it.index in exit + 1..6 && it.value != -1 }?.index ?: 7
-            return (leftBlocker + 1 until rightBlocker).map { destination ->
-                Move(destination, countSteps(toMove, destination))
-            }
-        }
-    }
-
-
-
     private fun play(initial: GameState): Int {
         val toCheck = PriorityQueue(compareBy<GameState> { it.totalCost + it.estimatedRemainingCost })
         toCheck.add(initial)
-        val alreadyChecked = mutableSetOf<String>()
+        val alreadyChecked = mutableSetOf<GameState>()
         while (toCheck.isNotEmpty()) {
             val current = toCheck.remove()
-
-            val allPodPositions = current.positions.indices.filter { current.positions[it] != -1 }
-            val allMoves = allPodPositions.flatMap { currentPod ->
-                findDestinations(current.positions, currentPod).map { currentPod to it }
-            }
-            val newStates = allMoves.map { (from, move) -> current.move(from, move.destination, move.steps) }
-            newStates.forEach {
-                if (it.isDone()) {
-                    return it.totalCost
-                } else if (it.tostr() !in alreadyChecked) {
-                    alreadyChecked.add(it.tostr())
-                    toCheck.add(it)
+            current.amphipodPositions.forEach { amphipodPosition ->
+                current.allPossibleMoves(amphipodPosition).forEach { move ->
+                    val nextState = current.move(amphipodPosition, move.destination, move.steps)
+                    if (nextState.isDone()) {
+                        return nextState.totalCost
+                    } else if (nextState !in alreadyChecked) {
+                        alreadyChecked.add(nextState)
+                        toCheck.add(nextState)
+                    }
                 }
             }
         }
@@ -269,12 +263,11 @@ class Day23(private val rawInput: List<String>) {
     }
 
     fun solvePart1(): Int {
-        roomSize = 2
         return play(GameState(initialMap))
     }
 
-    private fun createPart2Input(): IntArray {
-        val part2 = IntArray(23)
+    private fun createPart2Input(): List<Int> {
+        val part2 = MutableList(23) { -1 }
         (0..7).forEach { part2[it] = initialMap[it] }
         part2[8] = 3
         part2[9] = 3
@@ -295,7 +288,6 @@ class Day23(private val rawInput: List<String>) {
     }
 
     fun solvePart2(): Int {
-        roomSize = 4
         val input = if (rawInput.size == 5) createPart2Input() else parseInput2(rawInput)
         return play(GameState(input))
     }
