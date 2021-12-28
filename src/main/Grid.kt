@@ -40,6 +40,14 @@ class Grid(val size: Int) {
     operator fun get(y: Int): CharArray = data[y]
 
     /**
+     * Return the value at the given position, or the default if the position is outside
+     * of the grid, or has not been initialized yet.
+     */
+    fun getOrDefault(pos: Pos, default: Char): Char {
+        return if (pos.isInGrid() && this[pos] != '\u0000') this[pos] else default
+    }
+
+    /**
      * A list of all the positions in this grid
      */
     val keys: List<Pos> by lazy {
