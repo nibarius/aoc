@@ -1,79 +1,110 @@
 package aoc2021
 
+import java.lang.Integer.max
 import kotlin.math.abs
-import kotlin.math.sign
+
+// typealias is global, so use a name that won't collide with coordinates in other puzzles
+/**
+ * Each beacon position is just a list of three coordinates. Due to scanner alignment issues different
+ * indexes in the list may refer to different axis between beacons in different scanners.
+ */
+typealias Coordinate21d19 = List<Int>
+
 
 class Day19(input: List<String>) {
 
-    data class Pos3d(val x: Int, val y: Int, val z: Int) {
-        fun manhattanDistanceTo(other: Pos3d) = abs(x - other.x) + abs(y - other.y) + abs(z - other.z)
+    companion object {
+        operator fun Coordinate21d19.minus(other: Coordinate21d19): Coordinate21d19 = zip(other) { a, b -> a - b }
+        operator fun Coordinate21d19.plus(other: Coordinate21d19): Coordinate21d19 = zip(other) { a, b -> a + b }
+        fun Coordinate21d19.abs(): Coordinate21d19 = map { abs(it) }
 
-        // The coordinate system between beacons is not reliable, -x for one pos could be +z for another
-        // So keep the distance (absolute values) in a set where order of the individual distances doesn't matter
-        fun distanceTo(other: Pos3d) = setOf(abs(x - other.x), abs(y - other.y), abs(z - other.z))
-
-        fun distanceToOrdered(other: Pos3d) = listOf(abs(x - other.x), abs(y - other.y), abs(z - other.z))
+        // Distance to another coordinate as a set, as order must not be considered when comparing distances
+        // between beacons in different scanners.
+        fun Coordinate21d19.distanceTo(other: Coordinate21d19) = (this - other).abs().toSet()
+        fun Coordinate21d19.manhattanDistanceTo(other: Coordinate21d19) = (this - other).abs().sum()
     }
 
-    data class Scanner(val beacons: List<Pos3d>) {
-        // The sign (-1 or 1) of the three coordinates compared to the reference scanner.
-        // [1, 1, -1] means the first two coordinates have the same direction as the reference scanner while the
-        // last one points in the opposite way.
-        lateinit var sign: IntArray
-
-        // Specifies which beacon coordinates maps to which coordinates in the reference scanner.
-        // [2, 0, 1] means that the first coordinate is this scanner corresponds to the last coordinate in the reference
-        // scanner, while the second corresponds to the first and the last corresponds to the second.
-        lateinit var alignment: IntArray
-        lateinit var revAlignment: IntArray // revAlignment[0] is the coordinate that corresponds to the first coordinate in the reference scanner
-
-        // Example:
-        // A beacon with coordinates (4, 6, 5) in a scanner with sign [-1, 1, 1] and alignment [2, 1, 0]
-        // corresponds to the coordinates (5, 6 -4) in the reference scanner.
-
+    data class Scanner(val beacons: List<Coordinate21d19>) {
         // the offset of this scanner compared to the reference scanner
-        lateinit var scannerOffset: Pos3d //Todo: why is this a Pos3d and most other things a list of Ints?
+        lateinit var scannerOffset: Coordinate21d19
 
-        // Get the real coordinates for the given beacon in the coordinate system of the reference scanner
-        fun realCoordinatesForBeacon(index: Int): Pos3d {
-            // Todo: a lot of this is a copy paste from alignScanners.
-            val s2b1AsList = listOf(beacons[index].x, beacons[index].y, beacons[index].z)
-            val s2b1beforeRebase = listOf(
-                s2b1AsList[revAlignment[0]] * sign[0],
-                s2b1AsList[revAlignment[1]] * sign[1],
-                s2b1AsList[revAlignment[2]] * sign[2]
-            )
-            return Pos3d(
-                s2b1beforeRebase[0] + scannerOffset.x,
-                s2b1beforeRebase[1] + scannerOffset.y,
-                s2b1beforeRebase[2] + scannerOffset.z
-            )
-        }
+        // The positions in the beacons using the reference scanners coordinate system
+        lateinit var realPositions: List<Coordinate21d19>
 
-        val allDistances = beacons.mapIndexed { index, pos3d ->
-            buildList {
+        // The distance between all beacons in the scanner
+        val allDistances = beacons.map { beacon ->
+            buildSet {
                 for (i in beacons.indices) {
-                    val distance = pos3d.distanceTo(beacons[i])
+                    val distance = beacon.distanceTo(beacons[i])
                     add(distance)
                 }
             }
         }
+
+        /**
+         * Align this scanner based on the difference between the same two beacons in two different scanners.
+         *
+         * It also uses the position of one beacon in the two scanners to find the offset between the scanners
+         * to be able to calculate the true positions of all the beacons in this scanner in the reference scanner's
+         * coordinate system.
+         *
+         * Uses the distances between the beacons to find the correct alignment.
+         * @param expected the expected result when taking the difference of the coordinates in the coordinate system
+         * of the reference scanner
+         * @param actual the actual result when using this scanners coordinate system. The order and sign of the
+         * entries in actual may be different compared to expected.
+         * @param alignedPosition the position of one beacon using aligned coordinates
+         * @param unalignedPosition the position of the same beacon in this scanners coordinate system.
+         */
+        fun alignScanner(
+            expected: Coordinate21d19, actual: Coordinate21d19,
+            alignedPosition: Coordinate21d19,
+            unalignedPosition: Coordinate21d19
+        ) {
+            val expectedMagnitudes = expected.abs()
+            val actualMagnitudes = actual.abs()
+            // axisMapping[0] is the coordinate that corresponds to the first coordinate in the reference scanner
+            val axisMapping = listOf(
+                actualMagnitudes.indexOf(expectedMagnitudes[0]),
+                actualMagnitudes.indexOf(expectedMagnitudes[1]),
+                actualMagnitudes.indexOf(expectedMagnitudes[2])
+            )
+
+            // align the axis without regards to sign
+            val axisAligned = realignPosition(actual, axisMapping, listOf(1, 1, 1))
+            val signMapping = axisAligned.zip(expected) { a, b -> if (a == b) 1 else -1 }
+
+            // Find the scanner offset compared to the reference scanner
+            scannerOffset = alignedPosition - realignPosition(unalignedPosition, axisMapping, signMapping)
+            realPositions = beacons.map { realignPosition(it, axisMapping, signMapping) + scannerOffset }
+        }
+
+        // Realign the given position using the provided axes and sign mappings.
+        private fun realignPosition(
+            pos: Coordinate21d19, axisMapping: List<Int>, signMapping: List<Int>
+        ): Coordinate21d19 {
+            return listOf(
+                pos[axisMapping[0]] * signMapping[0],
+                pos[axisMapping[1]] * signMapping[1],
+                pos[axisMapping[2]] * signMapping[2]
+            )
+        }
     }
 
     private val scanners: List<Scanner>
+    private val allBeacons = mutableSetOf<Coordinate21d19>()
 
     init {
         val lineIterator = input.iterator()
         val scanners = mutableListOf<Scanner>()
         while (lineIterator.hasNext()) {
-            val scanner = lineIterator.next().split(" ")[2].toInt()
-            val beacons = buildList {
+            lineIterator.next() // skip scanner name, it's of no interest
+            val beacons: List<Coordinate21d19> = buildList {
                 for (line in lineIterator) {
                     if (line.isEmpty()) {
                         break
                     }
-                    val (x, y, z) = line.split(",").map { it.toInt() }
-                    add(Pos3d(x, y, z))
+                    add(line.split(",").map { it.toInt() })
                 }
             }
             scanners.add(Scanner(beacons))
@@ -81,57 +112,24 @@ class Day19(input: List<String>) {
 
         // Initialize the reference scanner
         scanners[0].apply {
-            sign = intArrayOf(1, 1, 1)
-            alignment = intArrayOf(0, 1, 2)
-            revAlignment = intArrayOf(0, 1, 2)
-            scannerOffset = Pos3d(0, 0, 0)
+            scannerOffset = listOf(0, 0, 0)
+            realPositions = beacons
         }
         this.scanners = scanners
+        alignAllScanners()
     }
 
-    private fun alignScanners(
-        s1b1: Pos3d, s1b2: Pos3d, s2: Scanner,
-        s2b1: Pos3d, s2b2: Pos3d
-    ) {
-        //Todo: instead of calculating distance and sign. Calculate the diff b2-b1 instead and check the sign of that.
-
-        // Calculate alignment by checking which coordinates correspond to each other ([a,b,c] vs [c,a,b])
-        val s1diff = s1b1.distanceToOrdered(s1b2)
-        val s2diff = s2b1.distanceToOrdered(s2b2)
-        s2.alignment = intArrayOf(s1diff.indexOf(s2diff[0]), s1diff.indexOf(s2diff[1]), s1diff.indexOf(s2diff[2]))
-        s2.revAlignment = intArrayOf(s2diff.indexOf(s1diff[0]), s2diff.indexOf(s1diff[1]), s2diff.indexOf(s1diff[2]))
-
-        // Calculate sign by checking the sign of pos 1 - pos 2 ([1, 1, -1] vs [-1, -1 -1])
-        val s1sign = listOf((s1b2.x - s1b1.x).sign, (s1b2.y - s1b1.y).sign, (s1b2.z - s1b1.z).sign)
-        val s2sign = listOf((s2b2.x - s2b1.x).sign, (s2b2.y - s2b1.y).sign, (s2b2.z - s2b1.z).sign)
-
-        // Align sign with reference scanner
-        val s2alignedSign = listOf(s2sign[s2.revAlignment[0]], s2sign[s2.revAlignment[1]], s2sign[s2.revAlignment[2]])
-        val signDiff = s2alignedSign.zip(s1sign).map { if (it.first == it.second) 1 else -1 }
-
-        s2.sign = signDiff.toIntArray()
-
-        // Find the scanner offset compared to the reference scanner
-        val s2b1AsList = listOf(s2b1.x, s2b1.y, s2b1.z)
-        val s2b1beforeRebase = listOf(
-            s2b1AsList[s2.revAlignment[0]] * s2.sign[0],
-            s2b1AsList[s2.revAlignment[1]] * s2.sign[1],
-            s2b1AsList[s2.revAlignment[2]] * s2.sign[2]
-        )
-
-        s2.scannerOffset =
-            Pos3d(s1b1.x - s2b1beforeRebase[0], s1b1.y - s2b1beforeRebase[1], s1b1.z - s2b1beforeRebase[2])
-    }
 
     // Aligns two scanners with each other. Identifying if two scanners can be aligned
     // is done by measuring the distance between all beacons seen by the first scanner
     // and then comparing with the distances seen by the second scanner. If there are at
     // least 12 beacons with the same distance between them the scanners overlap.
     private fun alignScanners(s1: Scanner, s2: Scanner): Boolean {
+        // Note: assumes that the allDistances set is ordered in the same way that they were added
         s1.allDistances.forEachIndexed { s1Index, s1Distances ->
             // for each beacon in s2. check how many common distances they have
             s2.allDistances.forEachIndexed { s2Index, s2Distances ->
-                val common = s1Distances intersect s2Distances.toSet()
+                val common = s1Distances intersect s2Distances
                 if (common.size >= 12) {
                     // At least 12 beacons overlap. Scanner s1 and s2 has an overlap
 
@@ -142,12 +140,12 @@ class Day19(input: List<String>) {
                     val s1Beacon2Index = s1Distances.indexOf(distanceToSecondBeacon)
                     val s2Beacon2Index = s2Distances.indexOf(distanceToSecondBeacon)
 
-                    alignScanners(
-                        s1.realCoordinatesForBeacon(s1Index), s1.realCoordinatesForBeacon(s1Beacon2Index),
-                        s2, s2.beacons[s2Index], s2.beacons[s2Beacon2Index]
+                    s2.alignScanner(
+                        s1.realPositions[s1Index] - s1.realPositions[s1Beacon2Index],
+                        s2.beacons[s2Index] - s2.beacons[s2Beacon2Index],
+                        s1.realPositions[s1Index], s2.beacons[s2Index]
                     )
-                    recordAllBeacons(s2)
-
+                    allBeacons.addAll(s2.realPositions)
                     return true
                 }
             }
@@ -155,65 +153,45 @@ class Day19(input: List<String>) {
         return false
     }
 
-    private val allBeacons = mutableSetOf<Pos3d>()
-    private fun recordAllBeacons(s: Scanner) {
-        s.beacons.indices.forEach { allBeacons.add(s.realCoordinatesForBeacon(it)) }
-    }
-
-    // todo: takes 6 seconds, a bit too slow for my liking
-    fun solvePart1(): Int {
-        // find all scanners that overlap with 0
-        // calculate coordinates of each scanner relative to scanner 0
-        // calculate beacon coordinates for the scanners in scanner 0 coordinate system
-
-        // remove identified scanners
-        // use next identified scanner to find all scanners that overlap
-        // calculate coordinates and beacons
-
-        // when all scanners has been identified the complete list of beacons shoudl be known
-        recordAllBeacons(scanners[0])
-
+    /**
+     * Align all scanners by searching for all scanners overlapping the reference scanner.
+     * Then continue searching for other scanners that overlaps any of the identified
+     * scanners until there are no unaligned scanners left.
+     */
+    private fun alignAllScanners() {
+        // Record all beacons for the first scanner and use it as the reference scanner
+        allBeacons.addAll(scanners[0].realPositions)
         val alignedScanners = mutableListOf(scanners[0])
         val remainingScanners = scanners.drop(1).toMutableList()
-        while (remainingScanners.isNotEmpty()) {
-            for (aligned in alignedScanners.indices) {
-                for (unaligned in remainingScanners.size -1 downTo 0) {
-                    val res = alignScanners(alignedScanners[aligned], remainingScanners[unaligned])
+        // set of scanners that has already been identified as unalignable
+        val alignmentHistory = mutableSetOf<Pair<Scanner, Scanner>>()
+        baseLoop@ while (remainingScanners.isNotEmpty()) {
+            for (aligned in alignedScanners) {
+                for (unaligned in remainingScanners.filterNot { aligned to it in alignmentHistory }) {
+                    val res = alignScanners(aligned, unaligned)
                     if (res) {
-                        alignedScanners.add(remainingScanners[unaligned])
-                        remainingScanners.removeAt(unaligned)
+                        alignedScanners.add(unaligned)
+                        remainingScanners.remove(unaligned)
+                        continue@baseLoop
                     }
+                    alignmentHistory.add(aligned to unaligned)
                 }
             }
         }
+    }
+
+    fun solvePart1(): Int {
         return allBeacons.size
     }
 
     fun solvePart2(): Int {
-        // todo: copy paste of part 1, just to align all scanners
-        recordAllBeacons(scanners[0])
-        val alignedScanners = mutableListOf(scanners[0])
-        val remainingScanners = scanners.drop(1).toMutableList()
-        while (remainingScanners.isNotEmpty()) {
-            for (aligned in alignedScanners.indices) {
-                for (unaligned in remainingScanners.size -1 downTo 0) {
-                    val res = alignScanners(alignedScanners[aligned], remainingScanners[unaligned])
-                    if (res) {
-                        alignedScanners.add(remainingScanners[unaligned])
-                        remainingScanners.removeAt(unaligned)
-                    }
-                }
+        var max = 0
+        val offsets = scanners.map { it.scannerOffset }
+        for (i in offsets.indices) {
+            for (j in offsets.indices) {
+                max = max(offsets[i].manhattanDistanceTo(offsets[j]), max)
             }
         }
-
-        val offsets = scanners.map { it.scannerOffset }
-        return buildList {
-            for (i in offsets.indices) {
-                for (j in offsets.indices) {
-                    add(offsets[i].manhattanDistanceTo(offsets[j]))
-                }
-            }
-        }.maxOf { it }
-
+        return max
     }
 }
