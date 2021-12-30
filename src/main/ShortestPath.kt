@@ -1,5 +1,4 @@
-import java.util.*
-import kotlin.math.abs
+import org.magicwerk.brownies.collections.GapList
 
 // traversable specifies which characters in the map are traversable
 // order specifies which direction have priority if two different directions result in the same length path
@@ -11,13 +10,12 @@ class ShortestPath(private val traversable: List<Char>,
                 .filter { newPos -> map.containsKey(newPos) && traversable.contains(map[newPos]) }
     }
 
-    private data class State(val currentPos: Pos, val previous: List<Pos>, val costSoFar: Int)
+    private data class State(val currentPos: Pos, val previous: List<Pos>)
 
-    fun find(map: AMap, from: Pos, to: Pos, costFn: (Pos) -> Int = { 1 }): List<Pos> {
-        val toCheck = PriorityQueue(compareBy<State> { state ->
-            state.costSoFar + abs(state.currentPos.x - to.x) + abs(state.currentPos.y - to.y)
-        })
-        availableNeighbours(map, from).forEach { toCheck.add(State(it, listOf(), costFn(it))) }
+    fun find(map: AMap, from: Pos, to: Pos): List<Pos> {
+
+        val toCheck = GapList<State>()
+        availableNeighbours(map, from).forEach { toCheck.add(State(it, listOf())) }
         val alreadyChecked = mutableSetOf<Pos>()
         while (toCheck.isNotEmpty()) {
             val current = toCheck.remove()
@@ -28,9 +26,7 @@ class ShortestPath(private val traversable: List<Char>,
                 return path
             }
             alreadyChecked.add(current.currentPos)
-            availableNeighbours(map, current.currentPos)
-                .filterNot { it in alreadyChecked }
-                .forEach { toCheck.add(State(it, path, current.costSoFar + costFn(it))) }
+            availableNeighbours(map, current.currentPos).forEach { toCheck.add(State(it, path)) }
         }
         return emptyList()
     }
