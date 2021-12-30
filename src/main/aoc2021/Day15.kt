@@ -2,33 +2,34 @@ package aoc2021
 
 import AMap
 import Pos
-import ShortestPath
+import Search
 
 class Day15(input: List<String>) {
-
     val map = AMap.parse(input)
-    val start = Pos(0, 0)
-    val end = Pos(map.xRange().last, map.yRange().last)
+
+    class Graph(val map: AMap, private val multiplier: Int) : Search.WeightedGraph {
+        private val size = map.xRange().last + 1 // Map is square
+
+        override fun cost(from: Search.Location, to: Search.Location): Float {
+            to as Pos
+            val extraRisk = to.x / size + to.y / size
+            return (((map[Pos(to.x % size, to.y % size)]!!.digitToInt() + extraRisk - 1) % 9) + 1).toFloat()
+        }
+
+        override fun neighbours(id: Search.Location): List<Search.Location> {
+            id as Pos
+            return id.allNeighbours().filter { it.x in 0 until size * multiplier && it.y in 0 until size * multiplier }
+        }
+    }
+
 
     fun solvePart1(): Int {
-        val pathfinder = ShortestPath(('0'..'9').toList())
-        val path = pathfinder.find(map, start, end) { pos -> map[pos]!!.digitToInt() }
-        return path.sumOf { map[it]!!.digitToInt() }
+        val end = Pos(map.xRange().last, map.yRange().last)
+        return Search.djikstra(Graph(map, 1), Pos(0, 0), end).cost[end]!!.toInt()
     }
 
     fun solvePart2(): Int {
-        val realMap = AMap()
-        map.keys.forEach { pos ->
-            for (y in 0..4) {
-                for (x in 0..4) {
-                    realMap[Pos(pos.x + x * map.xRange().count(), pos.y + y * map.yRange().count())] =
-                        (((map[pos]!!.digitToInt() + x + y - 1) % 9) + 1).digitToChar()
-                }
-            }
-        }
-        val pathfinder = ShortestPath(('0'..'9').toList())
-        val realEnd = Pos(realMap.xRange().last, realMap.yRange().last)
-        val path = pathfinder.find(realMap, start, realEnd) { pos -> realMap[pos]!!.digitToInt() }
-        return path.sumOf { realMap[it]!!.digitToInt() }
+        val end = Pos(map.xRange().count() * 5 - 1, map.xRange().count() * 5 - 1)
+        return Search.djikstra(Graph(map, 5), Pos(0, 0), end).cost[end]!!.toInt()
     }
 }
