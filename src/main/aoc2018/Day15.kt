@@ -1,8 +1,8 @@
 package aoc2018
 
 import AMap
-import ShortestPath
 import Pos
+import Search
 
 class Day15(val input: List<String>) {
     data class Player(val team: PlayerType, var pos: Pos, var attackPower: Int = 3, var hp: Int = 200) {
@@ -14,9 +14,26 @@ class Day15(val input: List<String>) {
         GOBLIN('G')
     }
 
+    class Graph(val map: AMap) : Search.WeightedGraph<Pos> {
+        override fun neighbours(id: Pos): List<Pos> {
+            return id.allNeighbours().filter { map[it] == '.' }
+        }
+
+        override fun cost(from: Pos, to: Pos): Float {
+            // Need to use fractions that are powers of two to avoid rounding errors when summing cost (floats).
+            return when {
+                from.y - to.y == 1 -> 1 + 1 / 1024f // up
+                from.x - to.x == 1 -> 1 + 2 / 1024f // left
+                from.x - to.x == -1 -> 1 + 3 / 1024f // right
+                from.y - to.y == -1 -> 1 + 4 / 1024f // down
+                else -> error("moving to invalid position")
+            }
+        }
+    }
+
     private val players = mutableListOf<Player>()
     private val map = AMap()
-    private val pathfinder = ShortestPath(listOf('.'))
+    private val graph = Graph(map)
     private var lastAction = "Start of game" // Only used for debugging
 
     init {
@@ -64,8 +81,8 @@ class Day15(val input: List<String>) {
 
     private fun attack(player: Player) {
         val target = players.filter { it.team != player.team && it.isAlive() && player.pos isAdjacentTo it.pos }
-                .sortedWith(compareBy({ it.pos.y }, { it.pos.x })) // If many adjacent and same hp, do reading order
-                .minByOrNull { it.hp }!!
+            .sortedWith(compareBy({ it.pos.y }, { it.pos.x })) // If many adjacent and same hp, do reading order
+            .minByOrNull { it.hp }!!
         target.hp -= player.attackPower
         if (target.hp <= 0) {
             map[target.pos] = '.'
@@ -91,10 +108,10 @@ class Day15(val input: List<String>) {
             return false
         }
 
-        // Find all adjacent open spaces next to all targets
-        val adjacent = targets.map { pathfinder.availableNeighbours(map, it.pos) }.flatten() // All open neighbours
-                .map { pathfinder.find(map, player.pos, it) } // Find shortest paths to all positions
-                .filter { it.isNotEmpty() }
+        // Find all adjacent open spaces next to all targets (list of paths to all targets, start is not part of path)
+        val adjacent = targets.flatMap { it.pos.allNeighbours().filter { map[it] == '.' } }
+            .map { Search.djikstra(graph, player.pos, it).getPath(it) }
+            .filter { it.isNotEmpty() }
 
         if (adjacent.isEmpty()) {
             // No reachable open spaces, end turn
@@ -102,9 +119,9 @@ class Day15(val input: List<String>) {
             return false
         }
 
-        // Choose closest open space (reading order if tied for distance) for moving toward
+        // Choose the closest open space (reading order if tied for distance) for moving toward
         val chosenPath = adjacent.groupBy { it.size }.minByOrNull { it.key }!!.value // closest distance
-                .minWithOrNull(compareBy({ it.last().y }, { it.last().x }))!! // positions in reading order
+            .minWithOrNull(compareBy({ it.last().y }, { it.last().x }))!! // positions in reading order
 
         val posBeforeMove = player.pos
         // Take one step toward chosen position (reading order if many different paths are available
@@ -158,7 +175,6 @@ class Day15(val input: List<String>) {
 
     fun solvePart1(): Int {
         val rounds = playGame()
-        println("rounds: $rounds, hpsum: ${players.filter { it.isAlive() }.sumBy { it.hp }}")
         return scoreForRounds(rounds)
     }
 
