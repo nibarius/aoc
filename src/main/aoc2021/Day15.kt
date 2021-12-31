@@ -7,17 +7,15 @@ import Search
 class Day15(input: List<String>) {
     val map = AMap.parse(input)
 
-    class Graph(val map: AMap, private val multiplier: Int) : Search.WeightedGraph {
+    class Graph(val map: AMap, private val multiplier: Int) : Search.WeightedGraph<Pos> {
         private val size = map.xRange().last + 1 // Map is square
 
-        override fun cost(from: Search.Location, to: Search.Location): Float {
-            to as Pos
+        override fun cost(from: Pos, to: Pos): Float {
             val extraRisk = to.x / size + to.y / size
             return (((map[Pos(to.x % size, to.y % size)]!!.digitToInt() + extraRisk - 1) % 9) + 1).toFloat()
         }
 
-        override fun neighbours(id: Search.Location): List<Search.Location> {
-            id as Pos
+        override fun neighbours(id: Pos): List<Pos> {
             return id.allNeighbours().filter { it.x in 0 until size * multiplier && it.y in 0 until size * multiplier }
         }
     }

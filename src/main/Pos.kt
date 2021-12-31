@@ -1,7 +1,7 @@
 import kotlin.math.abs
 import kotlin.math.sign
 
-data class Pos(val x: Int, val y: Int) : Search.Location {
+data class Pos(val x: Int, val y: Int) {
     val distanceToOrigin: Int
         get() {
             return abs(x) + abs(y)

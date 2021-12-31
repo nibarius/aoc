@@ -6,13 +6,17 @@ import java.util.*
  * in an easy-to-understand way.
  */
 object Search {
-    interface Location
-    interface Graph {
-        fun neighbours(id: Location): List<Location>
+    interface Graph<T> {
+        fun neighbours(id: T): List<T>
     }
 
-    interface WeightedGraph : Graph {
-        fun cost(from: Location, to: Location): Float
+    interface WeightedGraph<T> : Graph<T> {
+        /**
+         * Note, since cost returns a float, make sure to return fractions that are powers of two if it's important
+         * to avoid rounding errors. For example when it's important which path is taken if two paths have exactly
+         * the same cost (for example WWSS vs SSWW)
+         */
+        fun cost(from: T, to: T): Float
     }
 
     /**
@@ -21,7 +25,21 @@ object Search {
      * to B comes from A.
      * @param cost a map that shows the total cost to get to all visited locations
      */
-    data class Result(val cameFrom: Map<Location, Location>, val cost: Map<Location, Float>)
+    data class Result<T>(val cameFrom: Map<T, T>, val cost: Map<T, Float>) {
+        /**
+         * Gives the best path to the given location from the start point of the search (start point
+         * not included in the returned path.
+         */
+        fun getPath(to: T): List<T> {
+            return buildList {
+                var current = to
+                while (cameFrom[current] != null) {
+                    add(current)
+                    current = cameFrom.getValue(current)
+                }
+            }.asReversed()
+        }
+    }
 
     /**
      * Standard breadth first search. Good when all locations must be visited or when there is no cost
@@ -30,10 +48,10 @@ object Search {
      * @param start the location to start the search from
      * @param goal the location to search for, or null if the whole graph should be searched
      */
-    fun bfs(graph: Graph, start: Location, goal: Location?): Result {
-        val toCheck = ArrayDeque<Location>()
+    fun <T> bfs(graph: Graph<T>, start: T, goal: T?): Result<T> {
+        val toCheck = ArrayDeque<T>()
         toCheck.add(start)
-        val cameFrom = mutableMapOf<Location, Location>()
+        val cameFrom = mutableMapOf<T, T>()
         while (toCheck.isNotEmpty()) {
             val current = toCheck.removeFirst()
             if (current == goal) {
@@ -56,10 +74,10 @@ object Search {
      * @param start the location to start the search from
      * @param goal the location to search for
      */
-    fun djikstra(graph: WeightedGraph, start: Location, goal: Location): Result {
-        val toCheck = PriorityQueue(compareBy<Pair<Location, Float>> { it.second })
+    fun <T> djikstra(graph: WeightedGraph<T>, start: T, goal: T): Result<T> {
+        val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
         toCheck.add(start to 0f)
-        val cameFrom = mutableMapOf<Location, Location>()
+        val cameFrom = mutableMapOf<T, T>()
         val costSoFar = mutableMapOf(start to 0.0f)
         while (toCheck.isNotEmpty()) {
             val (current, _) = toCheck.remove()
@@ -94,10 +112,10 @@ object Search {
      * and goal location while the return value is the estimated cost to move from start to goal. Must never
      * overestimate the cost to reach the goal.
      */
-    fun aStar(graph: WeightedGraph, start: Location, goal: Location, heuristic: (Location, Location) -> Float): Result {
-        val toCheck = PriorityQueue(compareBy<Pair<Location, Float>> { it.second })
+    fun <T> aStar(graph: WeightedGraph<T>, start: T, goal: T, heuristic: (T, T) -> Float): Result<T> {
+        val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
         toCheck.add(start to 0f)
-        val cameFrom = mutableMapOf<Location, Location>()
+        val cameFrom = mutableMapOf<T, T>()
         val costSoFar = mutableMapOf(start to 0.0f)
         while (toCheck.isNotEmpty()) {
             val (current, _) = toCheck.remove()
