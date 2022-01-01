@@ -124,7 +124,7 @@ class Day15(val input: List<String>) {
             .minWithOrNull(compareBy({ it.last().y }, { it.last().x }))!! // positions in reading order
 
         val posBeforeMove = player.pos
-        // Take one step toward chosen position (reading order if many different paths are available
+        // Take one step toward chosen position (reading order if many paths are available)
         move(player, chosenPath.first())
 
         // If in range of enemy, attack
@@ -132,7 +132,7 @@ class Day15(val input: List<String>) {
             attack(player)
             lastAction += " after moving from $posBeforeMove"
         } else {
-            lastAction = "${player.team} moved from $posBeforeMove to at ${player.pos}"
+            lastAction = "${player.team} moved from $posBeforeMove to ${player.pos}"
         }
 
         return false
@@ -163,14 +163,14 @@ class Day15(val input: List<String>) {
             }
             round++
             if (round > 1000) {
-                println("Bailing out after 100 rounds")
+                println("Bailing out after 1000 rounds")
                 return -1
             }
         }
     }
 
     private fun scoreForRounds(rounds: Int): Int {
-        return rounds * players.filter { it.isAlive() }.sumBy { it.hp }
+        return rounds * players.filter { it.isAlive() }.sumOf { it.hp }
     }
 
     fun solvePart1(): Int {
@@ -188,6 +188,23 @@ class Day15(val input: List<String>) {
     }
 
     fun solvePart2(): Int {
-        return generateSequence(4) { it + 1 }.map { playWithPower(it) }.filter { it.first == 0 }.first().second
+        return binarySearch()
+    }
+
+    private fun binarySearch(): Int {
+        var tooLow = 4
+        var highEnough = Int.MAX_VALUE
+        var score = 0
+        while (tooLow < highEnough - 1) {
+            val toTry = if (highEnough == Int.MAX_VALUE) tooLow * 2 else tooLow + (highEnough - tooLow) / 2
+            val result = playWithPower(toTry)
+            if (result.first == 0) {
+                highEnough = toTry
+                score = result.second
+            } else {
+                tooLow = toTry
+            }
+        }
+        return score
     }
 }

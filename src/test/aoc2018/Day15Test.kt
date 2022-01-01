@@ -287,10 +287,6 @@ class Day15Test {
                 "#...E.#",
                 "#######"
         )
-        val d = Day15(input)
-        d.solvePart1()
-        d.printableMap(true).forEach { println(it) }
-
         assertEquals(36334, Day15(input).solvePart1())
     }
 
