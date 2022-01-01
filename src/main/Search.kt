@@ -73,8 +73,9 @@ object Search {
      * @param graph the graph to search
      * @param start the location to start the search from
      * @param goal the location to search for
+     * @param maxCost the maximum cost allowed to find a solution. No cost limit applied if not provided.
      */
-    fun <T> djikstra(graph: WeightedGraph<T>, start: T, goal: T): Result<T> {
+    fun <T> djikstra(graph: WeightedGraph<T>, start: T, goal: T, maxCost: Float = Float.MAX_VALUE): Result<T> {
         val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
         toCheck.add(start to 0f)
         val cameFrom = mutableMapOf<T, T>()
@@ -86,7 +87,7 @@ object Search {
             }
             for (next in graph.neighbours(current)) {
                 val nextCost = costSoFar.getValue(current) + graph.cost(current, next)
-                if (nextCost < costSoFar.getOrDefault(next, Float.MAX_VALUE)) {
+                if (nextCost < maxCost && nextCost < costSoFar.getOrDefault(next, Float.MAX_VALUE)) {
                     toCheck.add(next to nextCost)
                     cameFrom[next] = current
                     costSoFar[next] = nextCost
@@ -111,8 +112,15 @@ object Search {
      * @param heuristic a heuristic function that estimates the cost to reach the goal. Parameters are start location
      * and goal location while the return value is the estimated cost to move from start to goal. Must never
      * overestimate the cost to reach the goal.
+     * @param maxCost the maximum cost allowed to find a solution. No cost limit applied if not provided.
      */
-    fun <T> aStar(graph: WeightedGraph<T>, start: T, goal: T, heuristic: (T, T) -> Float): Result<T> {
+    fun <T> aStar(
+        graph: WeightedGraph<T>,
+        start: T,
+        goal: T,
+        heuristic: (T, T) -> Float,
+        maxCost: Float = Float.MAX_VALUE
+    ): Result<T> {
         val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
         toCheck.add(start to 0f)
         val cameFrom = mutableMapOf<T, T>()
@@ -124,7 +132,7 @@ object Search {
             }
             for (next in graph.neighbours(current)) {
                 val nextCost = costSoFar.getValue(current) + graph.cost(current, next)
-                if (nextCost < costSoFar.getOrDefault(next, Float.MAX_VALUE)) {
+                if (nextCost < maxCost && nextCost < costSoFar.getOrDefault(next, Float.MAX_VALUE)) {
                     toCheck.add(next to nextCost + heuristic(next, goal))
                     cameFrom[next] = current
                     costSoFar[next] = nextCost
