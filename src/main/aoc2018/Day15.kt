@@ -92,8 +92,9 @@ class Day15(val input: List<String>) {
 
     // Returns true if combat ends
     fun takeTurn(player: Player): Boolean {
-        // Identify all possible targets
+        // Identify all possible targets, sorted by closest first as that likely leads to cheaper cost
         val targets = players.filter { it.team != player.team && it.isAlive() }
+            .sortedBy { player.pos.distanceTo(it.pos) }
 
         // If no targets remain, combat ends
         if (targets.isEmpty()) {
@@ -108,24 +109,34 @@ class Day15(val input: List<String>) {
             return false
         }
 
-        // Find all adjacent open spaces next to all targets (list of paths to all targets, start is not part of path)
-        val adjacent = targets.flatMap { it.pos.allNeighbours().filter { map[it] == '.' } }
-            .map { Search.djikstra(graph, player.pos, it).getPath(it) }
-            .filter { it.isNotEmpty() }
+        // Find all adjacent open spaces next to all targets
+        val possibleTargets = targets.flatMap { enemy -> enemy.pos.allNeighbours().filter { map[it] == '.' } }
 
-        if (adjacent.isEmpty()) {
+        // Find the position to move to
+        var cheapestSoFar = Float.MAX_VALUE
+        var posToMoveTo: Pos? = null
+        for (target in possibleTargets) {
+            // Only find the shortest path to positions that are theoretically possible to reach
+            if (player.pos.distanceTo(target) < cheapestSoFar) {
+                // Optimization: Abort search when cost becomes higher than the cheapest path so far
+                val result = Search.djikstra(graph, player.pos, target, maxCost = cheapestSoFar)
+                val cost = result.cost[target]
+                if (cost != null && cost < cheapestSoFar) {
+                    cheapestSoFar = cost
+                    posToMoveTo = result.getPath(target).first()
+                }
+            }
+        }
+
+        if (posToMoveTo == null) {
             // No reachable open spaces, end turn
             lastAction = "${player.team} at ${player.pos} does nothing"
             return false
         }
 
-        // Choose the closest open space (reading order if tied for distance) for moving toward
-        val chosenPath = adjacent.groupBy { it.size }.minByOrNull { it.key }!!.value // closest distance
-            .minWithOrNull(compareBy({ it.last().y }, { it.last().x }))!! // positions in reading order
-
         val posBeforeMove = player.pos
-        // Take one step toward chosen position (reading order if many paths are available)
-        move(player, chosenPath.first())
+        // Move to the selected position
+        move(player, posToMoveTo)
 
         // If in range of enemy, attack
         if (targets.any { enemy -> player.pos isAdjacentTo enemy.pos }) {
