@@ -9,11 +9,11 @@ class Day21(input: List<String>) {
     data class Character(val name: String, val baseDamage: Int = 0, val baseArmor: Int = 0,
                          val equipment: List<Item> = listOf(), var hp: Int = 100) {
         val damage: Int
-            get() = baseDamage + equipment.sumBy { it.damage }
+            get() = baseDamage + equipment.sumOf { it.damage }
         val armor: Int
-            get() = baseArmor + equipment.sumBy { it.armor }
+            get() = baseArmor + equipment.sumOf { it.armor }
         val equipmentCost: Int
-            get() = equipment.sumBy { it.cost }
+            get() = equipment.sumOf { it.cost }
     }
 
     private val boss = Character("Boss",
@@ -97,7 +97,7 @@ class Day21(input: List<String>) {
      * @param hpComparison for how what is an acceptable player hp after the fight
      */
     private fun testAllItems(sortOrder: Int, hpComparison: (Int) -> Boolean): Int {
-        val combinations = allItemCombinations().sortedBy { it.sumBy { item -> sortOrder * item.cost } }
+        val combinations = allItemCombinations().sortedBy { it.sumOf { item -> sortOrder * item.cost } }
         return combinations
                 .map { Character("Player", equipment = it) }
                 .first {

@@ -16,7 +16,7 @@ class Day12Test {
         b-end
     """.trimIndent().split("\n")
 
-    val exampleInput2 = """
+    private val exampleInput2 = """
             dc-end
             HN-start
             start-kj
@@ -29,7 +29,7 @@ class Day12Test {
             kj-dc
         """.trimIndent().split("\n")
 
-    val exampleInput3 = """
+    private val exampleInput3 = """
             fs-end
             he-DX
             fs-he

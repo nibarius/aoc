@@ -8,13 +8,13 @@ class Day25(input: List<String>) {
     @Suppress("unused")
     private class Droid(val computer: Intcode, val verboseMode: Boolean = false) {
         private fun String.toAscii(): List<Long> {
-            return map { it.toLong() }
+            return map { it.code.toLong() }
                     .toMutableList()
                     .apply { add(10L) }
         }
 
         private fun List<Long>.fromAscii(): String {
-            return map { it.toChar() }.joinToString("")
+            return map { it.toInt().toChar() }.joinToString("")
         }
 
         private fun String.opposite(): String {

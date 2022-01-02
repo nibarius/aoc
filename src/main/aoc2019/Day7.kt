@@ -22,7 +22,7 @@ class Day7(input: List<String>) {
                 .first { amps.all { it.isDone() } }
     }
 
-    private fun highestSignal(sequences: List<List<Long>>) = sequences.map { runAmplifiers(it) }.maxOrNull()!!
+    private fun highestSignal(sequences: List<List<Long>>) = sequences.maxOf { runAmplifiers(it) }
 
     fun solvePart1(): Long {
         return highestSignal(allPermutationsOf(0..4))

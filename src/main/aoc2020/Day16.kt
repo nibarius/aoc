@@ -1,6 +1,5 @@
 package aoc2020
 
-@OptIn(ExperimentalStdlibApi::class)
 class Day16(input: List<String>) {
 
     private data class Rule(val name: String, val r1: IntRange, val r2: IntRange) {
@@ -78,7 +77,7 @@ class Day16(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return nearbyTickets.sumBy { it.scanningErrorRate() }
+        return nearbyTickets.sumOf { it.scanningErrorRate() }
     }
 
     fun solvePart2(): Long {

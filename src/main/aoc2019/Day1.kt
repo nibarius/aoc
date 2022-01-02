@@ -17,10 +17,10 @@ class Day1(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return parsedInput.sumBy { fuelNeeded(it) }
+        return parsedInput.sumOf { fuelNeeded(it) }
     }
 
     fun solvePart2(): Int {
-        return parsedInput.sumBy { fuelNeededIncludingFuel(it) }
+        return parsedInput.sumOf { fuelNeededIncludingFuel(it) }
     }
 }

@@ -6,7 +6,6 @@ class Day17(val input: List<String>) {
         // We're accessing neighbours frequently, only calculate the neighbours once and return
         // a cached value if calling this later. In this case, much (~30%) faster than a by lazy property
         // https://stackoverflow.com/questions/65543747/why-does-using-by-lazy-make-my-kotlin-code-slower/
-        @OptIn(ExperimentalStdlibApi::class)
         fun getNeighbours(): Set<Point> {
             if (!this::nb.isInitialized) {
                 nb = buildSet {
@@ -41,7 +40,7 @@ class Day17(val input: List<String>) {
             val next = current.toMutableMap()
             val points = next.keys.flatMap { it.getNeighbours() }.toSet() // any neighbour can be transformed
             for (point in points) {
-                val activeNeighbours = point.getNeighbours().filter { current[it] == '#' }.count()
+                val activeNeighbours = point.getNeighbours().count { current[it] == '#' }
                 when (current.getOrDefault(point, '.')) {
                     '#' -> if (activeNeighbours !in 2..3) next[point] = '.'
                     '.' -> if (activeNeighbours == 3) next[point] = '#'

@@ -59,7 +59,7 @@ class Day12(val input: String) {
         return if (node.red) {
             0
         } else {
-            node.sum + node.children.sumBy { sum(it) }
+            node.sum + node.children.sumOf { sum(it) }
         }
     }
 

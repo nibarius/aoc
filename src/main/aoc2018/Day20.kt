@@ -49,6 +49,6 @@ class Day20(input: String) {
 
 
     fun solvePart2(): Int {
-        return map.values.filter { it >= 1000 }.count()
+        return map.values.count { it >= 1000 }
     }
 }

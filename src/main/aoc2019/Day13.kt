@@ -24,13 +24,10 @@ class Day13(input: List<String>) {
         fun countBlocks() = screen.values.count { it == BLOCK }
 
         fun play(): Long {
-            var iter = 0
             do {
                 computer.run()
                 updateScreen()
                 computer.input.add((ballX - paddleX).coerceIn(-1, 1))
-
-                //drawStuff(screen, iter++)
             } while (computer.computerState != Intcode.ComputerState.Terminated)
 
             return score

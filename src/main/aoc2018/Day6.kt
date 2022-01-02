@@ -71,7 +71,7 @@ class Day6(input: List<String>) {
         var safeArea = 0
         for (y in yRange) {
             for (x in xRange) {
-                if (locations.sumBy { it.distanceTo(Location(x, y)) } < totalDistance) {
+                if (locations.sumOf { it.distanceTo(Location(x, y)) } < totalDistance) {
                     safeArea++
                 }
             }

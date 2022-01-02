@@ -13,9 +13,7 @@ class Day16(input: List<String>) {
         trees: 3
         cars: 2
         perfumes: 1
-    """.trimIndent().split("\n")
-            .map { line -> line.split(": ").let { it.first() to it.last().toInt() } }
-            .toMap()
+    """.trimIndent().split("\n").associate { line -> line.split(": ").let { it.first() to it.last().toInt() } }
 
     private val memories = parseInput(input)
 
@@ -24,9 +22,7 @@ class Day16(input: List<String>) {
             val sue = line.substringBefore(":").substringAfter(" ").toInt()
             val list = line.substringAfter(": ")
             val parts = list.split(", ")
-            val parsed = parts
-                    .map { part -> part.split(": ").let { it.first() to it.last().toInt() } }
-                    .toMap()
+            val parsed = parts.associate { part -> part.split(": ").let { it.first() to it.last().toInt() } }
             sue to parsed
         }
     }

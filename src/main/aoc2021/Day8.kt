@@ -4,7 +4,7 @@ class Day8(input: List<String>) {
     val parsed = input.map { it.split(" | ") }
 
     fun solvePart1(): Int {
-        return parsed.sumOf { it.last().split(" ").count { it.length in listOf(2, 3, 4, 7) } }
+        return parsed.sumOf { line -> line.last().split(" ").count { it.length in listOf(2, 3, 4, 7) } }
     }
 
 

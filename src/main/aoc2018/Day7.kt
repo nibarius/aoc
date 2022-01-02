@@ -33,7 +33,7 @@ class Day7(input: List<String>) {
     }
 
     private data class Worker(val id: Int, var workingOn: String?, var done: Int?, val delay: Int) {
-        val durations = ('A'..'Z').map { Pair("$it", delay + 1 + (it - 'A')) }.toMap()
+        val durations = ('A'..'Z').associate { Pair("$it", delay + 1 + (it - 'A')) }
         fun isWorking() = workingOn != null
         fun isIdle() = workingOn == null
         fun startWork(which: String, currentTime: Int): Int {

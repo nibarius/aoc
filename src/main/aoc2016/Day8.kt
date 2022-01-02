@@ -69,7 +69,7 @@ class Day8(input: List<String>) {
 
     fun solvePart1(): Int {
         instructions.forEach { it.execute(display) }
-        return display.sumBy { it.sum() }
+        return display.sumOf { it.sum() }
     }
 
     fun solvePart2() {

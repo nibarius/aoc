@@ -148,12 +148,12 @@ class Day24(input: List<String>) {
 
     fun solvePart1(): Int {
         fight()
-        return groups.filter { it.isAlive }.sumBy { it.liveUnits }
+        return groups.filter { it.isAlive }.sumOf { it.liveUnits }
     }
 
     fun solvePart2(): Int {
         // Fight with increasing boost until immune system wins.
         generateSequence(1) { it + 1 }.map { fightWithBoost(it) }.first { it }
-        return groups.filter { it.isAlive }.sumBy { it.liveUnits }
+        return groups.filter { it.isAlive }.sumOf { it.liveUnits }
     }
 }

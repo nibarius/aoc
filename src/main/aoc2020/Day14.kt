@@ -58,7 +58,7 @@ class Day14(input: List<String>) {
                 is Instruction.Write -> writeFn(memory, instruction, mask)
             }
         }
-        return memory.values.map { it.toLong(2) }.sum()
+        return memory.values.sumOf { it.toLong(2) }
     }
 
     fun solvePart1(): Long {

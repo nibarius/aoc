@@ -40,7 +40,7 @@ class Day14(input: List<String>) {
     }
 
     fun solvePart1(seconds: Int = 2503): Int {
-        return reindeers.map { it.distanceAfter(seconds) }.maxOrNull()!!
+        return reindeers.maxOf { it.distanceAfter(seconds) }
     }
 
     private fun race(time: Int): Int {

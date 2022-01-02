@@ -22,7 +22,6 @@ class Day11(private val input: String) {
     }
 
     fun isValid(pwd: String): Boolean {
-        var i = 0
         var threeIncreasing = false
         val pairIndices = mutableListOf<Int>() // indices of where pairs are found
         for (i in pwd.indices) {

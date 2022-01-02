@@ -6,7 +6,7 @@ class Day21(input: List<String>) {
     class Springdroid(private val computer: Intcode) {
         fun run(program: List<String>) {
             program.forEach {instruction ->
-                instruction.forEach { computer.input.add(it.toLong()) }
+                instruction.forEach { computer.input.add(it.code.toLong()) }
                 computer.input.add(10L) // Newline
             }
             computer.run()
@@ -16,7 +16,7 @@ class Day21(input: List<String>) {
 
         @Suppress("unused")
         fun getAsciiOutput(): String {
-            return computer.output.map { it.toChar() }.joinToString("")
+            return computer.output.map { it.toInt().toChar() }.joinToString("")
         }
     }
 

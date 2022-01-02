@@ -48,7 +48,7 @@ class Day8(input: String) {
 
 
     fun solvePart1(): Int {
-        return allNodes.sumBy { it.metadata.sum() }
+        return allNodes.sumOf { it.metadata.sum() }
     }
 
     fun solvePart2(): Int {

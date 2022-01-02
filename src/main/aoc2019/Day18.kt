@@ -129,7 +129,7 @@ class Day18(input: List<String>) {
             robotKeyPaths.withIndex().forEach { (robot, distancesToKeys) ->
                 distancesToKeys.getValue(current.standingAtKeys[robot])
                         // Only consider keys that are not blocked by locked doors
-                        .filter { it.doors.all { doors -> current.keysFound.contains(doors.toLowerCase()) } }
+                        .filter { it.doors.all { doors -> current.keysFound.contains(doors.lowercaseChar()) } }
                         .forEach { (key, steps, _) ->
                             // For each reachable key from the current robot, queue it for checking.
                             val keysHeld = current.keysFound.toMutableSet().apply { add(key) }

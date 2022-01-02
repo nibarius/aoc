@@ -30,7 +30,7 @@ class Day18(private val rows: Int, private val firstRow: String) {
     }
 
     fun solvePart1(): Int {
-        return generateRoom().sumBy { it.count {c -> c == '.' } }
+        return generateRoom().sumOf { it.count {c -> c == '.' } }
     }
 
     fun solvePart2(): Int {

@@ -38,7 +38,7 @@ class Day25(input: List<String>) {
         // For column 3 take the index of column 2 and increase with previous increase + 1
         // Example, row 4
         // 7, 12 (= 7 + 5), 18 (= 12 + 6), 25 (= 18 + 7), etc
-        return indexOfRowInColumnOne(row) + (1 until col).sumBy { row + it }
+        return indexOfRowInColumnOne(row) + (1 until col).sumOf { row + it }
     }
 
     fun solvePart1(): Int {

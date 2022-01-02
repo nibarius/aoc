@@ -29,7 +29,7 @@ class Day17(input: List<String>) {
         var y = 0
         val map = AMap()
         c.output.forEach {
-            val current = it.toChar()
+            val current = it.toInt().toChar()
             if (current == '\n') {
                 y++
                 x = 0
@@ -143,15 +143,15 @@ class Day17(input: List<String>) {
         val path = findPath(map)
         val functions = findFunctions(path)
         val mainRoutine = makeMainMovementRoutine(functions, path)
-                .map { it.toLong() }
+                .map { it.code.toLong() }
                 .toMutableList()
-                .apply { add('\n'.toLong()) }
+                .apply { add('\n'.code.toLong()) }
         val movementFunctions = functions
                 .map { (_, instructions) ->
                     instructions.joinToString(",")
-                            .map { it.toLong() }
+                            .map { it.code.toLong() }
                             .toMutableList()
-                            .apply { add('\n'.toLong()) }
+                            .apply { add('\n'.code.toLong()) }
                 }
 
         // Change the value at address 0 to 2 to wake the robot up
@@ -160,8 +160,8 @@ class Day17(input: List<String>) {
         Intcode(actualProgram).run {
             input.addAll(mainRoutine)
             movementFunctions.forEach { input.addAll(it) }
-            input.add('n'.toLong()) // No video feed please
-            input.add('\n'.toLong())
+            input.add('n'.code.toLong()) // No video feed please
+            input.add('\n'.code.toLong())
             run()
             return output.last()
         }

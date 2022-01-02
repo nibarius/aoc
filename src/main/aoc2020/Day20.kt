@@ -47,7 +47,7 @@ class Day20(input: List<String>) {
      * Coordinates of the tiles forms a square and Pos(0,0) is located somewhere inside the square.
      */
     private fun sortTiles(): Map<Pos, Long> {
-        val tilesLeft = tiles.map { it.id to it }.toMap().toMutableMap() // id to tile map
+        val tilesLeft = tiles.associateBy { it.id }.toMutableMap() // id to tile map
         // Start with the first tile without rotating it, and fix it's location to (0, 0)
         val found = mutableMapOf(Pos(0, 0) to tiles.first().id)
         val positionsToFindNeighboursOf = mutableListOf(Pos(0, 0))
@@ -141,9 +141,7 @@ class Day20(input: List<String>) {
     fun solvePart2(): Int {
         val mergedImage = getMergedImage()
         val numberOfMonsters = Grid.possibleTransformations
-                .map { mergedImage.transformed(it) }
-                .map { countMonsters(it) }
-                .maxOrNull()!!
+            .map { mergedImage.transformed(it) }.maxOf { countMonsters(it) }
         return mergedImage.count('#') - monsterString.count { it == '#' } * numberOfMonsters
     }
 }

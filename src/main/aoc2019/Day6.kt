@@ -14,7 +14,7 @@ class Day6(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return parsedInput.keys.sumBy { countParents(it) }
+        return parsedInput.keys.sumOf { countParents(it) }
     }
 
     private fun allParents(child: String): List<String> {

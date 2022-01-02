@@ -1,6 +1,5 @@
 package aoc2018
 
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.magicwerk.brownies.collections.GapList
@@ -32,13 +31,13 @@ class Day5(private val input: String) {
 
     fun solvePart2(): Int {
         return runBlocking {
-            input.groupBy { it.toLowerCase() }.keys // Letters to check
-                    .map { toRemove ->
-                        GlobalScope.async {
-                            // Check all letters in parallel
-                            react(input.replace("$toRemove", "", true)).length
-                        }
+            input.groupBy { it.lowercaseChar() }.keys // Letters to check
+                .map { toRemove ->
+                    async {
+                        // Check all letters in parallel
+                        react(input.replace("$toRemove", "", true)).length
                     }
+                }
                     .minByOrNull { it.await() }!!.await() // return the shortest length
         }
     }

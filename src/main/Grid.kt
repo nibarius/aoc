@@ -1,3 +1,5 @@
+@file:Suppress("KDocUnresolvedReference")
+
 import java.lang.Integer.max
 
 /**
@@ -127,7 +129,7 @@ class Grid(val size: Int) {
     /**
      * Count the number of occurrences of the given character in this Grid
      */
-    fun count(ch: Char) = data.sumBy { row -> row.count { it == ch } }
+    fun count(ch: Char) = data.sumOf { row -> row.count { it == ch } }
 
     /**
      * Return this Grid as a string.

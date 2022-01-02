@@ -36,7 +36,7 @@ class Day3(input: List<String>) {
             .map { Wire().trace(it) }
 
     private fun List<Wire>.intersections(): Set<Pos> {
-        return first().path.intersect(last().path)
+        return first().path.intersect(last().path.toSet())
     }
 
     fun solvePart1(): Int {

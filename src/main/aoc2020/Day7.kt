@@ -26,14 +26,13 @@ class Day7(input: List<String>) {
             if (contents == "no other bags.") continue
 
             // Parse and set all children for this node
-            contents.split(", ")
-                    .map { bag -> // each entry becomes a bag name to quantity pair
-                        "([0-9]+) (.*) bag.{0,2}".toRegex().matchEntire(bag)!!
-                                .destructured
-                                .let { (qty, name) -> Pair(name, qty.toInt()) }
-                    }
-                    .toMap()
-                    // add all children into ret
+            // each entry becomes a bag name to quantity pair
+            contents.split(", ").associate { bag -> // each entry becomes a bag name to quantity pair
+                "([0-9]+) (.*) bag.{0,2}".toRegex().matchEntire(bag)!!
+                    .destructured
+                    .let { (qty, name) -> Pair(name, qty.toInt()) }
+            }
+                // add all children into ret
                     .apply { ret[name]!!.children.putAll(this) }
                     // mark this node as parent for all its children
                     .also { it.keys.forEach { child -> ret.addChildToParent(child, name) } }
@@ -53,7 +52,7 @@ class Day7(input: List<String>) {
         // the bag itself + all its children
         return 1 + bags[name]!!.children
                 .toList()
-                .sumBy { it.second * countBagsContainedBy(it.first) }
+                .sumOf { it.second * countBagsContainedBy(it.first) }
 
     }
 

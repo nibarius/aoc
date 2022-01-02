@@ -3,7 +3,6 @@ package test.aoc2020
 import aoc2020.Day4
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import resourceAsList
 import resourceSplitOnBlankLines
 
 class Day4Test {

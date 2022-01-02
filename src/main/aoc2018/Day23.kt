@@ -145,7 +145,7 @@ class Day23(input: List<String>) {
 
     fun solvePart2(): Int {
         val spaces = findSpacesWithMostBotsInRange()
-        return spaces.map { it.shortestDistance(Pos(0, 0, 0)) }.minOrNull()!!
+        return spaces.minOf { it.shortestDistance(Pos(0, 0, 0)) }
     }
 
 

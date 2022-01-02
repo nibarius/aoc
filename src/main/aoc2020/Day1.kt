@@ -3,7 +3,7 @@ package aoc2020
 class Day1(input: List<String>) {
     // Most of the entries in the input will go past 2020 when summed
     // so sort the list to start with smaller numbers to find the solution faster
-    val entries = input.map { it.toInt() }.sorted()
+    private val entries = input.map { it.toInt() }.sorted()
 
 
     fun solve(partOne: Boolean = false, partTwo: Boolean = false): Int {

@@ -19,7 +19,7 @@ enum class Direction(val dx: Int, val dy: Int) {
     }
 
     companion object {
-        fun fromChar(dir: Char): Direction = when (dir.toUpperCase()) {
+        fun fromChar(dir: Char): Direction = when (dir.uppercaseChar()) {
             in setOf('R', '>', 'E') -> Right
             in setOf('U', '^', 'N') -> Up
             in setOf('L', '<', 'W') -> Left

@@ -51,7 +51,7 @@ class Day4(input: List<String>) {
 
 
     fun solvePart1(): Int {
-        return rooms.filter { it.isReal() }.sumBy { it.sectorId }
+        return rooms.filter { it.isReal() }.sumOf { it.sectorId }
     }
 
     fun solvePart2(): Int {

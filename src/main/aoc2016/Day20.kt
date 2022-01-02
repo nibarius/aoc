@@ -55,6 +55,6 @@ class Day20(input: List<String>) {
     }
 
     fun solvePart2(): Int {
-        return findAllAllowed().sumBy { it.count() }
+        return findAllAllowed().sumOf { it.count() }
     }
 }

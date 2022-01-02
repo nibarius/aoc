@@ -1,7 +1,7 @@
 package aoc2020
 
 class Day22(input: List<String>) {
-    val players = input.map { player -> player.split("\n").drop(1).map { it.toInt() } }
+    private val players = input.map { player -> player.split("\n").drop(1).map { it.toInt() } }
 
     private fun normalGame(players: List<MutableList<Int>>): Pair<Int, MutableList<Int>> {
         while (players.all { it.isNotEmpty() }) {

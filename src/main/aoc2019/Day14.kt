@@ -8,7 +8,7 @@ class Day14(input: List<String>) {
     data class Reaction(val req: List<Pair<Int, String>>, val res: Pair<Int, String>)
 
     // Material name to reaction to create the material
-    private val reactions = input.map { parseLine(it) }.map { it.res.second to it }.toMap()
+    private val reactions = input.map { parseLine(it) }.associateBy { it.res.second }
 
     // 165 ORE => 6 DCFZ
     // 44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL

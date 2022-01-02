@@ -1,6 +1,6 @@
 package aoc2019
 
-import java.math.BigInteger
+import MyMath
 import kotlin.math.abs
 
 class Day12(input: List<String>) {
@@ -16,8 +16,8 @@ class Day12(input: List<String>) {
             (0..2).forEach { pos[it] += vel[it] }
         }
 
-        private fun potentialEnergy() = pos.sumBy { abs(it) }
-        private fun kineticEnergy() = vel.sumBy { abs(it) }
+        private fun potentialEnergy() = pos.sumOf { abs(it) }
+        private fun kineticEnergy() = vel.sumOf { abs(it) }
         fun energy() = potentialEnergy() * kineticEnergy()
     }
 
@@ -48,7 +48,7 @@ class Day12(input: List<String>) {
         repeat(steps) {
             doOneStep()
         }
-        return system.sumBy { it.energy() }
+        return system.sumOf { it.energy() }
 
     }
 

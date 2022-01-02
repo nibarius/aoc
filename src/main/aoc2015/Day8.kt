@@ -27,10 +27,10 @@ class Day8(val input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return input.map { it.length - memoryNeeded(it) }.sum()
+        return input.sumOf { it.length - memoryNeeded(it) }
     }
 
     fun solvePart2(): Int {
-        return input.map { memoryNeededForEncode(it) - it.length }.sum()
+        return input.sumOf { memoryNeededForEncode(it) - it.length }
     }
 }

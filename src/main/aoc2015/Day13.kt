@@ -8,14 +8,14 @@ class Day13(input: List<String>) {
     private val persons = parsedInput.map { it.key.first }.distinct().toSet()
 
     private fun parseInput(input: List<String>): Map<Pair<String, String>, Int> {
-        return input.map {
+        return input.associate {
             val parts = it.split(" ")
             val who = parts.first()
             val other = parts.last().dropLast(1)
             val gain = if (parts[2] == "gain") 1 else -1
             val amount = gain * parts[3].toInt()
             Pair(who, other) to amount
-        }.toMap()
+        }
     }
 
     private fun totalHappiness(order: List<String>): Int {
@@ -37,8 +37,7 @@ class Day13(input: List<String>) {
                 // Remove a bunch of duplicates (but far from all) by only looking at the
                 // ones where one given person is is first.
                 .filter { it.first() == persons.first() }
-                .map { totalHappiness(it) }
-                .maxOrNull()!!
+                .maxOf { totalHappiness(it) }
 
         // A much better approach would be to implement Sawada's algorithm for generating
         // all unique necklaces (seating orders). But since this solution runs in less than

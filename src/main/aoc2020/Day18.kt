@@ -3,7 +3,7 @@ package aoc2020
 import java.lang.Integer.max
 
 class Day18(input: List<String>) {
-    val problems = input
+    private val problems = input
             .map { line -> line.mapNotNull { ch -> ch.takeUnless { it == ' ' } } }
             .map { parseInput(it) }
 

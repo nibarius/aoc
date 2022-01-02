@@ -18,7 +18,7 @@ class Day24(input: List<String>) {
 
     private fun adjacentBugs(level: Int, index: Int, grids: Map<Int, IntArray>): Int {
         // Sum up the number of bugs on all adjacent tiles
-        return (adjacent[index] ?: error("$index has no adjacent tiles")).sumBy { adjacentTile ->
+        return (adjacent[index] ?: error("$index has no adjacent tiles")).sumOf { adjacentTile ->
             grids.getOrDefault(level + adjacentTile.level, emptyGrid)[adjacentTile.index]
         }
     }
@@ -67,7 +67,7 @@ class Day24(input: List<String>) {
         var diversity: Int
         while (true) {
             ret = tick(ret)
-            diversity = ret.getValue(0).withIndex().sumBy { 2.0.pow(it.index).toInt() * it.value }
+            diversity = ret.getValue(0).withIndex().sumOf { 2.0.pow(it.index).toInt() * it.value }
             if (!seen.add(diversity)) {
                 break
             }
@@ -124,6 +124,6 @@ class Day24(input: List<String>) {
             grids = tick(grids)
         }
 
-        return grids.values.sumBy { it.sum() }
+        return grids.values.sumOf { it.sum() }
     }
 }

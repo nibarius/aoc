@@ -13,13 +13,13 @@ class Day19(input: List<String>) {
     // 1: 2 3 | 3 2
     // 4: "a"
     init {
-        rules = input.first().split("\n").map { line ->
+        rules = input.first().split("\n").associate { line ->
             val id = line.substringBefore(":")
             val options = line.substringAfter(": ")
-                    .split(" | ")
-                    .map { it.replace("\"", "").split(" ") }
+                .split(" | ")
+                .map { it.replace("\"", "").split(" ") }
             id to Rule(options)
-        }.toMap()
+        }
     }
 
     private fun String.isLetter() = this in listOf("a", "b")
@@ -86,7 +86,7 @@ class Day19(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return messages.filter { checkAllRules(it, rules) }.count()
+        return messages.count { checkAllRules(it, rules) }
     }
 
     private fun changeRules(): Map<String, Rule> {

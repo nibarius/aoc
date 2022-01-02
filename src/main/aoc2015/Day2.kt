@@ -21,10 +21,10 @@ class Day2(input: List<String>) {
 
 
     fun solvePart1(): Int {
-        return boxes.sumBy { it.area + it.slack }
+        return boxes.sumOf { it.area + it.slack }
     }
 
     fun solvePart2(): Int {
-        return boxes.sumBy { it.wrap + it.bow }
+        return boxes.sumOf { it.wrap + it.bow }
     }
 }

@@ -9,7 +9,7 @@ class Day12(input: List<String>) {
     private val rules = parseRules(input.drop(2))
 
     private fun parseRules(input: List<String>): Map<String, Char> {
-        return input.map { it.substringBefore(" => ") to it.last() }.toMap()
+        return input.associate { it.substringBefore(" => ") to it.last() }
     }
 
 
@@ -39,10 +39,11 @@ class Day12(input: List<String>) {
     }
 
     private fun getValue(state: String, offset: Int): Int {
-        return state.withIndex().sumBy { if (it.value == '#') it.index - offset else 0 }
+        return state.withIndex().sumOf { if (it.value == '#') it.index - offset else 0 }
     }
 
-    private fun grow(generations: Int): Int {
+    private fun grow(): Int {
+        val generations = 20
         var currentState = initialState
         var generation = 0
         repeat(generations) {
@@ -92,7 +93,7 @@ class Day12(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return grow(20)
+        return grow()
     }
 
     fun solvePart2(): Long {
