@@ -26,7 +26,7 @@ fun readInputFileFromInternet(year: Int, day: Int) {
 
     val sessionCookie = resourceAsString("session_cookie.txt")
     Fuel.get("https://adventofcode.com/$year/day/$day/input")
-            .header(Headers.USER_AGENT to "nibarius' input downloader")
+            .header(Headers.USER_AGENT to "github.com/nibarius/aoc/blob/master/src/main/main.kt by nibarius")
             .header(Headers.COOKIE to "session=$sessionCookie")
             .responseString { _, response, result ->
                 when (result) {
