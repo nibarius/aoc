@@ -6,7 +6,7 @@ class Day3(input: List<String>) {
      * List of rucksacks, each rucksack have two compartment with a set of items that the compartment holds.
      */
     private val rucksacks = input.map { line ->
-        line.chunked(line.length / 2) { it.toList().toSet() }
+        line.chunked(line.length / 2) { it.toSet() }
     }
 
     private val priorities = let {
@@ -20,7 +20,7 @@ class Day3(input: List<String>) {
      * List of elf groups, each elf in each group have a rucksack with a set containing all items
      * (ignoring the compartments)
      */
-    private val elfGroups = input.map { it.toList().toSet() }.chunked(3)
+    private val elfGroups = input.map { it.toSet() }.chunked(3)
 
     fun solvePart1(): Int {
         return rucksacks.sumOf { (it[0] intersect it[1]).single().priority() }
