@@ -18,6 +18,13 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
     fun containsKey(key: Pos) = map.containsKey(key)
 
     /**
+     * Return the position of the only occurrence of 'value' in the map.
+     */
+    fun positionOf(value: Char): Pos {
+        return map.filter { it.value == value  }.keys.single()
+    }
+
+    /**
      * Returns the number of neighbours with the given value. Neighbours outside of
      * the map are not counted.
      */
