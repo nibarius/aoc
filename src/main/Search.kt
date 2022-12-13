@@ -4,14 +4,39 @@ import java.util.*
  * Various common path finding algorithms. Based on https://www.redblobgames.com/pathfinding/a-star/introduction.html
  * and https://www.redblobgames.com/pathfinding/a-star/implementation.html which explains BFS, Djikstra and A*
  * in an easy-to-understand way.
+ *
+ * Which algorithm to use when:
+ * - Use BFS if there is no cost involved, or the whole graph have to be searched.
+ * - Use Djikstra if there is a different cost depending on how you move, but there is no way
+ *   to estimate the remaining cost.
+ * - Use A* if there is cost involved, and it's possible estimate the remaining cost without giving an
+ *   over estimation. With an over estimation the shortest path is not guaranteed to be found.
+ *
+ * How to use:
+ * - Create a class that implement the suitable Graph interface depending on algorithm
+ * - The class holds the representation of the thing to search through and just provides the available neighbours
+ *   and possible cost for any given node.
+ * - Call the desired search function with the provided graph.
  */
 object Search {
+    /**
+     * Interface that should be implemented by a class to do BFS. To search through a AMap, which uses Pos for
+     * indexing, create a class that implements Graph<Pos> and pass that to the bfs() function.
+     */
     interface Graph<T> {
+        /**
+         * Returns all neighbours that it's possible to reach from the given node id.
+         */
         fun neighbours(id: T): List<T>
     }
 
+    /**
+     * Interface that should be implemented by a class when Djikstra or A* search is wanted.
+     */
     interface WeightedGraph<T> : Graph<T> {
         /**
+         * The cost for moving between the two given nodes.
+         *
          * Note, since cost returns a float, make sure to return fractions that are powers of two if it's important
          * to avoid rounding errors. For example when it's important which path is taken if two paths have exactly
          * the same cost (for example WWSS vs SSWW)
@@ -22,18 +47,18 @@ object Search {
     /**
      * Holds the result of a search.
      * @param cameFrom shows how to get to a certain location. "cameFrom[B] == A" means that the path
-     * to B comes from A.
+     * to B comes from A. The start point points back to itself, so  cameFrom[A] == A.
      * @param cost a map that shows the total cost to get to all visited locations
      */
     data class Result<T>(val cameFrom: Map<T, T>, val cost: Map<T, Float>) {
         /**
          * Gives the best path to the given location from the start point of the search (start point
-         * not included in the returned path.
+         * not included in the returned path).
          */
         fun getPath(to: T): List<T> {
             return buildList {
                 var current = to
-                while (cameFrom[current] != null) {
+                while (cameFrom[current] != null && cameFrom[current] != current) {
                     add(current)
                     current = cameFrom.getValue(current)
                 }
@@ -51,7 +76,7 @@ object Search {
     fun <T> bfs(graph: Graph<T>, start: T, goal: T?): Result<T> {
         val toCheck = ArrayDeque<T>()
         toCheck.add(start)
-        val cameFrom = mutableMapOf<T, T>()
+        val cameFrom = mutableMapOf(start to start)
         while (toCheck.isNotEmpty()) {
             val current = toCheck.removeFirst()
             if (current == goal) {
@@ -78,7 +103,7 @@ object Search {
     fun <T> djikstra(graph: WeightedGraph<T>, start: T, goal: T, maxCost: Float = Float.MAX_VALUE): Result<T> {
         val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
         toCheck.add(start to 0f)
-        val cameFrom = mutableMapOf<T, T>()
+        val cameFrom = mutableMapOf(start to start)
         val costSoFar = mutableMapOf(start to 0.0f)
         while (toCheck.isNotEmpty()) {
             val (current, _) = toCheck.remove()
@@ -123,7 +148,7 @@ object Search {
     ): Result<T> {
         val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
         toCheck.add(start to 0f)
-        val cameFrom = mutableMapOf<T, T>()
+        val cameFrom = mutableMapOf(start to start)
         val costSoFar = mutableMapOf(start to 0.0f)
         while (toCheck.isNotEmpty()) {
             val (current, _) = toCheck.remove()
