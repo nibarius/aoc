@@ -122,6 +122,31 @@ object Search {
         return Result(cameFrom, costSoFar)
     }
 
+    fun <T> djikstra2(graph: WeightedGraph<T>, start: T, goalFn: (T)->Boolean, maxCost: Float = Float.MAX_VALUE): Result<T> {
+        val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
+        toCheck.add(start to 0f)
+        val cameFrom = mutableMapOf(start to start)
+        val costSoFar = mutableMapOf(start to 0.0f)
+        outer@ while (toCheck.isNotEmpty()) {
+            val (current, _) = toCheck.remove()
+            if (goalFn(current)) {
+                break
+            }
+            for (next in graph.neighbours(current)) {
+                val nextCost = costSoFar.getValue(current) + graph.cost(current, next)
+                if (nextCost < maxCost && nextCost < costSoFar.getOrDefault(next, Float.MAX_VALUE)) {
+                    toCheck.add(next to nextCost)
+                    cameFrom[next] = current
+                    costSoFar[next] = nextCost
+                    if (goalFn(next)) {
+                        break@outer
+                    }
+                }
+            }
+        }
+        return Result(cameFrom, costSoFar)
+    }
+
     // Note: In both djikstra and a* the toCheck queue may have multiple entries of the same location but with different
     // cost. There is no additional early continue for those as all their neighbours will be more expensive than
     // what's been processed so far anyway so that path will lead to a dead end quickly.
@@ -159,6 +184,34 @@ object Search {
                 val nextCost = costSoFar.getValue(current) + graph.cost(current, next)
                 if (nextCost < maxCost && nextCost < costSoFar.getOrDefault(next, Float.MAX_VALUE)) {
                     toCheck.add(next to nextCost + heuristic(next, goal))
+                    cameFrom[next] = current
+                    costSoFar[next] = nextCost
+                }
+            }
+        }
+        return Result(cameFrom, costSoFar)
+    }
+
+    fun <T> aStar2(
+        graph: WeightedGraph<T>,
+        start: T,
+        goalFn: (T) -> Boolean,
+        heuristic: (T, (T)->Boolean) -> Float,
+        maxCost: Float = Float.MAX_VALUE
+    ): Result<T> {
+        val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
+        toCheck.add(start to 0f)
+        val cameFrom = mutableMapOf(start to start)
+        val costSoFar = mutableMapOf(start to 0.0f)
+        while (toCheck.isNotEmpty()) {
+            val (current, _) = toCheck.remove()
+            if (goalFn(current)) {
+                break
+            }
+            for (next in graph.neighbours(current)) {
+                val nextCost = costSoFar.getValue(current) + graph.cost(current, next)
+                if (nextCost < maxCost && nextCost < costSoFar.getOrDefault(next, Float.MAX_VALUE)) {
+                    toCheck.add(next to nextCost + heuristic(next, goalFn))
                     cameFrom[next] = current
                     costSoFar[next] = nextCost
                 }
