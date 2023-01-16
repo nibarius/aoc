@@ -11,6 +11,9 @@ import java.util.*
  *   to estimate the remaining cost.
  * - Use A* if there is cost involved, and it's possible estimate the remaining cost without giving an
  *   over estimation. With an over estimation the shortest path is not guaranteed to be found.
+ * - Use maximizeValueDfs when a maximum value/cost should be found rather than the minimal, and it is possible
+ *   to estimate the final value without doing an underestimation. This is a DFS algorithm so with a good estimate
+ *   it's possible to cut off many non-viable branches very early on and find the optimal result quickly.
  *
  * How to use:
  * - Create a class that implement the suitable Graph interface depending on algorithm
@@ -209,5 +212,62 @@ object Search {
             }
         }
         return start to Result(cameFrom, costSoFar)
+    }
+
+    /**
+     * Search the given graph using a DFS approach in a way that maximises the value (rather than minimizing
+     * the cost).
+     *
+     * @param graph The graph to search, cost is treated as value that should be maximised
+     * @param start The start node
+     * @param isGoal Function that returns true if the state it's given is a goal state
+     * @param estimateBestCase Function that estimates the final value given a state. It must never underestimate
+     *        the actual value. If it does the best solution might not be found.
+     * @return A pair of best state to Result which holds information about all visited nodes during the search.
+     */
+    fun <T> maximizeValueDfs(
+        graph: WeightedGraph<T>,
+        start: T,
+        isGoal: (T) -> Boolean,
+        estimateBestCase: (T) -> Float,
+    ): Pair<T, Result<T>> {
+        val cameFrom = mutableMapOf(start to start)
+        val costSoFar = mutableMapOf(start to 0f)
+        val ret = dfs(graph, start, isGoal, estimateBestCase, start to 0f, cameFrom, costSoFar)
+        return ret.first to Result(cameFrom, costSoFar)
+    }
+
+    /**
+     * Use recursive dfs to find the node with the highest value (cost). Since a heuristic is used to prune
+     * branches that has no chance of beating the current best a recursive approach is better (faster) than an
+     * iterative approach. This is because an iterative approach will have to enqueue a lot of states that could
+     * otherwise be pruned away while it's iterating toward maximum depth.
+     *
+     * @return a pair of best state to the value (cost) at that state.
+     */
+    private fun <T> dfs(
+        graph: WeightedGraph<T>,
+        current: T,
+        isGoal: (T) -> Boolean,
+        estimateBestCase: (T) -> Float,
+        previousBest: Pair<T, Float>,
+        cameFrom: MutableMap<T, T>,
+        costSoFar: MutableMap<T, Float>
+    ): Pair<T, Float> {
+        if (isGoal(current)) {
+            return current to costSoFar.getValue(current)
+        }
+        var newBest = previousBest
+        graph.neighbours(current)
+            .filter { estimateBestCase(it) > newBest.second } // Only examine states that can beat current best
+            .forEach { next ->
+                cameFrom[next] = current
+                costSoFar[next] = graph.cost(current, next)
+                val ret = dfs(graph, next, isGoal, estimateBestCase, newBest, cameFrom, costSoFar)
+                if (ret.second > newBest.second) {
+                    newBest = ret
+                }
+            }
+        return newBest
     }
 }
