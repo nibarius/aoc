@@ -2,6 +2,25 @@ package aoc2022
 
 import Search
 
+/**
+ * Main idea:
+ *  - Reduce the map to traverse by creating an optimized search graph where only the significant nodes
+ *    are included. Nodes without valves are not included
+ *  - Also include opening a valve in the action. That is each action is move to another valve and open it.
+ *    So it's not possible to move to a valve and not open it. You may of cause move past valves in the
+ *    original map, but in the optimized search graph that's included in the distance to the destination valve.
+ *  - Do a* search on the optimized graph to find the best path to maximize the amount of pressure vented.
+ *    Some notes on how this is done and what to keep in mind:
+ *     + To avoid negative costs, use amount of pressure not being vented as cost
+ *     + Goal state is unknown, so use a goal function instead (stop searching when time is up regardless
+ *       of which valves are open and where in the graph the actors are).
+ *     + As a cost heuristic move to the closest valve and open the most valuable valve each time.
+ *     + The order of in which the valves are opened is important
+ *   - Use the same logic for both part 1 (one actor) and part 2 (two actors).
+ *     + With one actor, the second actor is stuck at location "Done" all the time and doesn't help out.
+ *     + With two actors it's important that they don't move to the same valves
+ *     + Having one actor go to A and the other go to B is the same as the first goes to B and the second to A.
+ */
 class Day16(input: List<String>) {
 
     private data class Valve(val name: String, val flowRate: Int, val leadsTo: List<String>)
@@ -13,336 +32,197 @@ class Day16(input: List<String>) {
     }
     private val nameToValve = nodes.associateBy { it.name }
 
-    // the cost of having all valves closed. this is how much pressure is not being released
-    private val maxCost = nodes.sumOf { it.flowRate }
+    /**
+     * The distances from every significant node to every other significant node.
+     */
+    private val allDistances = distances()
 
-    private val optimizedMap = optimizeMap()
-    private val nameToNode = optimizedMap.associateBy { it.name }
+    /**
+     * A simple graph over the input just as it's given without any modifications. Used for BFS to find
+     * the shortest paths between significant nodes which is used for the real graph where the main
+     * pathfinding takes place.
+     */
+    private class VolcanoMap(private val nodes: Map<String, Valve>) : Search.Graph<String> {
+        override fun neighbours(id: String) = nodes[id]!!.leadsTo
+    }
 
-    // leadsTo is a pair of node + distance to that node
-    private data class Node(val name: String, val flowRate: Int, val leadsTo: List<Pair<String, Int>>)
-
-    private tailrec fun walkToNextSignificantNode(from: String, isAt: String, distanceSoFar: Int): Pair<String, Int> {
-        val current = nameToValve[isAt]!!
-        if (current.flowRate > 0 || current.leadsTo.size > 2) {
-            return current.name to distanceSoFar
+    /**
+     * The time it takes to go from any valve to any other valve and open that valve.
+     */
+    private fun distances(): Map<String, Map<String, Int>> {
+        val map = VolcanoMap(nameToValve)
+        val significantNodes = nodes.filter { it.name == "AA" || it.flowRate > 0 }
+        return significantNodes.associate { from ->
+            val res = Search.bfs(map, from.name, null)
+            from.name to significantNodes.filter { it != from && it.name != "AA" }
+                .associate { to -> to.name to res.getPath(to.name).size + 1 }
         }
-        val next = current.leadsTo.first { it != from }
-        return walkToNextSignificantNode(current.name, next, distanceSoFar + 1)
     }
 
-    private fun optimizeMap(): Set<Node> {
-        return nodes.filter { it.flowRate > 0 || it.leadsTo.size > 2 }
-            .map { valve ->
-                val tunnels = valve.leadsTo.map { walkToNextSignificantNode(valve.name, it, 1) }
-                Node(valve.name, valve.flowRate, tunnels)
-            }.toSet()
+    /**
+     * Used for the different states while searching.
+     * Time and pressure released needs to be tracked, but it's not used for comparisons between states.
+     * @param pos List of the current positions for the actors, has either one or two values.
+     * @param dist List of remaining distance until the actor reaches the position indicated in pos.
+     *             Has either one or two values, at least one value is always 0.
+     * @param openValves The valves that have been opened so far, in the order they were opened.
+     */
+    private data class State(val pos: List<String>, val dist: List<Int>, val openValves: List<String>) {
+        var timeLeft = 0
+        var pressureReleased = 0
     }
 
-    private class OptimizedGraph(val nameToNode: Map<String, Node>, val maxCost: Int) : Search.WeightedGraph<State3> {
-        override fun neighbours(id: State3): List<State3> {
-            if (id.time >= 30) {
-                return listOf()
-            }
-            if (id.openValves.size == nameToNode.size) {
-                // All valves open, fast-forward to time 30
+    /**
+     * An optimized graph representing the volcano and actions that can be taken. The only actions that can be taken
+     * is to walk to an unvisited valve and open the valve there. There is no need to track any intermediate valves
+     * as you always walk the shortest path to the next valve you want to open.
+     * @param distances The time it takes to go from one valve to another and open it (for all combinations of valves)
+     * @param valves A map between valve names and valves.
+     */
+    private class Graph(val distances: Map<String, Map<String, Int>>, val valves: Map<String, Valve>) :
+        Search.WeightedGraph<State> {
+        val maximumFlowRate = valves.values.sumOf { it.flowRate } // todo: better name
+        val numValves = valves.values.count { it.flowRate > 0 }
+        override fun neighbours(id: State): List<State> {
+            if (id.openValves.size == numValves) {
+                // All valves are open, fast-forward to the end
                 return listOf(
-                    State3(
-                        30,
-                        id.flowRate,
-                        id.openValves,
-                        id.currentPosition,
-                        id.pressureReleased + id.flowRate * (30 - id.time),
-                        null
-                    )
+                    State(listOf("Done", "Done"), listOf(0, 0), id.openValves).apply {
+                        timeLeft = 0
+                        pressureReleased = id.pressureReleased + id.timeLeft * maximumFlowRate
+                    }
                 )
             }
 
-            val ret = mutableListOf<State3>()
+            // Don't walk to valves that the other player is going to
+            val closedValves = valves.values.filter { it.flowRate > 0 && it.name !in id.openValves + id.pos }
 
-            // Things that can be done:
-            //  - Open a valve
-            //  - Walk to another room (but don't walk back)
-            val currentValve = nameToNode[id.currentPosition]!!
-            if (currentValve.name !in id.openValves && currentValve.flowRate > 0) {
-                ret.add(
-                    State3(
-                        id.time + 1,
-                        id.flowRate + currentValve.flowRate,
-                        id.openValves.toMutableList().apply { add(currentValve.name) },
-                        id.currentPosition,
-                        id.pressureReleased + id.flowRate + currentValve.flowRate,
-                        null
-                    )
-                )
-            }
-
-            currentValve.leadsTo
-                .filter { it.first != id.cameFrom }
-                .forEach { neighbour ->
-                    val timeLeft = 30 - id.time
-                    if (timeLeft > neighbour.second) {
-                        // Enough time to walk to the neighbour and possibly open a valve
-                        ret.add(
-                            State3(
-                                id.time + neighbour.second,
-                                id.flowRate,
-                                id.openValves,
-                                neighbour.first,
-                                id.pressureReleased + id.flowRate * neighbour.second,
-                                currentValve.name
-                            )
-                        )
+            // moves is a list with two elements: List of all moves for p1 and list of all moves for p2
+            // Each move is name + time it takes to go there
+            val moves = (id.pos zip id.dist).map { (pos, dist) ->
+                if (dist != 0) {
+                    // Continue the move in progress
+                    listOf(pos to dist)
+                } else {
+                    // Start moving toward a new valve
+                    if (closedValves.isEmpty() || pos == "Done") {
+                        // Everything open, or already done (elephant is always in done state in part 1): do nothing.
+                        listOf("Done" to id.timeLeft)
                     } else {
-                        // Not enough time to walk to the neighbour. Just wait for time to run out.
-                        ret.add(
-                            State3(
-                                30,
-                                id.flowRate,
-                                id.openValves,
-                                id.currentPosition,
-                                id.pressureReleased + id.flowRate * timeLeft,
-                                null
-                            )
-                        )
+                        closedValves.map { it.name to distances[pos]!![it.name]!! }
                     }
                 }
-            return ret
-        }
-
-        override fun cost(from: State3, to: State3): Float {
-            // Cost to move between states is the amount of pressure not being released during the
-            // time it takes to move between the states.
-            return ((maxCost - to.flowRate) * (to.time - from.time)).toFloat()
-        }
-    }
-
-    private data class Move(val dest: String, val durationLeft: Int, val valveToOpen: String?)
-
-    private data class State3(
-        val time: Int, val flowRate: Int, val openValves: List<String>, val currentPosition: String,
-        val pressureReleased: Int, val cameFrom: String?
-    )
-
-    private class BetterGraph(val nameToNode: Map<String, Node>, val maxCost: Int) : Search.WeightedGraph<BetterState> {
-        override fun neighbours(id: BetterState): List<BetterState> {
-            if (id.time >= numMinutes) {
-                return listOf()
-            }
-            if (id.openValves.size == nameToNode.size - 1) { // AA is not openable
-                // All valves open, fast-forward to time 26
-                return listOf(
-                    BetterState(
-                        id.myPosition,
-                        id.myTimeToDest,
-                        id.elephantPosition,
-                        id.elephantTimeToDest,
-                        id.openValves,
-                        true
-                    ).apply {
-                        time = numMinutes
-                        // all valves are open and releases pressure at maxCost rate until the end.
-                        pressureReleased = id.pressureReleased + maxCost * (numMinutes - id.time)
-                    }
-                )
             }
 
-            // Set of all moves that can be made, how I move to how elephant moves.
-            val moves = mutableSetOf<Pair<Move, Move>>()
-
-            val myCurrentPos = nameToNode[id.myPosition]!!
-            val elephantCurrentPos = nameToNode[id.elephantPosition]!!
-
-            if (id.elephantPosition == id.myPosition && id.elephantTimeToDest == 0 && id.myTimeToDest == 0) {
-                // We are at the same place and both can take action
-                val canVisit = myCurrentPos.leadsTo
-
-                if (myCurrentPos.name !in id.openValves && myCurrentPos.flowRate > 0) {
-                    // valve can be opened, I open valve and elephant moves
-                    val myMove = Move(myCurrentPos.name, 1, myCurrentPos.name)
-                    canVisit.forEach { next ->
-                        val elephantMove = Move(next.first, next.second, null)
-                        moves.add(myMove to elephantMove)
-                    }
-                }
-
-                // Ignore the valve and have both move.
-                // There's no difference between (me->A, elephant->B) and (me->B, elephant->A) so
-                // use sets to keep track of where to go so that duplicates gets merged.
-                val toVisit = mutableSetOf<Set<Pair<String, Int>>>()
-                canVisit.forEach { me ->
-                    canVisit.forEach { elephant ->
+            // Set of all possible moves pairs, each move pair is a set of my move and the elephant move
+            // Each move is in turn a destination-time pair.
+            val toVisit = mutableSetOf<Set<Pair<String, Int>>>()
+            moves.first().forEach { me ->
+                moves.last().forEach { elephant ->
+                    // Never have both go to the same node at once
+                    if (me.first != elephant.first) {
                         toVisit.add(setOf(me, elephant))
                     }
                 }
-
-                toVisit.forEach { destinations ->
-                    if (destinations.size == 1) {
-                        // Both are going to the same location
-                        val dest = destinations.single()
-                        val bothMoves = Move(dest.first, dest.second, null)
-                        moves.add(bothMoves to bothMoves)
-                    } else {
-                        // We're going to different places
-                        val (me, elephant) = destinations.toList()
-                        val myMove = Move(me.first, me.second, null)
-                        val elephantMove = Move(elephant.first, elephant.second, null)
-                        moves.add(myMove to elephantMove)
-                    }
-                }
-            } else {
-                // Not the same place, both act independently
-                val myMoves = mutableListOf<Move>()
-                if (id.myTimeToDest == 0) {
-                    // I can take action
-                    if (myCurrentPos.name !in id.openValves && myCurrentPos.flowRate > 0) { // open valve
-                        myMoves.add(Move(myCurrentPos.name, 1, myCurrentPos.name))
-                    }
-
-                    // Move
-                    // desperate test, never move away from closed valves that has a flow rate higher than 10, those should always be opened.
-                    if (myCurrentPos.name in id.openValves || myCurrentPos.flowRate < 4) {
-                        myCurrentPos.leadsTo.forEach { nextLocation ->
-                            myMoves.add(Move(nextLocation.first, nextLocation.second, null))
-                        }
-                    }
-                } else {
-                    // Currently moving towards a new node, just keep moving and reduce time to arrival
-                    // time to dest will be reduced by one further down where the actual next step is created
-                    myMoves.add(Move(id.myPosition, id.myTimeToDest, null))
-                }
-                val elephantMoves = mutableListOf<Move>()
-                if (id.elephantTimeToDest == 0) {
-                    // Elephant can take action
-                    if (elephantCurrentPos.name !in id.openValves && elephantCurrentPos.flowRate > 0) { // open valve
-                        elephantMoves.add(Move(elephantCurrentPos.name, 1, elephantCurrentPos.name))
-                    }
-                    // Move
-                    // desperate test, never move away from valves that has a flow rate higher than 10, those should always be opened.
-                    if (elephantCurrentPos.name in id.openValves || elephantCurrentPos.flowRate < 4) {
-                        elephantCurrentPos.leadsTo.forEach { nextLocation ->
-                            elephantMoves.add(Move(nextLocation.first, nextLocation.second, null))
-                        }
-                    }
-                } else {
-                    // Currently moving towards a new node, just keep moving and reduce time to arrival
-                    elephantMoves.add(Move(id.elephantPosition, id.elephantTimeToDest, null))
-                }
-
-                // Make a list of all possible move combinations
-                myMoves.forEach { myMove ->
-                    elephantMoves.forEach { elephantMove ->
-                        moves.add(myMove to elephantMove)
-                    }
-                }
             }
 
-            val ret = moves.map { (myMove, elephantMove) ->
-                var addedFlowRate = myMove.valveToOpen?.let { nameToNode[it]!!.flowRate } ?: 0
-                addedFlowRate += elephantMove.valveToOpen?.let { nameToNode[it]!!.flowRate } ?: 0
-
+            // Create all the neighbouring states from the move sets.
+            return toVisit.map { moveSet ->
+                val (me, elephant) = moveSet.toList()
+                // Fast-forward to when the next move is done for either actor or to when time is up.
+                val nextTimeLeft = listOf(0, id.timeLeft - me.second, id.timeLeft - elephant.second).max()
+                val timeTaken = id.timeLeft - nextTimeLeft
+                val currentlyVenting = id.openValves.sumOf { valves[it]!!.flowRate }
                 val openValves = id.openValves.toMutableList().apply {
-                    myMove.valveToOpen?.let { add(it) }
-                    elephantMove.valveToOpen?.let { add(it) }
+                    // open a valve when time to destination reaches 0
+                    if (me.second - timeTaken == 0) add(me.first)
+                    if (elephant.second - timeTaken == 0) add(elephant.first)
                 }
-
-                BetterState(
-                    myMove.dest,
-                    myMove.durationLeft - 1,
-                    elephantMove.dest,
-                    elephantMove.durationLeft - 1,
+                State(
+                    listOf(me.first, elephant.first),
+                    listOf(me.second - timeTaken, elephant.second - timeTaken),
                     openValves
                 ).apply {
-                    time = id.time + 1
-                    pressureReleased = id.pressureReleased + openValves.sumOf { nameToNode[it]!!.flowRate }
+                    timeLeft = id.timeLeft - timeTaken
+                    pressureReleased = id.pressureReleased + timeTaken * currentlyVenting
                 }
             }
-
-            return ret
         }
 
-        override fun cost(from: BetterState, to: BetterState): Float {
-            // Cost to move between states is the amount of pressure not being released during the
-            // time it takes to move between the states.
-            val releasedPressure = to.openValves.sumOf { nameToNode[it]!!.flowRate }
-            return (maxCost - releasedPressure).toFloat()
+        /**
+         * The cost to move between two states is the amount of pressure that is not being released
+         * during the time it takes to move.
+         */
+        override fun cost(from: State, to: State): Float {
+            val notVenting = maximumFlowRate - from.openValves.sumOf { valves[it]!!.flowRate }
+            return (notVenting * (from.timeLeft - to.timeLeft)).toFloat()
         }
     }
 
-    data class BetterState(
-        val myPosition: String, val myTimeToDest: Int,
-        val elephantPosition: String, val elephantTimeToDest: Int,
-        val openValves: List<String>,
-        val isComplete: Boolean = false
-    ) {
-        var time = -1
-        var pressureReleased = -1
+    /**
+     * Estimate remaining cost by assuming that the distance all actors have to walk to reach a valve is
+     * the shortest distance to any open valve, including from the current position of a player that's
+     * on its way to a valve already. Also assume that all players will open the best valves possible
+     * every time.
+     *
+     * This never overestimates and is fairly close with my input (88% of the real cost when estimating
+     * on the first node on part 2).
+     */
+    private fun costHeuristic(currentState: State): Float {
+        var timeLeft = currentState.timeLeft
+        var estimatedCost = 0
 
-        override fun toString(): String {
-            return "t: $time, m: $myPosition($myTimeToDest), e: $elephantPosition($elephantTimeToDest), o: $openValves, p: $pressureReleased"
+        // Closed valves ordered by the most useful first
+        val closedValves = nodes.filter { it.flowRate > 0 && it.name !in currentState.openValves }
+            .sortedBy { -it.flowRate }
+            .toMutableList()
+
+        if (closedValves.isEmpty()) {
+            return 0f
         }
+
+        val timeLeftToFinishStartedAction = currentState.dist.sum() // at least one is always zero
+        val minDistanceBetweenValves = closedValves.minOf { node -> allDistances[node.name]!!.values.min() }
+        val minDistanceToAValve = if (timeLeftToFinishStartedAction in 1 until minDistanceBetweenValves) {
+            timeLeftToFinishStartedAction
+        } else {
+            minDistanceBetweenValves
+        }
+        var timeToNextOpen = minDistanceToAValve
+        while (timeLeft > 0 && closedValves.isNotEmpty()) {
+            if (timeToNextOpen == 0) {
+                // Each actor that's not done can open a valve
+                repeat(currentState.pos.filter { it != "Done" }.size) {
+                    closedValves.removeFirstOrNull()
+                }
+                timeToNextOpen = closedValves.minOfOrNull { node -> allDistances[node.name]!!.values.min() } ?: 0
+            } else {
+                timeToNextOpen--
+            }
+            estimatedCost += closedValves.sumOf { it.flowRate }
+            timeLeft--
+        }
+        return estimatedCost.toFloat()
+    }
+
+    /**
+     * Find the best path using A*
+     */
+    private fun solveGeneric(start: State): Int {
+        val res = Search.aStar(
+            graph = Graph(distances(), nameToValve),
+            start = start,
+            goalFn = { node -> node.timeLeft == 0 },
+            heuristic = ::costHeuristic
+        )
+        return res.first.pressureReleased
     }
 
     fun solvePart1(): Int {
-        val start3 = State3(1, 0, listOf(), "AA", 0, null)
-        val res = Search.aStar2(OptimizedGraph(nameToNode, maxCost), start3, { pos -> pos.time == 30 },
-            { start, _ ->
-                // simple best case heuristic, close best valve, move one step, close one valve
-                val stillClosed =
-                    nodes.filter { it.flowRate > 0 && it.name !in start.openValves }.sortedBy { -it.flowRate }
-                stillClosed.withIndex().sumOf { (i, v) -> (2 * i + 1) * v.flowRate }.toFloat()
-            })
-
-        val x = res.cost.filterKeys { it.time == 30 }
-        val max = x.maxBy { it.key.pressureReleased }.key.pressureReleased
-        val path = res.getPath(x.keys.first())
-        return max
-    }
-
-    companion object {
-        private const val numMinutes = 26
-    }
-
-    private fun costHeuristic(currentState: BetterState, goalFn: (BetterState) -> Boolean): Float {
-            var timeLeft = numMinutes - currentState.time
-            var estimatedCost = 0
-            var openValveTurn = true
-            val stillClosed =
-                nodes.filter { it.flowRate > 0 && it.name !in currentState.openValves }
-                    .sortedBy { -it.flowRate }
-                    .toMutableList()
-            // Absolute best case heuristic, open the two best valves, move one step, open the two best
-            // and continue until all valves are open
-            while (timeLeft > 0 && stillClosed.isNotEmpty()) {
-                if (openValveTurn) {
-                    // open the two best valves
-                    stillClosed.removeFirstOrNull()
-                    stillClosed.removeFirstOrNull()
-                }
-                // else: move one space (doesn't change what's closed)
-                timeLeft--
-                openValveTurn = !openValveTurn
-                val notVentingThisTurn = stillClosed.sumOf { it.flowRate }
-                estimatedCost += notVentingThisTurn
-            }
-
-            return estimatedCost.toFloat()
+        return solveGeneric(State(listOf("AA", "Done"), listOf(0, 0), listOf()).apply { timeLeft = 30 })
     }
 
     fun solvePart2(): Int {
-        val start = BetterState("AA", 0, "AA", 0, listOf())
-            .apply {
-                time = 1
-                pressureReleased = 0
-            }
-        val res = Search.aStar2(BetterGraph(nameToNode, maxCost), start,
-            { pos -> pos.time == numMinutes },
-            ::costHeuristic
-            )
-
-        val x = res.cost.filterKeys { it.time == numMinutes }
-        val max = x.maxBy { it.key.pressureReleased }.key.pressureReleased
-        return max
+        return solveGeneric(State(listOf("AA", "AA"), listOf(0, 0), listOf()).apply { timeLeft = 26 })
     }
-
 }

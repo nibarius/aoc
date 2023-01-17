@@ -167,13 +167,29 @@ object Search {
         return Result(cameFrom, costSoFar)
     }
 
-    fun <T> aStar2(
+    /**
+     * A* but rather than searching for a known goal position it takes a goal function and keep searching until
+     * the goal function returns true. The cost map in the result may contain many nodes that fulfill the goal
+     * function as nodes are inserted into the cost map when they are queued for continued searching. The returned
+     * node is the optimal one that triggered the goal function first.
+     *
+     * @param graph the graph to search
+     * @param start the location to start the search from
+     * @param goalFn a function that takes a node and should return true when the goal is found.
+     * @param heuristic a heuristic function that estimates the cost to reach the goal. Start location
+     * is given as parameter and the return value is the estimated cost to move from start to goal. Must never
+     * overestimate the cost to reach the goal.
+     * @param maxCost the maximum cost allowed to find a solution. No cost limit applied if not provided.
+     * @return A pair of the node that triggered the goal function to return true to the search Result. If the goal
+     *         isn't found the start node is returned instead.
+     */
+    fun <T> aStar(
         graph: WeightedGraph<T>,
         start: T,
         goalFn: (T) -> Boolean,
-        heuristic: (T, (T) -> Boolean) -> Float,
+        heuristic: (T) -> Float,
         maxCost: Float = Float.MAX_VALUE
-    ): Result<T> {
+    ): Pair<T, Result<T>> {
         val toCheck = PriorityQueue(compareBy<Pair<T, Float>> { it.second })
         toCheck.add(start to 0f)
         val cameFrom = mutableMapOf(start to start)
@@ -181,17 +197,17 @@ object Search {
         while (toCheck.isNotEmpty()) {
             val (current, _) = toCheck.remove()
             if (goalFn(current)) {
-                break
+                return current to Result(cameFrom, costSoFar)
             }
             for (next in graph.neighbours(current)) {
                 val nextCost = costSoFar.getValue(current) + graph.cost(current, next)
                 if (nextCost < maxCost && nextCost < costSoFar.getOrDefault(next, Float.MAX_VALUE)) {
-                    toCheck.add(next to nextCost + heuristic(next, goalFn))
+                    toCheck.add(next to nextCost + heuristic(next))
                     cameFrom[next] = current
                     costSoFar[next] = nextCost
                 }
             }
         }
-        return Result(cameFrom, costSoFar)
+        return start to Result(cameFrom, costSoFar)
     }
 }
