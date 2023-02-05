@@ -16,12 +16,13 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
     fun toMap() = map.toMap()
     fun copy() = AMap(map.toMutableMap())
     fun containsKey(key: Pos) = map.containsKey(key)
+    operator fun contains(pos: Pos) = containsKey(pos)
 
     /**
      * Return the position of the only occurrence of 'value' in the map.
      */
     fun positionOf(value: Char): Pos {
-        return map.filter { it.value == value  }.keys.single()
+        return map.filter { it.value == value }.keys.single()
     }
 
     /**
@@ -30,8 +31,8 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
      */
     fun numNeighboursWithValue(pos: Pos, value: Char, includeDiagonals: Boolean = false): Int {
         return pos.allNeighbours(includeDiagonals)
-                .filter { map[it] == value }
-                .size
+            .filter { map[it] == value }
+            .size
     }
 
     /**
@@ -39,13 +40,13 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
      */
     fun numVisibleWithValue(pos: Pos, value: Char, transparent: List<Char>, includeDiagonals: Boolean = false): Int {
         return Pos.allDeltas(includeDiagonals)
-                .map { delta ->
-                    generateSequence(pos) { Pos(it.x + delta.x, it.y + delta.y) }
-                            .drop(1)
-                            .map { map[it] }
-                            .first { it !in transparent }
-                }
-                .sumBy { if (it == value) 1 else 0 }
+            .map { delta ->
+                generateSequence(pos) { Pos(it.x + delta.x, it.y + delta.y) }
+                    .drop(1)
+                    .map { map[it] }
+                    .first { it !in transparent }
+            }
+            .sumBy { if (it == value) 1 else 0 }
     }
 
     fun toString(emptySpace: Char = '#'): String {
@@ -62,11 +63,13 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
     }
 
     companion object {
-        fun parse(input: List<String>): AMap {
+        fun parse(input: List<String>, ignoreChars: List<Char> = listOf()): AMap {
             val map = AMap()
             for (y in input.indices) {
-                for (x in input[0].indices) {
-                    map[Pos(x, y)] = input[y][x]
+                for (x in input[y].indices) {
+                    if (input[y][x] !in ignoreChars) {
+                        map[Pos(x, y)] = input[y][x]
+                    }
                 }
             }
             return map
