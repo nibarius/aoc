@@ -81,7 +81,7 @@ class Day16(input: List<String>) {
     private fun testExamples(): List<Pair<Int, List<InstructionName>>> {
         return examples.map { example ->
             val possible = mutableListOf<InstructionName>()
-            InstructionName.values().forEach { instruction ->
+            entries.forEach { instruction ->
                 for (i in 0 until registers.size) {
                     registers[i] = example.before[i]
                 }
@@ -100,7 +100,7 @@ class Day16(input: List<String>) {
         val examples = testExamples()
         (0..15).forEach { opcode ->
             val possibleInstructions = examples.filter { it.first == opcode }.map { it.second }
-            ret[opcode] = InstructionName.values().toMutableList()
+            ret[opcode] = entries.toMutableList()
                     .filter { instruction -> possibleInstructions.all { it.contains(instruction) } }
         }
         return ret

@@ -56,7 +56,7 @@ class Day20(input: List<String>) {
             val matchAgainst = tilesLeft.remove(found[currentPos])!!
 
             // check in all directions from the current tile
-            for (direction in Direction.values()) {
+            for (direction in Direction.entries) {
                 val checkPos = currentPos.move(direction)
                 if (found.containsKey(checkPos)) {
                     // skip this direction if it's already been identified

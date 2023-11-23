@@ -33,10 +33,10 @@ class Day25(input: List<String>) {
      */
     private fun convertDecimalDigitToSnafu(target: Double, smaller: Double) = when (target) {
         0.0 -> "0"
-        in smaller..smaller * 2 - 1 -> "1"
-        in smaller * 2..smaller * 3 - 1 -> "2"
-        in smaller * 3..smaller * 4 - 1 -> "="
-        in smaller * 4..smaller * 5 - 1 -> "-"
+        in smaller..<smaller * 2 -> "1"
+        in smaller * 2..<smaller * 3 -> "2"
+        in smaller * 3..<smaller * 4 -> "="
+        in smaller * 4..<smaller * 5 -> "-"
         else -> error("should never happen")
     }
 

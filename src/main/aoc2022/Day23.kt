@@ -32,7 +32,7 @@ class Day23(input: List<String>) {
      * Simulates and returns the number of turns after there were no movement at all
      */
     private fun simulate(maxTurns: Int): Int {
-        val directions = Direction.values()
+        val directions = Direction.entries
 
         repeat(maxTurns) { turn ->
             // proposed position to origin position

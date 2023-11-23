@@ -9,9 +9,9 @@ import java.util.*
 class Day18(input: List<String>) {
 
     sealed interface Token {
-        object Open : Token
-        object Close : Token
-        object Separator : Token // Separators are not really needed, but they make testing and debugging easier
+        data object Open : Token
+        data object Close : Token
+        data object Separator : Token // Separators are not really needed, but they make testing and debugging easier
         data class Value(val value: Int) : Token
 
         companion object {

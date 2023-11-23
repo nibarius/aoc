@@ -42,7 +42,7 @@ class Day10(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return asteroids.map { asteroids.inSightOf(it) }.maxOrNull() ?: 0
+        return asteroids.maxOfOrNull { asteroids.inSightOf(it) } ?: 0
     }
 
     fun solvePart2(): Int {

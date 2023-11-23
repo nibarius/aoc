@@ -49,7 +49,7 @@ class Day24(input: List<String>) {
         // Get all the direction that it's possible to move in from the given coordinate
         private fun getPossibleDirectionsFrom(address: Pos): List<Direction> {
             val ret = mutableListOf<Direction>()
-            for (direction in Direction.values()) {
+            for (direction in Direction.entries) {
                 val next = theMap[address.y + direction.dy][address.x + direction.dx]
                 if (next != '#') {
                     ret.add(direction)

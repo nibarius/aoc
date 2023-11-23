@@ -129,7 +129,7 @@ class Day19(input: List<String>) {
             } else {
                 // Build the bot and queue up variants for all possible next bots
                 val nextInventory = id.inventory.produce() + blueprint.buildCost(id.wantToBuild, id.timeLeft)
-                return Type.values()
+                return Type.entries
                     .mapNotNull { botToBuild ->
                         State(id.timeLeft - 1, nextInventory, botToBuild)
                             .takeIf { it.canBuildBot(blueprint, botToBuild) }

@@ -3,6 +3,7 @@ package aoc2019
 import Direction
 import Pos
 import AMap
+import kotlin.enums.EnumEntries
 import kotlin.math.min
 
 class Day17(input: List<String>) {
@@ -14,7 +15,7 @@ class Day17(input: List<String>) {
             for (x in 1 until map.xRange().last) {
                 val current = Pos(x, y)
                 if (map[current] == '#' &&
-                        Direction.values().all { dir -> map[dir.from(current)] == '#' }) {
+                        Direction.entries.all { dir -> map[dir.from(current)] == '#' }) {
                     sum += x * y
                 }
             }

@@ -49,8 +49,8 @@ object Search {
 
     /**
      * Holds the result of a search.
-     * @param cameFrom shows how to get to a certain location. "cameFrom[B] == A" means that the path
-     * to B comes from A. The start point points back to itself, so  cameFrom[A] == A.
+     * @param cameFrom shows how to get to a certain location. `cameFrom[B] == A` means that the path
+     * to B comes from A. The start point points back to itself, so  `cameFrom[A] == A`.
      * @param cost a map that shows the total cost to get to all visited locations
      */
     data class Result<T>(val cameFrom: Map<T, T>, val cost: Map<T, Float>) {

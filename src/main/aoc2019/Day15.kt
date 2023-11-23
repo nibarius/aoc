@@ -58,7 +58,7 @@ class Day15(input: List<String>) {
 
         // Move one step in every direction
         droid.stepsTaken++
-        Direction.values().forEach { queue.add(QueueEntry(it.from(startPos), droid.copy(), it)) }
+        Direction.entries.forEach { queue.add(QueueEntry(it.from(startPos), droid.copy(), it)) }
         while (queue.isNotEmpty()) {
             val current = queue.remove()
             if (alreadyChecked.contains(current.pos)) continue
@@ -73,7 +73,7 @@ class Day15(input: List<String>) {
             }
 
             current.droid.stepsTaken++
-            Direction.values().forEach {
+            Direction.entries.forEach {
                 val nextPos = it.from(current.pos)
                 if (!alreadyChecked.contains(nextPos)) {
                     queue.add(QueueEntry(nextPos, current.droid.copy(), it))
@@ -92,7 +92,7 @@ class Day15(input: List<String>) {
         var maxDistance = 0
 
         // Move one step in every direction
-        Direction.values().forEach { queue.add(QueueEntry2(it.from(pos), 1)) }
+        Direction.entries.forEach { queue.add(QueueEntry2(it.from(pos), 1)) }
         while (queue.isNotEmpty()) {
             val current = queue.remove()
             if (alreadyChecked.contains(current.pos)) continue
@@ -102,7 +102,7 @@ class Day15(input: List<String>) {
             if (result == '#') continue
             maxDistance = max(maxDistance, current.stepsTaken)
 
-            Direction.values().forEach {
+            Direction.entries.forEach {
                 val nextPos = it.from(current.pos)
                 if (!alreadyChecked.contains(nextPos)) {
                     queue.add(QueueEntry2(nextPos, current.stepsTaken + 1))

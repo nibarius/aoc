@@ -95,7 +95,7 @@ class Day18(input: List<String>) {
             alreadyChecked.add(current.currentPos)
 
             // Try moving in all directions from here
-            Direction.values()
+            Direction.entries
                     .map { dir -> dir.from(current.currentPos) }
                     .filter { newPos -> traversable.contains(map[newPos]) }
                     .forEach { toCheck.add(ExplorationState(it, current.steps + 1, newDoors)) }

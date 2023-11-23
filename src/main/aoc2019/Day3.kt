@@ -40,14 +40,10 @@ class Day3(input: List<String>) {
     }
 
     fun solvePart1(): Int {
-        return wires.intersections()
-                .map { it.distanceToOrigin }
-                .minOrNull() ?: -1
+        return wires.intersections().minOfOrNull { it.distanceToOrigin } ?: -1
     }
 
     fun solvePart2(): Int {
-        return wires.intersections()
-                .map { wires[0].distanceTo(it) + wires[1].distanceTo(it) }
-                .minOrNull() ?: -1
+        return wires.intersections().minOfOrNull { wires[0].distanceTo(it) + wires[1].distanceTo(it) } ?: -1
     }
 }

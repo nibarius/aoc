@@ -134,7 +134,7 @@ class Day20(input: List<String>) {
     }
 
     private fun availableNeighbours(map: Map<Pos, Char>, pos: Pos, portals: Map<Pos, Pos>, withFloors: Boolean): List<Pos> {
-        return Dir.values().map { dir -> dir.from(pos) }
+        return Dir.entries.map { dir -> dir.from(pos) }
                 .filter { newPos -> map.containsKey(newPos.flatten()) && map[newPos.flatten()] == '.' }
                 .toMutableList()
                 .apply {

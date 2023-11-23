@@ -97,6 +97,6 @@ class Day19(input: List<String>) {
     }
 
     fun solvePart2(): Int {
-        return messages.filter { checkAllRules(it, changeRules()) }.count()
+        return messages.count { checkAllRules(it, changeRules()) }
     }
 }
