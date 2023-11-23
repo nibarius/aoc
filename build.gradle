@@ -29,8 +29,8 @@ sourceSets {
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.21'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
-    implementation 'org.magicwerk.brownies:brownies-collections:0.9.19'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
+    implementation 'org.magicwerk.brownies:brownies-collections:0.9.21'
     implementation "com.marcinmoskala:DiscreteMathToolkit:1.0.3"
     implementation 'com.github.kittinunf.fuel:fuel:2.3.1' // For downloading input file
     implementation 'com.github.kittinunf.result:result:3.1.0' // Needed for Fuel
