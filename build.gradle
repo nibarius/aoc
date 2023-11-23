@@ -22,6 +22,7 @@ sourceSets {
     test.java.srcDirs += 'src/test/aoc2020'
     test.java.srcDirs += 'src/test/aoc2021'
     test.java.srcDirs += 'src/test/aoc2022'
+    test.java.srcDirs += 'src/test/aoc2023'
     test.java.srcDirs += 'src/test/common'
     test.resources.srcDirs += 'src/test/resources'
 }
