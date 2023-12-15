@@ -48,6 +48,6 @@ class Day12Test {
     @Test
     fun partTwoRealInput() {
         val day12 = Day12(resourceAsList("2023/day12.txt"))
-        assertEquals(0, day12.solvePart2())
+        assertEquals(30568243604962, day12.solvePart2())
     }
 }
