@@ -1,145 +1,137 @@
 package aoc2023
 
-import AMap
-import Pos
-import size
+import Grid
 
 class Day14(input: List<String>) {
-    private val platform = AMap.parse(input, listOf('.'))
-    private val fixedRocksOnly = AMap(platform.toMap().filterValues { it == '#' }.toMutableMap())
 
-    private fun AMap.tiltNorth(): AMap {
-        val state = this
-        val next = fixedRocksOnly.copy()
-        for (x in next.xRange()) {
+    // Do double buffering and copy data between two grids to minimize allocations
+    private val grid = Grid.parse(input)
+    private val grid2 = grid.copy()
+
+    private fun Grid.tiltNorth(dest: Grid): Grid {
+        for (x in 0..<size) {
             var offset = 0
-            while (offset in state.yRange()) {
+            while (offset < size) {
                 var round = 0
                 var emptySpace = 0
                 var y = offset
-                // Count number of empty spaces and round rocks until the next square rock
-                while (y in state.yRange()) {
-                    when (state[Pos(x, y++)]) {
-                        null -> emptySpace++
+                while (y < size) {
+                    when (this[y++][x]) {
+                        '.' -> emptySpace++
                         'O' -> round++
                         '#' -> break
                     }
+                    dest[y - 1][x] = '.' // Clear everything except square rocks
                 }
-                // Move up all round rocks
+                // Move all round rocks to the north
                 for (i in offset..<offset + round) {
-                    next[Pos(x, i)] = 'O'
+                    dest[i][x] = 'O'
                 }
-                // Skip part the square rock for the next iteration
+                // Skip past the square rock for the next iteration
                 offset = y
             }
         }
-        return next
+        return dest
     }
 
-    private fun AMap.tiltWest(): AMap {
-        val state = this
-        val next = fixedRocksOnly.copy()
-        for (y in next.yRange()) {
+    private fun Grid.tiltWest(dest: Grid): Grid {
+        for (y in 0..<size) {
             var offset = 0
-            while (offset in state.yRange()) {
+            while (offset < size) {
                 var round = 0
                 var emptySpace = 0
                 var x = offset
-                // Count number of empty spaces and round rocks until the next square rock
-                while (x in state.xRange()) {
-                    when (state[Pos(x++, y)]) {
-                        null -> emptySpace++
+                while (x < size) {
+                    when (this[y][x++]) {
+                        '.' -> emptySpace++
                         'O' -> round++
                         '#' -> break
                     }
+                    dest[y][x - 1] = '.' // Clear everything except square rocks
                 }
-                // Move west all round rocks
+                // Move all round rocks to the west
                 for (i in offset..<offset + round) {
-                    next[Pos(i, y)] = 'O'
+                    dest[y][i] = 'O'
                 }
-                // Skip part the square rock for the next iteration
+                // Skip past the square rock for the next iteration
                 offset = x
             }
         }
-        return next
+        return dest
     }
 
-    private fun AMap.tiltSouth(): AMap {
-        val state = this
-        val next = fixedRocksOnly.copy()
-        for (x in next.xRange()) {
-            var offset = state.yRange().last
-            while (offset in state.yRange()) {
+    private fun Grid.tiltSouth(dest: Grid): Grid {
+        for (x in 0..<size) {
+            var offset = size - 1
+            while (offset >= 0) {
                 var round = 0
                 var emptySpace = 0
                 var y = offset
-                // Count number of empty spaces and round rocks until the next square rock
-                while (y in state.yRange()) {
-                    when (state[Pos(x, y--)]) {
-                        null -> emptySpace++
+                while (y >= 0) {
+                    when (this[y--][x]) {
+                        '.' -> emptySpace++
                         'O' -> round++
                         '#' -> break
                     }
+                    dest[y + 1][x] = '.' // Clear everything except square rocks
                 }
-                // Move down all round rocks
+                // Move all round rocks to the south
                 for (i in (offset - round + 1..offset).reversed()) {
-                    next[Pos(x, i)] = 'O'
+                    dest[i][x] = 'O'
                 }
-                // Skip part the square rock for the next iteration
+                // Skip past the square rock for the next iteration
                 offset = y
             }
         }
-        return next
+        return dest
     }
 
-    private fun AMap.tiltEast(): AMap {
-        val state = this
-        val next = fixedRocksOnly.copy()
-        for (y in next.yRange()) {
-            var offset = state.xRange().last
-            while (offset in state.xRange()) {
+    private fun Grid.tiltEast(dest: Grid): Grid {
+        for (y in 0..<size) {
+            var offset = size - 1
+            while (offset >= 0) {
                 var round = 0
                 var emptySpace = 0
                 var x = offset
-                // Count number of empty spaces and round rocks until the next square rock
-                while (x in state.xRange()) {
-                    when (state[Pos(x--, y)]) {
-                        null -> emptySpace++
+                while (x >= 0) {
+                    when (this[y][x--]) {
+                        '.' -> emptySpace++
                         'O' -> round++
                         '#' -> break
                     }
+                    dest[y][x + 1] = '.' // Clear everything except square rocks
                 }
-                // Move east all round rocks
-                for (i in (offset - round + 1..offset).reversed()) {
-                    next[Pos(i, y)] = 'O'
+                // Move all round rocks to the east
+                for (i in offset - round + 1..offset) {
+                    dest[y][i] = 'O'
                 }
-                // Skip part the square rock for the next iteration
+                // Skip past the square rock for the next iteration
                 offset = x
             }
         }
-        return next
+        return dest
     }
 
-    private fun doOneCycle(state: AMap): AMap {
-        return state.tiltNorth().tiltWest().tiltSouth().tiltEast()
+    private fun doOneCycle(): Grid {
+        // Not nice to have 4 almost identical methods, but doing a generic method
+        // that can handle both north and south increases runtime from 50ms to over 200ms
+        return grid.tiltNorth(grid2).tiltWest(grid).tiltSouth(grid2).tiltEast(grid)
     }
 
-    private fun doManyCycles(state: AMap): Int {
-        var hash = state.toString('.').hashCode()
+    private fun doManyCycles(): Int {
+        var hash = grid.hashCode()
         val memory = mutableMapOf(hash to 0)
-        val loads = mutableListOf(state.load())
+        val loads = mutableListOf(grid.load())
         var i = 1
-        var current = state
         while (true) {
-            val next = doOneCycle(current)
-            hash = next.toString('.').hashCode()
+            val next = doOneCycle()
+            hash = next.hashCode()
             if (memory.containsKey(hash)) {
                 // found a loop
                 break
             }
             memory[hash] = i++
             loads.add(next.load())
-            current = next
         }
         val loopStart = memory[hash]!!
         val len = i - loopStart
@@ -148,17 +140,15 @@ class Day14(input: List<String>) {
         return loads[loopStart + targetOffset]
     }
 
-    private fun AMap.load(): Int {
-        val size = xRange().size()
-        return toMap().filterValues { it == 'O' }.keys.sumOf { size - it.y }
+    private fun Grid.load(): Int {
+        return keys.filter { get(it) == 'O' }.sumOf { size - it.y }
     }
 
     fun solvePart1(): Int {
-        return platform.tiltNorth().load()
+        return grid.tiltNorth(grid2).load()
     }
 
     fun solvePart2(): Int {
-        // Found loop after 151 cycles. Loops back to cycle 81, takes 1min 18 sec
-        return doManyCycles(platform)
+        return doManyCycles()
     }
 }
