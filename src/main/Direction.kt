@@ -18,6 +18,9 @@ enum class Direction(val dx: Int, val dy: Int) {
         else -> throw IllegalArgumentException("Not possible to turn $dir, Left and Right are the only valid directions")
     }
 
+    fun isHorizontal() = this in listOf(Left, Right)
+    fun isVertical() = this in listOf(Up, Down)
+
     companion object {
         fun fromChar(dir: Char): Direction = when (dir.uppercaseChar()) {
             in setOf('R', '>', 'E') -> Right
