@@ -20,19 +20,19 @@ class Visualization(private val zoom: Int = 10) {
         val img = BufferedImage(xrange.count() * zoom, yrange.count() * zoom, BufferedImage.TYPE_INT_ARGB)
         yrange.forEach { y ->
             xrange.forEach { x ->
-                if (x >= 0) {
-                    toDraw.getOrDefault(Pos(x, y), '\u0000').let { color ->
-                        val realColor: Int = colors.getOrDefault(color, Color(0, 0, 0, 0).rgb)
-                        (0..<zoom).forEach { yOffset ->
-                            (0..<zoom).forEach { xOffset ->
-                                val drawColor = if (zoom > 5 && (yOffset == 0 || xOffset == 0)) {
-                                    // Draw a solid black border around each pixel for large enough zoom levels
-                                    Color.BLACK.rgb
-                                } else {
-                                    realColor
-                                }
-                                img.setRGB(x * zoom + xOffset, y * zoom + yOffset, drawColor)
+                toDraw.getOrDefault(Pos(x, y), '\u0000').let { color ->
+                    val realColor: Int = colors.getOrDefault(color, Color(0, 0, 0, 0).rgb)
+                    (0..<zoom).forEach { yOffset ->
+                        (0..<zoom).forEach { xOffset ->
+                            val drawColor = if (zoom > 5 && (yOffset == 0 || xOffset == 0)) {
+                                // Draw a solid black border around each pixel for large enough zoom levels
+                                Color.BLACK.rgb
+                            } else {
+                                realColor
                             }
+                            val drawX = (x - xrange.first) * zoom + xOffset
+                            val drawY = (y - yrange.first) * zoom + yOffset
+                            img.setRGB(drawX, drawY, drawColor)
                         }
                     }
                 }
