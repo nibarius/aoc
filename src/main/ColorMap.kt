@@ -1,4 +1,5 @@
 import java.awt.Color
+import kotlin.math.max
 
 /**
  * A collection of pre-defined color maps that can be used to visualize data with
@@ -13,13 +14,15 @@ interface ColorMap {
 
     /**
      * Get a char to color mapping for this ColorMap for the characters in the given list.
-     * @param input A list of chars that should be evenly distributed across the color map
+     * @param input A list of chars that should be evenly distributed across the color map.
+     *              If the list has more entries than the color map it will wrap around and
+     *              start over as needed.
      */
     fun getColorMap(input: List<Char>): Map<Char, Int> {
-        val step = data.size / input.size
+        val step = max(1, data.size / input.size)
         val x = data.map { colors -> colors.map { (255 * it).toInt() } }
         return input.withIndex().associate { (index, ch) ->
-            val offset = step * index
+            val offset = (step * index) % data.size
             ch to Color(x[offset][0], x[offset][1], x[offset][2]).rgb
         }
     }
