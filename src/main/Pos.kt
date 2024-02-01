@@ -1,7 +1,7 @@
 import kotlin.math.abs
 import kotlin.math.sign
 
-data class Pos(val x: Int, val y: Int) {
+data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
     val distanceToOrigin: Int
         get() {
             return abs(x) + abs(y)
@@ -43,6 +43,11 @@ data class Pos(val x: Int, val y: Int) {
             strictNb
         }
     }
+
+    /**
+     * Compare two positions by it's distance to origin, then x coordinate, then y coordinate.
+     */
+    override fun compareTo(other: Pos): Int = compareValuesBy(this, other, { it.distanceToOrigin }, { it.x }, { it.y })
 
     override fun toString() = "($x, $y)"
 
