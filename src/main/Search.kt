@@ -1,3 +1,4 @@
+import aoc2023.Day23
 import java.util.*
 
 /**
@@ -223,6 +224,8 @@ object Search {
      * @param isGoal Function that returns true if the state it's given is a goal state
      * @param estimateBestCase Function that estimates the final value given a state. It must never underestimate
      *        the actual value. If it does the best solution might not be found.
+     * @param accumulateCost If the cost should be accumulated between steps. Default is false, set to true if each
+     *        state contains the total cost so far.
      * @return A pair of best state to Result which holds information about all visited nodes during the search.
      */
     fun <T> maximizeValueDfs(
@@ -230,10 +233,11 @@ object Search {
         start: T,
         isGoal: (T) -> Boolean,
         estimateBestCase: (T) -> Float,
+        accumulateCost: Boolean = true
     ): Pair<T, Result<T>> {
         val cameFrom = mutableMapOf(start to start)
         val costSoFar = mutableMapOf(start to 0f)
-        val ret = dfs(graph, start, isGoal, estimateBestCase, start to 0f, cameFrom, costSoFar)
+        val ret = dfs(graph, start, isGoal, estimateBestCase, start to 0f, cameFrom, costSoFar, accumulateCost)
         return ret.first to Result(cameFrom, costSoFar)
     }
 
@@ -252,18 +256,23 @@ object Search {
         estimateBestCase: (T) -> Float,
         previousBest: Pair<T, Float>,
         cameFrom: MutableMap<T, T>,
-        costSoFar: MutableMap<T, Float>
+        costSoFar: MutableMap<T, Float>,
+        accumulateCost: Boolean = true
     ): Pair<T, Float> {
         if (isGoal(current)) {
             return current to costSoFar.getValue(current)
         }
         var newBest = previousBest
         graph.neighbours(current)
-            .filter { estimateBestCase(it) > newBest.second } // Only examine states that can beat current best
+            .filter {
+                // Only examine states that can beat current best
+                val soFar = if (accumulateCost) costSoFar.getValue(current) + graph.cost(current, it) else 0f
+                soFar + estimateBestCase(it) > newBest.second
+            }
             .forEach { next ->
                 cameFrom[next] = current
-                costSoFar[next] = graph.cost(current, next)
-                val ret = dfs(graph, next, isGoal, estimateBestCase, newBest, cameFrom, costSoFar)
+                costSoFar[next] = graph.cost(current, next) + if (accumulateCost) costSoFar.getValue(current) else 0f
+                val ret = dfs(graph, next, isGoal, estimateBestCase, newBest, cameFrom, costSoFar, accumulateCost)
                 if (ret.second > newBest.second) {
                     newBest = ret
                 }

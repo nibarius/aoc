@@ -191,7 +191,8 @@ class Day19(input: List<String>) {
     private fun mostGeodesOpened(time: Int, blueprint: Blueprint): Int {
         val start = State(time, startInventory, null)
         val g = Graph(blueprint)
-        val res = maximizeValueDfs(g, start, { it.timeLeft == 0 }, { state -> bestCaseEstimate(blueprint, state) })
+        val res =
+            maximizeValueDfs(g, start, { it.timeLeft == 0 }, { state -> bestCaseEstimate(blueprint, state) }, false)
         return res.second.cost[res.first]!!.toInt()
     }
 
