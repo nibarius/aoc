@@ -47,4 +47,28 @@ class MyMathTest {
         Assert.assertEquals(80, MyMath.lcm(setOf(16, 20)))
         Assert.assertEquals(2520, MyMath.lcm((1..10).toList()))
     }
+
+    // Also used by 2023 day 24 part 2
+    @Test
+    fun testGaussianElimination() {
+        val a1 = MyMath.gaussianElimination(listOf(
+            listOf(4, 3, 11).map { it.toBigInteger() }.toTypedArray(),
+            listOf(1, -3, -1).map { it.toBigInteger() }.toTypedArray(),
+        ))
+        Assert.assertEquals(listOf(2L, 1L), a1)
+
+        val a2 = MyMath.gaussianElimination(listOf(
+            listOf(1, 2 ,3 , -7).map { it.toBigInteger() }.toTypedArray(),
+            listOf(2, -3, -5, 9).map { it.toBigInteger() }.toTypedArray(),
+            listOf(-6, -8, 1, -22).map { it.toBigInteger() }.toTypedArray(),
+        ))
+        Assert.assertEquals(listOf(-1L, 3L, -4L), a2)
+
+        val a3 = MyMath.gaussianElimination(listOf(
+            listOf(3, 2, -4, 3).map { it.toBigInteger() }.toTypedArray(),
+            listOf(2, 3, 3, 15).map { it.toBigInteger() }.toTypedArray(),
+            listOf(5, -3, 1, 14).map { it.toBigInteger() }.toTypedArray()
+        ))
+        Assert.assertEquals(listOf(3L, 1L, 2L), a3)
+    }
 }
