@@ -86,3 +86,4 @@ gradle-app.setting
 src/main/resources/session_cookie.txt
 src/main/resources/key.json
 visualizations/tmp*.png
+src/test/resources/20*
