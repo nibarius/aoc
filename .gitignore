@@ -84,4 +84,5 @@ gradle-app.setting
 
 # My sensitive files
 src/main/resources/session_cookie.txt
+src/main/resources/key.json
 visualizations/tmp*.png

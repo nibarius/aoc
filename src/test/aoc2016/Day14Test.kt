@@ -3,6 +3,7 @@ package test.aoc2016
 import aoc2016.Day14
 import org.junit.Assert
 import org.junit.Test
+import resourceAsString
 
 class Day14Test {
 
@@ -14,7 +15,7 @@ class Day14Test {
 
     @Test
     fun partOneRealInput() {
-        Assert.assertEquals(15168, Day14("qzyelonm").solvePart1())
+        Assert.assertEquals(15168, Day14(resourceAsString("2016/day14.txt")).solvePart1())
     }
 
     @Test
@@ -24,6 +25,6 @@ class Day14Test {
 
     @Test
     fun partTwoRealInput() {
-        Assert.assertEquals(20864, Day14("qzyelonm").solvePart2())
+        Assert.assertEquals(20864, Day14(resourceAsString("2016/day14.txt")).solvePart2())
     }
 }
