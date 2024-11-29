@@ -35,7 +35,7 @@ dependencies {
     implementation "com.marcinmoskala:DiscreteMathToolkit:1.0.3"
     implementation 'com.github.kittinunf.fuel:fuel:2.3.1' // For downloading input file
     implementation 'com.github.kittinunf.result:result:3.1.0' // Needed for Fuel
-    implementation 'com.sksamuel.scrimage:scrimage-core:4.1.1' // For visualizations
+    implementation 'com.sksamuel.scrimage:scrimage-core:4.2.0' // For visualizations
     implementation 'com.google.crypto.tink:tink:1.12.0'
 }
 
