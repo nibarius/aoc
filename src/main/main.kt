@@ -4,17 +4,16 @@ import com.github.kittinunf.result.Result
 import java.io.File
 
 fun main(args: Array<String>) {
-    val year = 2023
-    val day = 25
+    val year = 2024
+    val day = 1
     when (args.firstOrNull()) {
         "download" -> readInputFileFromInternet(year, day)
         "decrypt" -> decryptInputFile(year, day)
         "decrypt_all" -> {
-            ((2015..2016) + (2018..2023)).forEach { y ->
+            ((2015..2016) + (2018..2024)).forEach { y ->
                 (1..25).forEach { d -> decryptInputFile(y, d) }
             }
         }
-
         else -> {
             createDayClassFile(year, day)
             createTestFile(year, day)
