@@ -5,7 +5,7 @@ import java.io.File
 
 fun main(args: Array<String>) {
     val year = 2024
-    val day = 1
+    val day = 2
     when (args.firstOrNull()) {
         "download" -> readInputFileFromInternet(year, day)
         "decrypt" -> decryptInputFile(year, day)
