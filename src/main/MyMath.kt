@@ -70,6 +70,8 @@ object MyMath {
      *
      * Result is undefined (unknown) for unsolvable equations.
      *
+     * An error is raised for equations with non-integer solutions.
+     *
      * @param a The linear equation system to be solved (modified in-place)
      * @return A list of longs with the solution of the equation, each entry holds the value of the
      *         corresponding parameter.
