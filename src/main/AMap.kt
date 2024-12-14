@@ -62,6 +62,10 @@ class AMap(private val map: MutableMap<Pos, Char> = mutableMapOf()) {
         toString(emptySpace).split('\n').forEach { println(it) }
     }
 
+    fun drawPng(colors: Map<Char, Int>, filename: String = "tmp.png", zoom: Int = 10) {
+        Visualization(zoom).drawPng(this, colors, filename)
+    }
+
     companion object {
         fun parse(input: List<String>, ignoreChars: List<Char> = listOf()): AMap {
             val map = AMap()
