@@ -62,4 +62,11 @@ class PosTest {
         Assert.assertEquals(Pos(-61, -16), Pos(-16, 61).rotate(Direction.Right))
         Assert.assertEquals(Pos(-1, 1), Pos(1, 1).rotate(Direction.Right))
     }
+
+    @Test
+    fun wrapWithin() {
+        Assert.assertEquals(Pos(1,1), Pos(1,1).wrapWithin(10,10))
+        Assert.assertEquals(Pos(1,1), Pos(11,11).wrapWithin(10,10))
+        Assert.assertEquals(Pos(9,9), Pos(-1,-1).wrapWithin(10,10))
+    }
 }

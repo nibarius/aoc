@@ -19,15 +19,6 @@ class Day21(input: List<String>) {
         return currentPos.size
     }
 
-    /**
-     * Return a new position within the original garden
-     */
-    private fun wrappedPos(pos: Pos, size: Int): Pos {
-        val newX = pos.x % size + if (pos.x < 0) size else 0
-        val newY = pos.y % size + if (pos.y < 0) size else 0
-        return Pos(newX % size, newY % size)
-    }
-
     // Returns in which garden the given absolute position is in
     private fun whichGarden(pos: Pos, size: Int): Pair<Int, Int> {
         val x = pos.x - if (pos.x < 0) size - 1 else 0
@@ -85,7 +76,7 @@ class Day21(input: List<String>) {
                     it.allNeighbours().filter { neighbour -> neighbour !in reachable[offset] }
                 }
                 .filter {// Filter out rocks
-                    wrappedPos(it, gardenSize) in garden.keys
+                    it.wrapWithin(gardenSize, gardenSize) in garden.keys
                 }
                 .toSet()
 
@@ -102,7 +93,7 @@ class Day21(input: List<String>) {
                     var g = visitedGardens[inGarden]
                     if (g == null) {
                         g = GardenInfo(
-                            inGarden, wrappedPos(positions.first(), gardenSize), step + 1,
+                            inGarden, positions.first().wrapWithin(gardenSize, gardenSize), step + 1,
                             mutableListOf(positions.size)
                         )
                         visitedGardens[inGarden] = g

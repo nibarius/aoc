@@ -73,6 +73,17 @@ data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
      */
     fun sign() = Pos(x.sign, y.sign)
 
+    /**
+     * Wrap this pos within the given bounding box, with one corner in origin.
+     * Pos(11,11).wrapWithin(10,10) gives Pos(1,1)
+     * Pos(-1,-1).wrapWithin(10,10) gives Pos(9,9)
+     */
+    fun wrapWithin(w: Int, h: Int): Pos {
+        val newX = x % w + if (x < 0) w else 0
+        val newY = y % h + if (y < 0) h else 0
+        return Pos(newX % w, newY % h)
+    }
+
     companion object {
         fun allDeltas(includeDiagonals: Boolean = false): List<Pos> {
             val ret = mutableListOf<Pos>()
