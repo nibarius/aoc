@@ -30,6 +30,13 @@ enum class Direction(val dx: Int, val dy: Int) {
             else -> throw IllegalArgumentException("Unknown direction: $dir")
         }
     }
+
+    override fun toString() = when(this) {
+        Up -> "^"
+        Right -> ">"
+        Down -> "v"
+        Left -> "<"
+    }
 }
 
 fun Char.toDirection() = Direction.fromChar(this)
