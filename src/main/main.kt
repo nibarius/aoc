@@ -4,8 +4,8 @@ import com.github.kittinunf.result.Result
 import java.io.File
 
 fun main(args: Array<String>) {
-    val year = 2024
-    val day = 25
+    val year = 2025
+    val day = 1
     when (args.firstOrNull()) {
         "download" -> readInputFileFromInternet(year, day)
         "decrypt" -> decryptInputFile(year, day)
