@@ -1,31 +1,16 @@
 package aoc2025
 
-import kotlin.math.pow
 
 class Day2(input: List<String>) {
     val ranges = input.first().split(",")
-        .map { range ->
-            range.split("-")
-                .map { it.toLong() }
-                .let { (start, end) ->
-                    start..end
-                }
-        }
-
-    /**
-     * Calculate 10 to the power of x and return it as a long.
-     */
-    private fun tenPow(x: Int): Long {
-        return 10.toDouble().pow(x).toLong()
-    }
+        .map { it.split("-") }
 
     /**
      * Returns a list of all chunks that numbers in the range can be divided into.
      * Each entry is a pair of chunkSize to num chunks.
      * When limited chunks are true only 2 chunks are allowed
      */
-    private fun getChunkSizesFor(range: LongRange, limitedChunks: Boolean): List<Pair<Int, Int>> {
-        val numDigits = range.first.toString().length
+    private fun getChunkSizesFor(numDigits: Int, limitedChunks: Boolean): List<Pair<Int, Int>> {
         return (1..numDigits / 2)
             .filter { !limitedChunks || numDigits % 2 == 0 && it == numDigits / 2 }
             .filter { chunkSize -> numDigits % chunkSize == 0 }
@@ -33,70 +18,57 @@ class Day2(input: List<String>) {
     }
 
     /**
-     * Generate all invalid ids within the given range. All numbers in the range is
-     * guaranteed to have the same number of digits. In addition to generating all
-     * invalid ids in the range it may also generate some ids outside the range to
-     * make the code simpler.
+     * Generate all invalid ids within the given range and then sum them. All
+     * numbers in the range are guaranteed to have the same number of digits.
      *
-     * This function looks at the first digit of the first number in the range and
-     * the first digit of the last number in the range to decide the range to generate
-     * invalid ids in. 123456 - 654321 will generate all invalid ids in the range
-     * 100000 - 700000.
-     *
-     * For small ranges with high numbers it generates a large amount of ids outside
-     * the range, but it makes the implementation fairly simple. Compared to testing
-     * all numbers in the range it's still much faster with my puzzle input. Around
-     * 13x faster for part 2 and 10x faster for part 1. The example input becomes around
-     * 5x slower though, but overall runtime for all inputs is 7-8x faster than testing
-     * all numbers.
+     * This is done by splitting up the range in all the possible group sizes and
+     * generating all repeating ids. Example:
+     * 120056-570078 becomes
+     * 111111, 222222, 333333, 444444, 555555
+     * 121212, 131313, 141414... 565656
+     * 120120, 121121, 122122... 569569
      */
-    private fun generateInvalidIds(range: LongRange, limitedChunks: Boolean): Set<Long> {
-        val chunkList = getChunkSizesFor(range, limitedChunks)
-        val firstDigit = range.first.toString().take(1).toInt()
-        val firstDigitEnd = range.last.toString().take(1).toInt()
-        val ret = mutableSetOf<Long>()
-        chunkList.forEach { (chunkSize, chunks) ->
-            val rangeStart = firstDigit * tenPow(chunkSize - 1)
-            val rangeEnd = (firstDigitEnd + 1) * tenPow(chunkSize - 1)
-            (rangeStart..<rangeEnd).forEach {
-                ret.add(it.toString().repeat(chunks).toLong())
+    private fun generateAndSumInvalidIds(start: String, end: String, limitedChunks: Boolean): Long {
+        // Use a set to avoid duplicates (for example 1.1.1.1 and 11.11)
+        return buildSet {
+            val chunkSizes = getChunkSizesFor(start.length, limitedChunks)
+            chunkSizes.forEach { (chunkSize, numChunks) ->
+                val rangeStart = start.take(chunkSize).toInt()
+                val rangeEnd = end.take(chunkSize).toInt()
+                (rangeStart..rangeEnd).forEach {
+                    val invalidId = it.toString().repeat(numChunks)
+                    // The first and last id generated may be outside the range: both
+                    // 11 and 33 are outside the range 12-32. So verify that generated
+                    // ids are in range before adding them. String comparison is fine
+                    // since all strings are numbers of the same length
+                    if (invalidId in start..end) {
+                        add(invalidId.toLong())
+                    }
+                }
             }
-        }
-        return ret
+        }.sum()
     }
 
-    /**
-     * Sum up all invalid ids in the given range. Do this by generating all invalid ids
-     * in the range, including some slightly outside to keep the code fairly simple.
-     * Then filter out the invalid ids outside the range before summing it up.
-     */
-    private fun invalidInRange(range: LongRange, limitedChunks: Boolean): Long {
-        val startLength = range.first.toString().length
-        val endLength = range.last.toString().length
-        val candidates = mutableSetOf<Long>()
 
-        if (startLength == endLength) {
-            // In the input most ranges are within the same power of ten
-            candidates.addAll(generateInvalidIds(range, limitedChunks))
-        } else {
-            // but a few goes on to the next one. Split those up in two ranges.
-            val breakpoint = tenPow(startLength)
-            candidates.addAll(generateInvalidIds(range.first..<breakpoint, limitedChunks))
-            candidates.addAll(generateInvalidIds(breakpoint..range.last, limitedChunks))
+    private fun sumInvalidInAllRanges(limitedChunks: Boolean): Long {
+        return ranges.sumOf { (start, end) ->
+            val startLength = start.length
+            if (startLength == end.length) {
+                // In the input most ranges are within the magnitude
+                generateAndSumInvalidIds(start, end, limitedChunks)
+            } else {
+                // but a few goes on to the next one. Split those up in two ranges.
+                generateAndSumInvalidIds(start, "9".repeat(startLength), limitedChunks) +
+                        generateAndSumInvalidIds("1" + "0".repeat(startLength), end, limitedChunks)
+            }
         }
-
-        return candidates.filter { it in range }.sum()
     }
 
     fun solvePart1(): Long {
-        return ranges.sumOf { range ->
-            invalidInRange(range, true)
-        }
+        return sumInvalidInAllRanges(true)
     }
 
     fun solvePart2(): Long {
-        return ranges.sumOf { range ->
-            invalidInRange(range, false)
-        }
+        return sumInvalidInAllRanges(false)
     }
 }
