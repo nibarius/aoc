@@ -46,3 +46,5 @@ rootProject.tasks.named("processTestResources") {
 rootProject.tasks.named("processResources") {
     duplicatesStrategy = 'include'
 }
+compileKotlin {
+}
