@@ -41,26 +41,20 @@ fun String.md5(): String {
 }
 
 /**
- * Calculates the union of two IntRanges, returns a list of either one or two IntRanges depending
+ * Calculates the union of two sorted IntRanges, returns a list of either one or two IntRanges depending
  * on if the ranges are overlapping each other or not.
  */
 fun IntRange.union(other: IntRange): List<IntRange> {
     return when {
-        // The two IntRanges are adjacent, join them into one
-        this.last == other.first - 1 -> listOf(this.first..other.last)
-        this.first == other.last + 1 -> listOf(other.first..this.last)
+        first > other.first -> error("IntRanges not sorted")
+        // adjacent, join to one range
+        last + 1 == other.first -> listOf(first..other.last)
+        // overlap, join to one range
+        last in other || other.last in this -> listOf(
+            start..maxOf(last, other.last)
+        )
 
-        // There is no overlap at all
-        this.last < other.first || this.first > other.last -> listOf(this, other)
-
-        // There is a complete overlap, return the larger one
-        first in other && last in other -> listOf(other)
-        other.first in this && other.last in this -> listOf(this)
-
-        // There is a partial overlap, combine to one range
-        this.last in other -> listOf(first..other.last)
-        this.first in other -> listOf(other.first..last)
-        else -> error("Impossible state")
+        else -> listOf(this, other) // no overlap
     }
 }
 
@@ -68,8 +62,7 @@ fun IntRange.union(other: IntRange): List<IntRange> {
  * Calculates the union of all the IntRanges in the given list. Returns a minimal list
  * containing only the remaining IntRanges.
  */
-fun List<IntRange>.unionALl(): List<IntRange> {
-    // Sort the list of int ranges based on their start.
+fun List<IntRange>.unionAll(): List<IntRange> {
     val sorted = sortedBy { it.first }
 
     // The union of the first two entries will either result in one or two ranges.
@@ -78,13 +71,14 @@ fun List<IntRange>.unionALl(): List<IntRange> {
     // second range does not overlap. This in turn that we can keep doing unions with
     // the next element and the last returned range and that way get a minimal list
     // of ranges.
-    val ret = mutableListOf(sorted.first())
-    for (i in 1 until sorted.size) {
-        val tmp = ret.last().union(sorted[i])
-        ret.removeLast()
-        ret.addAll(tmp)
+    return buildList {
+        add(sorted.first())
+        for (i in 1 until sorted.size) {
+            val tmp = last().union(sorted[i])
+            removeLast()
+            addAll(tmp)
+        }
     }
-    return ret
 }
 
 /**
@@ -100,3 +94,36 @@ fun IntRange.intersect(other: IntRange): IntRange? {
  * ends before they start.
  */
 fun IntRange.size() = last - first + 1
+
+/**
+ * Calculates the union of two sorted IntRanges, returns a list of either one or two IntRanges depending
+ * on if the ranges are overlapping each other or not.
+ */
+fun LongRange.union(other: LongRange): List<LongRange> {
+    return when {
+        first > other.first -> error("LongRanges not sorted")
+        last + 1 == other.first -> listOf(first..other.last)
+        last in other || other.last in this -> listOf(
+            start..maxOf(last, other.last)
+        )
+
+        else -> listOf(this, other) // no overlap
+    }
+}
+
+/**
+ * Calculates the union of all the LongRanges in the given list. Returns a minimal list
+ * containing only the remaining LongRanges.
+ */
+@JvmName("unionAllLong")
+fun List<LongRange>.unionAll(): List<LongRange> {
+    val sorted = sortedBy { it.first }
+    return buildList {
+        add(sorted.first())
+        for (i in 1 until sorted.size) {
+            val tmp = last().union(sorted[i])
+            removeLast()
+            addAll(tmp)
+        }
+    }
+}

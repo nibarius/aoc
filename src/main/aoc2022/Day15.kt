@@ -3,7 +3,7 @@ package aoc2022
 import Pos
 import intersect
 import size
-import unionALl
+import unionAll
 import kotlin.math.abs
 
 
@@ -43,7 +43,7 @@ class Day15(input: List<String>) {
     fun solvePart1(row: Int): Int {
         val sensorCoverage = sensors
             .mapNotNull { it.xRangeAt(row) } // the ranges for all beacons
-            .unionALl() // reduce to the minimal set of ranges
+            .unionAll() // reduce to the minimal set of ranges
 
         // The distress beacon can not be where a detected beacon, or sensor is located, so subtract those
         return sensorCoverage.sumOf { it.size() } - beacons.count { it.y == row } - sensors.count { it.pos.y == row }
@@ -55,7 +55,7 @@ class Day15(input: List<String>) {
         for (y in searchSpace downTo 0) { // the correct location is close to the end, so search backwards
             val coverage = sensors
                 .mapNotNull { it.xRangeAt(y) } // the ranges for all beacons
-                .unionALl() // reduce to the minimal set of ranges
+                .unionAll() // reduce to the minimal set of ranges
                 .mapNotNull { it.intersect(targetRange) } // clamp the ranges to the area of interest
 
             if (coverage.size > 1) {
