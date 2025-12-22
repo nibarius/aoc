@@ -1,3 +1,4 @@
+import MyMath.toRREF
 import org.junit.Assert
 import org.junit.Test
 
@@ -51,24 +52,66 @@ class MyMathTest {
     // Also used by 2023 day 24 part 2
     @Test
     fun testGaussianElimination() {
-        val a1 = MyMath.gaussianElimination(listOf(
-            listOf(4, 3, 11).map { it.toBigInteger() }.toTypedArray(),
-            listOf(1, -3, -1).map { it.toBigInteger() }.toTypedArray(),
-        ))
+        val a1 = MyMath.gaussianElimination(
+            listOf(
+                listOf(4, 3, 11).map { it.toBigInteger() }.toTypedArray(),
+                listOf(1, -3, -1).map { it.toBigInteger() }.toTypedArray(),
+            )
+        )
         Assert.assertEquals(listOf(2L, 1L), a1)
 
-        val a2 = MyMath.gaussianElimination(listOf(
-            listOf(1, 2 ,3 , -7).map { it.toBigInteger() }.toTypedArray(),
-            listOf(2, -3, -5, 9).map { it.toBigInteger() }.toTypedArray(),
-            listOf(-6, -8, 1, -22).map { it.toBigInteger() }.toTypedArray(),
-        ))
+        val a2 = MyMath.gaussianElimination(
+            listOf(
+                listOf(1, 2, 3, -7).map { it.toBigInteger() }.toTypedArray(),
+                listOf(2, -3, -5, 9).map { it.toBigInteger() }.toTypedArray(),
+                listOf(-6, -8, 1, -22).map { it.toBigInteger() }.toTypedArray(),
+            )
+        )
         Assert.assertEquals(listOf(-1L, 3L, -4L), a2)
 
-        val a3 = MyMath.gaussianElimination(listOf(
-            listOf(3, 2, -4, 3).map { it.toBigInteger() }.toTypedArray(),
-            listOf(2, 3, 3, 15).map { it.toBigInteger() }.toTypedArray(),
-            listOf(5, -3, 1, 14).map { it.toBigInteger() }.toTypedArray()
-        ))
+        val a3 = MyMath.gaussianElimination(
+            listOf(
+                listOf(3, 2, -4, 3).map { it.toBigInteger() }.toTypedArray(),
+                listOf(2, 3, 3, 15).map { it.toBigInteger() }.toTypedArray(),
+                listOf(5, -3, 1, 14).map { it.toBigInteger() }.toTypedArray()
+            )
+        )
         Assert.assertEquals(listOf(3L, 1L, 2L), a3)
+    }
+
+    @Test
+    fun testToRREF() {
+        // Machine 116 from 2025 day 10
+        val a = listOf(
+            listOf(1, 0, 0, 0, 0, 1, 9).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 1, 1, 0, 0, 0, 19).map { it.toBigInteger() }.toTypedArray(),
+            listOf(1, 0, 1, 1, 1, 0, 37).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 1, 0, 1, 0, 0, 20).map { it.toBigInteger() }.toTypedArray(),
+        ).toRREF()
+
+        val expected = listOf(
+            listOf(1, 0, 0, 2, 1, 0, 38).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 1, 0, 1, 0, 0, 20).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 0, 1, -1, 0, 0, -1).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 0, 0, 2, 1, -1, 29).map { it.toBigInteger() }.toTypedArray(),
+        )
+        a.zip(expected).forEach { (a, b) -> Assert.assertArrayEquals(a, b) }
+
+        // Machine 8 from 2025 day 10
+        val a2 = listOf(
+            listOf(0, 1, 0).map { it.toBigInteger() }.toTypedArray(),
+            listOf(1, 0, 1).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 1, 0).map { it.toBigInteger() }.toTypedArray(),
+            listOf(1, 0, 1).map { it.toBigInteger() }.toTypedArray(),
+        ).toRREF()
+
+        val expected2 = listOf(
+            listOf(1, 0, 1).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 1, 0).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 0, 0).map { it.toBigInteger() }.toTypedArray(),
+            listOf(0, 0, 0).map { it.toBigInteger() }.toTypedArray(),
+        )
+        a2.zip(expected2).forEach { (a, b) -> Assert.assertArrayEquals(a, b) }
+
     }
 }
